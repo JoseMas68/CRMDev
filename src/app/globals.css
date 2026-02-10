@@ -1,0 +1,345 @@
+/* Google Fonts - JetBrains Mono and Inter */
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+    --radius: 0.5rem;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+  }
+
+  .dark {
+    /* CRMDev Dark Theme - Charcoal/Violet/Green */
+    --background: 240 6% 6%;           /* #0e0e10 charcoal bg */
+    --foreground: 210 40% 98%;
+    --card: 240 6% 10%;                /* #18181b charcoal cards */
+    --card-foreground: 210 40% 98%;
+    --popover: 240 6% 10%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 263 70% 75%;            /* #a78bfa neon-violet */
+    --primary-foreground: 240 6% 6%;
+    --secondary: 142 71% 45%;          /* #22c55e accent-green */
+    --secondary-foreground: 0 0% 100%;
+    --muted: 240 4% 16%;               /* #27272a charcoal border */
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 263 70% 75%;             /* neon-violet */
+    --accent-foreground: 240 6% 6%;
+    --destructive: 0 62.8% 50%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 240 4% 16%;              /* #27272a */
+    --input: 240 4% 16%;
+    --ring: 263 70% 75%;               /* neon-violet */
+    --chart-1: 263 70% 75%;            /* violet */
+    --chart-2: 142 71% 45%;            /* green */
+    --chart-3: 199 89% 48%;            /* cyan */
+    --chart-4: 43 96% 56%;             /* amber */
+    --chart-5: 0 84% 60%;              /* red */
+
+    /* CRMDev Custom Colors */
+    --neon-violet: 263 70% 75%;
+    --accent-green: 142 71% 45%;
+    --charcoal-bg: 240 6% 6%;
+    --charcoal-card: 240 6% 10%;
+    --charcoal-border: 240 4% 16%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* JetBrains Mono for everything */
+  .font-mono,
+  .font-sans,
+  code,
+  kbd,
+  pre,
+  samp,
+  input,
+  textarea,
+  button,
+  select {
+    font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace !important;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-muted/50;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-muted-foreground/30 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-muted-foreground/50;
+  }
+}
+
+@layer components {
+  /* Kanban board styles */
+  .kanban-column {
+    @apply flex flex-col min-h-[500px] bg-muted/30 rounded-lg p-4;
+  }
+
+  .kanban-card {
+    @apply bg-card border rounded-lg p-4 shadow-sm cursor-grab active:cursor-grabbing;
+    @apply hover:shadow-md transition-shadow;
+  }
+
+  .kanban-card-dragging {
+    @apply shadow-lg opacity-50;
+  }
+
+  /* Dashboard card animations */
+  .dashboard-card {
+    @apply transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5;
+  }
+
+  /* Status badges */
+  .status-badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .status-lead {
+    @apply bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200;
+  }
+
+  .status-prospect {
+    @apply bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200;
+  }
+
+  .status-customer {
+    @apply bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200;
+  }
+
+  .status-inactive {
+    @apply bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200;
+  }
+
+  .status-churned {
+    @apply bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200;
+  }
+
+  /* Priority badges */
+  .priority-low {
+    @apply bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300;
+  }
+
+  .priority-medium {
+    @apply bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300;
+  }
+
+  .priority-high {
+    @apply bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300;
+  }
+
+  .priority-urgent {
+    @apply bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300;
+  }
+
+  /* Loading skeleton */
+  .skeleton {
+    @apply animate-pulse bg-muted rounded;
+  }
+
+  /* Form styles */
+  .form-section {
+    @apply space-y-4 p-6 bg-card rounded-lg border;
+  }
+
+  .form-label {
+    @apply text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70;
+  }
+
+  /* Sidebar styles */
+  .sidebar-link {
+    @apply flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary;
+  }
+
+  .sidebar-link-active {
+    @apply bg-primary/10 text-primary;
+  }
+
+  /* Empty state */
+  .empty-state {
+    @apply flex flex-col items-center justify-center py-12 text-center;
+  }
+
+  .empty-state-icon {
+    @apply h-12 w-12 text-muted-foreground/50 mb-4;
+  }
+
+  /* Data table */
+  .data-table-header {
+    @apply bg-muted/50;
+  }
+
+  .data-table-row {
+    @apply hover:bg-muted/50 transition-colors;
+  }
+}
+
+@layer utilities {
+  /* CRMDev Gradient text - violet to green */
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-[hsl(263,70%,75%)] to-[hsl(142,71%,45%)];
+  }
+
+  /* Glass effect */
+  .glass {
+    @apply bg-white/80 dark:bg-[hsl(240,6%,10%)]/80 backdrop-blur-md;
+  }
+
+  /* Neon glow effects */
+  .glow-violet {
+    box-shadow: 0 0 20px rgba(167, 139, 250, 0.3);
+  }
+
+  .glow-green {
+    box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
+  }
+
+  /* Neon border hover effect */
+  .neon-border-hover {
+    @apply transition-all duration-200;
+  }
+
+  .neon-border-hover:hover {
+    border-color: hsl(263 70% 75%);
+    box-shadow: 0 0 10px rgba(167, 139, 250, 0.2);
+  }
+
+  /* Verified dev badge */
+  .verified-badge {
+    @apply inline-flex items-center justify-center rounded-full bg-[hsl(142,71%,45%)] text-white;
+  }
+
+  /* Sync pulse animation */
+  .sync-pulse {
+    animation: pulse-green 2s infinite;
+  }
+
+  @keyframes pulse-green {
+    0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); }
+    70% { box-shadow: 0 0 0 8px rgba(34, 197, 94, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+  }
+
+  /* Terminal cursor blink */
+  .terminal-cursor {
+    animation: blink 1s step-end infinite;
+  }
+
+  @keyframes blink {
+    50% { opacity: 0; }
+  }
+
+  /* Tech glow effects from CRMDev mockup */
+  .tech-glow-text {
+    text-shadow:
+      0 0 15px rgba(167, 139, 250, 0.6),
+      0 0 30px rgba(167, 139, 250, 0.4),
+      0 0 45px rgba(167, 139, 250, 0.2);
+  }
+
+  .tech-glow-icon {
+    filter: drop-shadow(0 0 8px rgba(34, 197, 94, 0.8));
+  }
+
+  /* GitHub commits canvas styling */
+  .commits-canvas {
+    @apply bg-charcoal-dark/50 rounded-lg border border-charcoal-light;
+  }
+
+  /* Code block styling */
+  .code-block {
+    @apply font-mono text-sm bg-charcoal-dark rounded-lg p-4 border border-charcoal-light overflow-x-auto;
+  }
+
+  /* Dev card with neon accent */
+  .dev-card {
+    @apply bg-card border border-border rounded-lg transition-all duration-200;
+  }
+
+  .dev-card:hover {
+    border-color: hsl(263 70% 75%);
+    box-shadow:
+      0 0 20px rgba(167, 139, 250, 0.15),
+      0 4px 20px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Hide scrollbar */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* Scrollbar hide alias */
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* Truncate multiple lines */
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
