@@ -10,7 +10,6 @@ import Link from "next/link";
 import {
   Eye,
   AlertCircle,
-  CheckCircle2,
   Clock,
   Bug,
   Lightbulb,
@@ -63,8 +62,8 @@ export function SupportTicketsTable() {
   const [tickets, setTickets] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState({
-    status: undefined as string | undefined,
-    priority: undefined as string | undefined,
+    status: "all",
+    priority: "all",
     search: "",
   });
 
@@ -77,8 +76,8 @@ export function SupportTicketsTable() {
       setLoading(true);
       // Build filter object, only including defined values
       const filterParams: any = {};
-      if (filter.status) filterParams.status = filter.status;
-      if (filter.priority) filterParams.priority = filter.priority;
+      if (filter.status && filter.status !== "all") filterParams.status = filter.status;
+      if (filter.priority && filter.priority !== "all") filterParams.priority = filter.priority;
       if (filter.search) filterParams.search = filter.search;
 
       const result = await getTickets(filterParams);
@@ -104,14 +103,14 @@ export function SupportTicketsTable() {
         />
 
         <Select
-          value={filter.status || ""}
-          onValueChange={(value) => setFilter({ ...filter, status: value || undefined })}
+          value={filter.status}
+          onValueChange={(value) => setFilter({ ...filter, status: value })}
         >
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Estado" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Todos los estados</SelectItem>
+            <SelectItem value="all">Todos los estados</SelectItem>
             <SelectItem value="OPEN">Abierto</SelectItem>
             <SelectItem value="IN_PROGRESS">En Progreso</SelectItem>
             <SelectItem value="WAITING_CLIENT">Esperando Cliente</SelectItem>
@@ -121,14 +120,14 @@ export function SupportTicketsTable() {
         </Select>
 
         <Select
-          value={filter.priority || ""}
-          onValueChange={(value) => setFilter({ ...filter, priority: value || undefined })}
+          value={filter.priority}
+          onValueChange={(value) => setFilter({ ...filter, priority: value })}
         >
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Prioridad" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Todas las prioridades</SelectItem>
+            <SelectItem value="all">Todas las prioridades</SelectItem>
             <SelectItem value="LOW">Baja</SelectItem>
             <SelectItem value="MEDIUM">Media</SelectItem>
             <SelectItem value="HIGH">Alta</SelectItem>
