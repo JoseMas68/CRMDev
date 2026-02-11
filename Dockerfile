@@ -1,16 +1,11 @@
 # Build stage
-FROM node:20-alpine AS builder
+FROM oven/bun:1-alpine AS builder
 
 WORKDIR /app
 
-# Install bun using official installer
-RUN npm install -g bun@latest || \
-    curl -fsSL https://bun.sh/install | bash && \
-    mv /root/.bun/bin/bun /usr/local/bin/
-
 # Install dependencies
 COPY package.json bun.lockb* ./
-RUN bun install
+RUN bun install --frozen-lockfile
 
 # Copy source code
 COPY . .
@@ -23,7 +18,7 @@ RUN bunx prisma db push --skip-generate
 RUN bun run build
 
 # Production stage
-FROM node:20-alpine AS runner
+FROM oven/bun:1-alpine AS runner
 
 WORKDIR /app
 
