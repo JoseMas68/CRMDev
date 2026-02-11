@@ -15,8 +15,8 @@ Configura las siguientes variables de entorno en EasyPanel:
 DATABASE_URL="postgresql://neondb_owner:npg_t2iTrWfX0jeb@ep-sparkling-field-abku1jh0-pooler.eu-west-2.aws.neon.tech/neondb?sslmode=require"
 
 # Better Auth (CAMBIAR la URL por tu dominio real)
-NEXT_PUBLIC_APP_URL="https://tu-dominio.com"
-BETTER_AUTH_URL="https://tu-dominio.com"
+NEXT_PUBLIC_APP_URL="https://crmdev.tech"
+BETTER_AUTH_URL="https://crmdev.tech"
 BETTER_AUTH_SECRET="qd0wJGUiSfA/Nok/W3HSIjUzq6tiFt6pfijmMsTx+SE="
 
 # GitHub OAuth
@@ -48,7 +48,7 @@ EasyPanel soporta cron jobs. Añade este cron para el monitoreo de WordPress:
 
 ```
 # Cada 6 horas
-0 */6 * * * curl -X GET http://localhost:3000/api/cron/wp-monitor -H "Authorization: Bearer +LDqsT036bgBxxceEGmVXBstbRYNNJ3QwsBZwnpPB08="
+0 */6 * * * curl -X GET https://crmdev.tech/api/cron/wp-monitor -H "Authorization: Bearer +LDqsT036bgBxxceEGmVXBstbRYNNJ3QwsBZwnpPB08="
 ```
 
 ## Despliegue Local con Docker
@@ -73,6 +73,6 @@ docker-compose up -d --build
 
 ## Notas Importantes
 
-- **NEXT_PUBLIC_APP_URL** y **BETTER_AUTH_URL** deben usar HTTPS en producción
+- **NEXT_PUBLIC_APP_URL** y **BETTER_AUTH_URL** deben ser `https://crmdev.tech`
 - Asegúrate de que tu base de datos Neon permite conexiones desde el servidor de EasyPanel
 - Los cron jobs de Vercel (`vercel.json`) no funcionan en EasyPanel, configura los crons en el panel de EasyPanel
