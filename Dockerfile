@@ -10,9 +10,8 @@ RUN npm install --legacy-peer-deps --ignore-scripts
 # Copy source code
 COPY . .
 
-# Generate Prisma Client and push schema
+# Generate Prisma Client (only generate, don't push to DB)
 RUN npx prisma generate
-RUN npx prisma db push --skip-generate
 
 # Build Next.js application
 RUN npm run build
