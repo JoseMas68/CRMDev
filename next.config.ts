@@ -2,7 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   // Output standalone para Docker/EasyPanel
-  output: "standalone",
+  // output: "standalone", // Temporarily disabled for EasyPanel debugging
 
   // Experimental features para Next.js 15+
   experimental: {
