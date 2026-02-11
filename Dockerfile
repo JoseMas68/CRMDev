@@ -11,7 +11,7 @@ RUN npm install --legacy-peer-deps --ignore-scripts
 COPY . .
 
 # Build Next.js application (without prisma generate during build)
-RUN npx next build --debug 2>&1 || npx next build
+RUN npx next build
 
 # Production stage
 FROM node:20-alpine AS runner
