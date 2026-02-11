@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Output standalone para Docker/EasyPanel
+  output: "standalone",
+
   // Experimental features para Next.js 15+
   experimental: {
     // Server Actions habilitados por default en Next.js 15
