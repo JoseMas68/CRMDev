@@ -26,6 +26,9 @@ GITHUB_CLIENT_SECRET="73485eeb5bddc8806df4e863705b7f3603878e2e"
 # OpenAI (opcional, para soporte con IA)
 OPENAI_API_KEY="sk-your-openai-key-here"
 
+# Resend (para emails de verificación y invitaciones)
+RESEND_API_KEY="re-your-resend-api-key-here"
+
 # Cron Secret
 CRON_SECRET="+LDqsT036bgBxxceEGmVXBstbRYNNJ3QwsBZwnpPB08="
 ```
