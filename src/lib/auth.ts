@@ -40,7 +40,7 @@ export const auth = betterAuth({
     minPasswordLength: 8,
     maxPasswordLength: 128,
     // Send verification email using Resend
-    sendVerificationEmail: async ({ user, url }) => {
+    sendVerificationEmail: async ({ user, url }: { user: any; url: string }) => {
       const { sendEmail } = await import("./email");
       await sendEmail({
         to: user.email,
@@ -58,10 +58,10 @@ export const auth = betterAuth({
             ],
           },
         },
-      });
+      } as any);
     },
     // Send password reset email using Resend
-    sendResetPassword: async ({ user, url }) => {
+    sendResetPassword: async ({ user, url }: { user: any; url: string }) => {
       const { sendEmail } = await import("./email");
       await sendEmail({
         to: user.email,
@@ -79,7 +79,7 @@ export const auth = betterAuth({
             ],
           },
         },
-      });
+      } as any);
     },
   },
 
