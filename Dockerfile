@@ -1,24 +1,24 @@
 # Build stage
-FROM oven/bun:1-alpine AS builder
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Install dependencies
-COPY package.json bun.lockb* ./
-RUN bun install
+# Install dependencies using npm with lockfile (secure, reproducible)
+COPY package.json package-lock.json ./
+RUN npm ci
 
 # Copy source code
 COPY . .
 
 # Generate Prisma Client and push schema
-RUN bunx prisma generate
-RUN bunx prisma db push --skip-generate
+RUN npx prisma generate
+RUN npx prisma db push --skip-generate
 
 # Build Next.js application
-RUN bun run build
+RUN npm run build
 
 # Production stage
-FROM oven/bun:1-alpine AS runner
+FROM node:20-alpine AS runner
 
 WORKDIR /app
 
