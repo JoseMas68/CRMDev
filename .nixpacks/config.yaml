@@ -1,0 +1,3 @@
+# Disable Nixpacks - use Dockerfile instead
+disabled: true
+provider: "docker"
