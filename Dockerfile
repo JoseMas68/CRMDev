@@ -4,7 +4,7 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 # Install dependencies
-COPY package.json package-lock.json bun.lockb* ./
+COPY package.json bun.lockb* ./
 RUN npm install --legacy-peer-deps
 
 # Copy source code
