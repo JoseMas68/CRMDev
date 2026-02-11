@@ -3,16 +3,21 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+# Install bun using official installer
+RUN npm install -g bun@latest || \
+    curl -fsSL https://bun.sh/install | bash && \
+    mv /root/.bun/bin/bun /usr/local/bin/
+
 # Install dependencies
 COPY package.json bun.lockb* ./
-RUN npm install -g bun && bun install
+RUN bun install
 
 # Copy source code
 COPY . .
 
 # Generate Prisma Client and push schema
 RUN bunx prisma generate
-RUN bunx prisma db push
+RUN bunx prisma db push --skip-generate
 
 # Build Next.js application
 RUN bun run build
