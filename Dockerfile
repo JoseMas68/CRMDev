@@ -7,11 +7,13 @@ WORKDIR /app
 COPY package.json bun.lockb* ./
 RUN npm install --legacy-peer-deps --ignore-scripts
 
-# Copy source code
+# Copy source code and build script
 COPY . .
+COPY build.sh /tmp/
+RUN chmod +x /tmp/build.sh
 
-# Build Next.js application (without prisma generate during build)
-RUN npx next build
+# Build Next.js application using script for better error logging
+RUN /tmp/build.sh || npx next build
 
 # Production stage
 FROM node:20-alpine AS runner
