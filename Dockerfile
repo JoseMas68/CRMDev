@@ -49,9 +49,6 @@ COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 COPY --from=builder /app/package.json ./package.json
 
-# Generate Prisma Client at runtime (with actual ENV vars)
-RUN npx prisma generate
-
 # Expose port
 EXPOSE 3000
 
