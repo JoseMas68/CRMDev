@@ -1,7 +1,15 @@
 # Build stage
 FROM node:20-alpine AS builder
 
+# Declare build arguments for Next.js
+ARG NEXT_PUBLIC_APP_URL
+ARG BETTER_AUTH_URL
+
 WORKDIR /app
+
+# Set build environment variables
+ENV NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}
+ENV BETTER_AUTH_URL=${BETTER_AUTH_URL}
 
 # Install dependencies (ignore postinstall scripts)
 COPY package.json bun.lockb* ./
@@ -16,9 +24,15 @@ RUN npm run build
 # Production stage
 FROM node:20-alpine AS runner
 
+# Declare build arguments
+ARG NEXT_PUBLIC_APP_URL
+ARG BETTER_AUTH_URL
+
 WORKDIR /app
 
 ENV NODE_ENV=production
+ENV NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}
+ENV BETTER_AUTH_URL=${BETTER_AUTH_URL}
 
 # Copy files from builder for standalone output
 COPY --from=builder /app/public ./public
