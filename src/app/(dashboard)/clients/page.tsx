@@ -1,3 +1,5 @@
+"use client";
+
 import { Metadata } from "next";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";

@@ -280,6 +280,7 @@ export function ProjectsGrid({
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
+                </div>
               </CardHeader>
               <CardContent className="space-y-4">
                 {/* Status and GitHub badges */}
