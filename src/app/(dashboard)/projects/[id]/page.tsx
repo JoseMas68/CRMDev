@@ -11,7 +11,7 @@ import {
   CheckSquare,
   Plus,
   ListTodo,
-  GitHub,
+  Github,
   Users,
 } from "lucide-react";
 
@@ -140,7 +140,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
         tabs={[
           { value: "overview", label: "Resumen", icon: ListTodo },
           { value: "tasks", label: "Tareas", icon: CheckSquare },
-          { value: "github", label: "GitHub", icon: GitHub },
+          { value: "github", label: "GitHub", icon: Github },
           { value: "members", label: "Miembros", icon: Users },
         ]}
         defaultValue="overview"
