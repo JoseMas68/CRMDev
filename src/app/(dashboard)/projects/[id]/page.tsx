@@ -10,6 +10,9 @@ import {
   DollarSign,
   CheckSquare,
   Plus,
+  ListTodo,
+  GitHub,
+  Users,
 } from "lucide-react";
 
 import { auth } from "@/lib/auth";
@@ -25,6 +28,8 @@ import { GitHubCommitsCanvas } from "@/components/projects/github-commits-canvas
 import { ImportIssuesButton } from "@/components/projects/import-issues-button";
 import { ProjectMembersSection } from "@/components/projects/project-members-section";
 import { WpMonitoringCard } from "@/components/projects/wp-monitoring-card";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { MobileTabNavigation } from "@/components/mobile/tab-navigation";
 
 interface ProjectPageProps {
   params: Promise<{ id: string }>;
@@ -130,8 +135,87 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
         </div>
       </div>
 
-      {/* Project info cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      {/* Mobile tabs - solo visible en móvil */}
+      <MobileTabNavigation
+        tabs={[
+          { value: "overview", label: "Resumen", icon: ListTodo },
+          { value: "tasks", label: "Tareas", icon: CheckSquare },
+          { value: "github", label: "GitHub", icon: GitHub },
+          { value: "members", label: "Miembros", icon: Users },
+        ]}
+        defaultValue="overview"
+      >
+        <TabsContent value="overview">
+          <div className="lg:hidden space-y-4">
+            <div className="grid gap-4 grid-cols-2">
+              {/* Progress */}
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                    Progreso
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{project.progress}%</div>
+                </CardContent>
+              </Card>
+
+              {/* Tasks */}
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                    Tareas
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{project.tasks.length}</div>
+                  <p className="text-sm text-muted-foreground">
+                    {project.tasks.filter((t) => t.status === "DONE").length}{" "}
+                    completadas
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="tasks">
+          <div className="lg:hidden">
+            <ProjectTaskList tasks={project.tasks} projectId={id} />
+          </div>
+        </TabsContent>
+
+        <TabsContent value="github">
+          <div className="lg:hidden">
+            {project.repoUrl && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">GitHub Commits</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <GitHubCommitsCanvas
+                    repoUrl={project.repoUrl}
+                    projectName={project.name}
+                  />
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="members">
+          <div className="lg:hidden">
+            <ProjectMembersSection
+              projectId={id}
+              members={project.projectMembers}
+              canManage={canManageMembers}
+            />
+          </div>
+        </TabsContent>
+      </MobileTabNavigation>
+
+      {/* Project info cards - desktop */}
+      <div className="hidden lg:grid lg:gap-4 lg:grid-cols-4">
         {/* Progress */}
         <Card>
           <CardHeader className="pb-2">

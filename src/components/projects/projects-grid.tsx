@@ -226,8 +226,9 @@ export function ProjectsGrid({
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {projects.map((project) => (
-            <Card key={project.id} className="dashboard-card group">
+            <Card key={project.id} className="dashboard-card group lg:hover:shadow-md transition-shadow">
               <CardHeader className="pb-2">
+                <div className="flex items-start justify-between gap-3 lg:gap-4">
                 <div className="flex items-start justify-between">
                   <div className="space-y-1 flex-1 min-w-0">
                     <Link

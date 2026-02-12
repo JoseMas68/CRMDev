@@ -36,6 +36,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { MobileTabNavigation } from "@/components/mobile/tab-navigation";
 
 interface ClientPageProps {
   params: Promise<{ id: string }>;
@@ -257,7 +259,159 @@ export default async function ClientPage({ params }: ClientPageProps) {
         </Card>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      {/* Mobile tabs - solo visible en móvil */}
+      <MobileTabNavigation
+        tabs={[
+          { value: "contact", label: "Contacto", icon: User },
+          { value: "notes", label: "Notas", icon: FileText },
+          { value: "activity", label: "Actividad", icon: Calendar },
+        ]}
+        defaultValue="contact"
+      >
+        <TabsContent value="contact">
+          <Card className="lg:hidden">
+            <CardHeader>
+              <CardTitle className="text-lg">Información de Contacto</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {client.email && (
+                <div className="flex items-center gap-3">
+                  <Mail className="h-4 w-4 text-muted-foreground" />
+                  <a
+                    href={`mailto:${client.email}`}
+                    className="text-sm hover:text-primary"
+                  >
+                    {client.email}
+                  </a>
+                </div>
+              )}
+
+              {client.phone && (
+                <div className="flex items-center gap-3">
+                  <Phone className="h-4 w-4 text-muted-foreground" />
+                  <a
+                    href={`tel:${client.phone}`}
+                    className="text-sm hover:text-primary"
+                  >
+                    {client.phone}
+                  </a>
+                </div>
+              )}
+
+              {client.website && (
+                <div className="flex items-center gap-3">
+                  <Globe className="h-4 w-4 text-muted-foreground" />
+                  <a
+                    href={client.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm hover:text-primary"
+                  >
+                    {client.website}
+                  </a>
+                </div>
+              )}
+
+              {(client.address || client.city || client.country) && (
+                <div className="flex items-start gap-3">
+                  <MapPin className="h-4 w-4 text-muted-foreground mt-0.5" />
+                  <div className="text-sm">
+                    {client.address && <p>{client.address}</p>}
+                    {(client.city || client.state) && (
+                      <p>
+                        {[client.city, client.state].filter(Boolean).join(", ")}
+                      </p>
+                    )}
+                    {(client.country || client.postalCode) && (
+                      <p>
+                        {[client.country, client.postalCode]
+                          .filter(Boolean)
+                          .join(" ")}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {client.source && (
+                <div className="flex items-center gap-3">
+                  <Tag className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm">Fuente: {client.source}</span>
+                </div>
+              )}
+
+              <div className="flex items-center gap-3">
+                <Calendar className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm">
+                  Cliente desde {formatDate(client.createdAt)}
+                </span>
+              </div>
+
+              {client.tags && client.tags.length > 0 && (
+                <div className="flex flex-wrap gap-2 pt-2">
+                  {client.tags.map((tag) => (
+                    <Badge key={tag} variant="secondary">
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="notes">
+          <Card className="lg:hidden">
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <FileText className="h-5 w-5" />
+                Notas
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {client.notes ? (
+                <p className="text-sm whitespace-pre-wrap">{client.notes}</p>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  Sin notas agregadas
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="activity">
+          <Card className="lg:hidden">
+            <CardHeader>
+              <CardTitle className="text-lg">Actividad Reciente</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {client.activities.map((activity) => (
+                  <div key={activity.id} className="flex items-start gap-4">
+                    <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-xs font-medium">
+                      {activity.user.name
+                        .split(" ")
+                        .map((n) => n[0])
+                        .join("")
+                        .toUpperCase()}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm">{activity.title}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {activity.user.name} • {formatDate(activity.createdAt)}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </MobileTabNavigation>
+
+      {/* Desktop layout */}
+      <div className="hidden lg:grid lg:grid-cols-3 lg:gap-6">
         {/* Contact Info */}
         <Card className="lg:col-span-1">
           <CardHeader>

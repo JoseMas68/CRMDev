@@ -220,7 +220,7 @@ export function TasksKanban({
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >
-      <div className="flex gap-4 overflow-x-auto pb-4 min-h-[500px]">
+      <div className="lg:flex lg:gap-4 lg:overflow-x-auto lg:pb-4 lg:min-h-[500px] flex flex-col gap-4">
         {columns.map((column) => (
           <TaskColumn
             key={column.id}
@@ -278,7 +278,7 @@ function TaskColumn({
     <div
       ref={setNodeRef}
       className={cn(
-        "flex-shrink-0 w-80 bg-muted/30 rounded-lg p-4 border-t-4 transition-colors",
+        "bg-muted/30 rounded-lg p-4 border-t-4 transition-colors lg:flex-shrink-0 lg:w-80 w-full",
         columnColors[column.id] || "border-t-gray-400",
         isOver && "bg-muted/50 ring-2 ring-primary/20"
       )}
