@@ -7,13 +7,11 @@ WORKDIR /app
 COPY package.json bun.lockb* ./
 RUN npm install --legacy-peer-deps --ignore-scripts
 
-# Copy source code and build script
+# Copy source code
 COPY . .
-COPY build.sh /tmp/
-RUN chmod +x /tmp/build.sh
 
-# Build Next.js application using script for better error logging
-RUN /tmp/build.sh || npx next build
+# Build Next.js application
+RUN npm run build
 
 # Production stage
 FROM node:20-alpine AS runner
@@ -22,8 +20,14 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
-# Copy all files from builder (standalone disabled for debugging)
-COPY --from=builder /app ./
+# Copy files from builder for standalone output
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
+COPY --from=builder /app/package.json ./package.json
 
 # Generate Prisma Client at runtime (with actual ENV vars)
 RUN npx prisma generate
@@ -32,4 +36,4 @@ RUN npx prisma generate
 EXPOSE 3000
 
 # Start the application
-CMD ["npm", "run", "start"]
+CMD ["node", "server.js"]
