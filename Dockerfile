@@ -15,6 +15,7 @@ ENV NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}
 
 # Install dependencies
 COPY package.json bun.lockb* ./
+COPY prisma ./prisma
 RUN npm install --legacy-peer-deps
 
 # Copy source code
