@@ -42,44 +42,28 @@ export const auth = betterAuth({
     // Send verification email using Resend
     sendVerificationEmail: async ({ user, url }: { user: any; url: string }) => {
       const { sendEmail } = await import("./email");
+      const { default: VerificationEmail } = await import("../emails/verification-email");
       await sendEmail({
         to: user.email,
         subject: "Verifica tu email en CRMDev",
-        react: {
-          type: "div",
-          props: {
-            style: { fontFamily: "sans-serif", padding: "20px" },
-            children: [
-              { type: "h1", props: { children: "Verifica tu email", style: { color: "#333" } } },
-              { type: "p", props: { children: `Hola ${user.name || user.email},` } },
-              { type: "p", props: { children: "Por favor verifica tu email haciendo clic en el siguiente enlace:" } },
-              { type: "a", props: { href: url, children: "Verificar email", style: { color: "#5468ff", textDecoration: "none", padding: "10px 20px", background: "#f0f0f0", borderRadius: "5px", display: "inline-block" } } },
-              { type: "p", props: { children: "Este enlace expirará en 24 horas.", style: { color: "#8898aa", fontSize: "12px" } } },
-            ],
-          },
-        },
-      } as any);
+        react: VerificationEmail({
+          userName: user.name || user.email,
+          verificationUrl: url,
+        }),
+      });
     },
     // Send password reset email using Resend
     sendResetPassword: async ({ user, url }: { user: any; url: string }) => {
       const { sendEmail } = await import("./email");
+      const { default: PasswordResetEmail } = await import("../emails/password-reset-email");
       await sendEmail({
         to: user.email,
         subject: "Restablece tu contraseña en CRMDev",
-        react: {
-          type: "div",
-          props: {
-            style: { fontFamily: "sans-serif", padding: "20px" },
-            children: [
-              { type: "h1", props: { children: "Restablece tu contraseña", style: { color: "#333" } } },
-              { type: "p", props: { children: `Hola ${user.name || user.email},` } },
-              { type: "p", props: { children: "Recibimos una solicitud para restablecer tu contraseña. Haz clic en el siguiente enlace:" } },
-              { type: "a", props: { href: url, children: "Restablecer contraseña", style: { color: "#5468ff", textDecoration: "none", padding: "10px 20px", background: "#f0f0f0", borderRadius: "5px", display: "inline-block" } } },
-              { type: "p", props: { children: "Este enlace expirará en 1 hora. Si no solicitaste esto, ignora este correo.", style: { color: "#8898aa", fontSize: "12px" } } },
-            ],
-          },
-        },
-      } as any);
+        react: PasswordResetEmail({
+          userName: user.name || user.email,
+          resetUrl: url,
+        }),
+      });
     },
   },
 

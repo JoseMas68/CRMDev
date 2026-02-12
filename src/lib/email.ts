@@ -88,9 +88,15 @@ export async function sendVerificationEmail({
   email: string;
   verificationUrl: string;
 }) {
-  // TODO: Create verification email template
-  console.log("[EMAIL] Verification email would be sent to:", email);
-  return { success: true };
+  const VerificationEmail = (await import("../emails/verification-email")).default;
+  return sendEmail({
+    to: email,
+    subject: "Verifica tu email en CRMDev",
+    react: VerificationEmail({
+      userName: email,
+      verificationUrl,
+    }),
+  });
 }
 
 /**
@@ -103,7 +109,13 @@ export async function sendPasswordResetEmail({
   email: string;
   resetUrl: string;
 }) {
-  // TODO: Create password reset email template
-  console.log("[EMAIL] Password reset email would be sent to:", email);
-  return { success: true };
+  const PasswordResetEmail = (await import("../emails/password-reset-email")).default;
+  return sendEmail({
+    to: email,
+    subject: "Restablece tu contraseña en CRMDev",
+    react: PasswordResetEmail({
+      userName: email,
+      resetUrl,
+    }),
+  });
 }
