@@ -4,16 +4,18 @@ FROM node:20-alpine AS builder
 # Declare build arguments for Next.js
 ARG NEXT_PUBLIC_APP_URL
 ARG BETTER_AUTH_URL
+ARG BETTER_AUTH_SECRET
 
 WORKDIR /app
 
 # Set build environment variables
 ENV NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}
-ENV BETTER_AUTH_URL=${BETTER_AUTH_URL}
+# Use --secret flag for sensitive data (Better Auth)
+# ENV BETTER_AUTH_URL=${BETTER_AUTH_URL}
 
-# Install dependencies (ignore postinstall scripts)
+# Install dependencies
 COPY package.json bun.lockb* ./
-RUN npm install --legacy-peer-deps --ignore-scripts
+RUN npm install --legacy-peer-deps
 
 # Copy source code
 COPY . .
