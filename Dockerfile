@@ -21,6 +21,9 @@ RUN npm install --legacy-peer-deps
 # Copy source code
 COPY . .
 
+# Ensure public directory exists (optional in Next.js but required by Dockerfile)
+RUN mkdir -p /app/public
+
 # Build Next.js application
 RUN npm run build
 
