@@ -74,6 +74,7 @@ export function CreateTaskDialog({
   console.log("Form errors:", errors);
 
   async function onSubmit(data: CreateTaskInput) {
+    console.log("[CREATE-TASK] onSubmit llamado con:", data);
     setIsLoading(true);
 
     try {
