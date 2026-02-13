@@ -31,7 +31,8 @@ export const createTaskSchema = z.object({
     .string()
     .max(5000, "Description must be less than 5000 characters")
     .optional()
-    .or(z.literal("")),
+    .or(z.literal(""))
+    .nullable(),
 
   status: taskStatusEnum.default("TODO"),
 
@@ -52,11 +53,11 @@ export const createTaskSchema = z.object({
       .nullable()
   ),
 
-  projectId: z.string().cuid("Invalid project ID").nullable().optional(),
+  projectId: z.string().cuid("Invalid project ID").nullish(),
 
-  assigneeId: z.string().cuid("Invalid assignee ID").nullable().optional(),
+  assigneeId: z.string().cuid("Invalid assignee ID").nullish(),
 
-  parentId: z.string().cuid("Invalid parent task ID").nullable().optional(),
+  parentId: z.string().cuid("Invalid parent task ID").nullish(),
 
   tags: z.array(z.string().max(50)).max(10, "Maximum 10 tags allowed").optional(),
 
