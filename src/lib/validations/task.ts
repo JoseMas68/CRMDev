@@ -52,11 +52,11 @@ export const createTaskSchema = z.object({
       .nullable()
   ),
 
-  projectId: z.string().cuid("Invalid project ID").optional().nullable(),
+  projectId: z.string().cuid("Invalid project ID").nullable().optional(),
 
-  assigneeId: z.string().cuid("Invalid assignee ID").optional().nullable(),
+  assigneeId: z.string().cuid("Invalid assignee ID").nullable().optional(),
 
-  parentId: z.string().cuid("Invalid parent task ID").optional().nullable(),
+  parentId: z.string().cuid("Invalid parent task ID").nullable().optional(),
 
   tags: z.array(z.string().max(50)).max(10, "Maximum 10 tags allowed").optional(),
 

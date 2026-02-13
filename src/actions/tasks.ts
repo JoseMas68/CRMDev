@@ -350,6 +350,22 @@ export async function createTask(
     const validatedData = createTaskSchema.parse(input);
     const db = await getPrismaWithSession(session);
 
+    // Validate assignee is a member of the organization
+    if (validatedData.assigneeId) {
+      const member = await db.member.findUnique({
+        where: {
+          organizationId_userId: {
+            organizationId: session.session.activeOrganizationId,
+            userId: validatedData.assigneeId,
+          },
+        },
+      });
+
+      if (!member) {
+        return { success: false, error: "El usuario asignado no es miembro de la organización" };
+      }
+    }
+
     // Get max order for the status
     const maxOrderTask = await db.task.findFirst({
       where: {
@@ -372,7 +388,7 @@ export async function createTask(
         dueDate: validatedData.dueDate,
         estimatedHours: validatedData.estimatedHours,
         projectId: validatedData.projectId || null,
-        assigneeId: validatedData.assigneeId || null,
+        assigneeId: validatedData.assigneeId,
         parentId: validatedData.parentId || null,
         tags: validatedData.tags || [],
         order: newOrder,

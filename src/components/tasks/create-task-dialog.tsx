@@ -79,19 +79,22 @@ export function CreateTaskDialog({
 
     try {
       // Data has already been validated by zod, just pass it through
-      // Clean up falsy values to undefined for optional fields
+      // Clean up falsy values to null for optional fields (consistent with DB)
       const cleanData = {
         title: data.title,
         status: data.status,
         priority: data.priority,
-        description: data.description || undefined,
-        dueDate: data.dueDate || undefined,
-        estimatedHours: data.estimatedHours ?? undefined,
-        projectId: data.projectId || undefined,
-        assigneeId: data.assigneeId || undefined,
+        description: data.description || null,
+        dueDate: data.dueDate || null,
+        estimatedHours: data.estimatedHours ?? null,
+        projectId: data.projectId || null,
+        assigneeId: data.assigneeId || null,
         labels: [],
         tags: [],
       };
+
+      console.log("[CREATE-TASK] assigneeId:", data.assigneeId, "Type:", typeof data.assigneeId);
+      console.log("[CREATE-TASK] cleanData.assigneeId:", cleanData.assigneeId);
 
       console.log("Enviando datos:", cleanData);
       const result = await createTask(cleanData);
