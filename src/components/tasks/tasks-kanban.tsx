@@ -7,6 +7,7 @@ import {
   closestCorners,
   KeyboardSensor,
   PointerSensor,
+  TouchSensor,
   useSensor,
   useSensors,
   type DragEndEvent,
@@ -83,6 +84,12 @@ export function TasksKanban({
     useSensor(PointerSensor, {
       activationConstraint: {
         distance: 8,
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 250,
+        tolerance: 5,
       },
     }),
     useSensor(KeyboardSensor, {
@@ -239,6 +246,7 @@ export function TasksKanban({
             isDragging
             projects={projects}
             members={members}
+            useDragHandle={true}
           />
         ) : null}
       </DragOverlay>
@@ -306,6 +314,7 @@ function TaskColumn({
               projects={projects}
               members={members}
               onClick={() => onTaskClick(task, column.id)}
+              useDragHandle={true}
             />
           ))}
         </SortableContext>

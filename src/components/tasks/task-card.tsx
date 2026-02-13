@@ -13,6 +13,7 @@ import {
   GitPullRequest,
   ExternalLink,
   Eye,
+  GripVertical,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -62,6 +63,7 @@ interface TaskCardProps {
   projects: { id: string; name: string }[];
   members: { id: string; name: string; image: string | null }[];
   onClick?: () => void;
+  useDragHandle?: boolean; // If true, only the handle is draggable
 }
 
 const priorityColors: Record<string, string> = {
@@ -78,9 +80,10 @@ const priorityLabels: Record<string, string> = {
   URGENT: "Urgente",
 };
 
-export function TaskCard({ task, isDragging, projects, members, onClick }: TaskCardProps) {
+export function TaskCard({ task, isDragging, projects, members, onClick, useDragHandle = false }: TaskCardProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [handleRef, setHandleRef] = useState<HTMLDivElement | null>(null);
 
   const {
     attributes,
@@ -95,6 +98,10 @@ export function TaskCard({ task, isDragging, projects, members, onClick }: TaskC
     transform: CSS.Transform.toString(transform),
     transition,
   };
+
+  // Use handle listeners if useDragHandle is true, otherwise use card listeners
+  const dragListeners = useDragHandle ? listeners : undefined;
+  const dragAttributes = useDragHandle ? attributes : undefined;
 
   const isOverdue =
     task.dueDate && new Date(task.dueDate) < new Date();
@@ -137,15 +144,27 @@ export function TaskCard({ task, isDragging, projects, members, onClick }: TaskC
       <div
         ref={setNodeRef}
         style={style}
-        {...attributes}
-        {...listeners}
+        {...(!useDragHandle ? attributes : {})}
+        {...(!useDragHandle ? listeners : {})}
         className={cn(
-          "bg-card border rounded-lg p-3 shadow-sm cursor-grab active:cursor-grabbing group",
+          "bg-card border rounded-lg p-3 shadow-sm group relative",
+          !useDragHandle && "cursor-grab active:cursor-grabbing",
           "hover:shadow-md transition-shadow",
           (isDragging || isSortableDragging) && "shadow-lg opacity-50",
           isOverdue && "border-destructive/50"
         )}
       >
+        {/* Drag Handle - Only shown when useDragHandle is true */}
+        {useDragHandle && (
+          <div
+            ref={setHandleRef}
+            {...attributes}
+            {...listeners}
+            className="cursor-grab active:cursor-grabbing touch-none absolute top-2 right-2 p-1 hover:bg-muted rounded"
+          >
+            <GripVertical className="h-4 w-4 text-muted-foreground" />
+          </div>
+        )}
         {/* Header */}
         <div className="flex items-start justify-between gap-2 mb-2">
           <h4
