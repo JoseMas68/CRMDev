@@ -53,11 +53,9 @@ export const createTaskSchema = z.object({
       .nullable()
   ),
 
-  projectId: z.string().cuid("Invalid project ID").nullish(),
-
-  assigneeId: z.string().cuid("Invalid assignee ID").nullish(),
-
-  parentId: z.string().cuid("Invalid parent task ID").nullish(),
+  projectId: z.string().min(1, "Invalid project ID").optional().nullable(),
+  assigneeId: z.string().min(1, "Invalid assignee ID").optional().nullable(),
+  parentId: z.string().min(1, "Invalid parent task ID").optional().nullable(),
 
   tags: z.array(z.string().max(50)).max(10, "Maximum 10 tags allowed").optional(),
 
@@ -108,20 +106,20 @@ export const updateTaskSchema = createTaskSchema.partial().extend({
 
 // Move task schema (for drag & drop)
 export const moveTaskSchema = z.object({
-  id: z.string().cuid("Invalid task ID"),
+  id: z.string().min(1, "Invalid task ID"),
   status: taskStatusEnum,
   order: z.number().int().nonnegative(),
 });
 
 // Bulk update tasks schema
 export const bulkUpdateTasksSchema = z.object({
-  ids: z.array(z.string().cuid()).min(1, "At least one task ID required"),
+  ids: z.array(z.string().min(1)).min(1, "At least one task ID required"),
   data: updateTaskSchema,
 });
 
 // Task ID validation
 export const taskIdSchema = z.object({
-  id: z.string().cuid("Invalid task ID"),
+  id: z.string().min(1, "Invalid task ID"),
 });
 
 // Types
@@ -135,8 +133,8 @@ export type TaskPriority = z.infer<typeof taskPriorityEnum>;
 export const taskFilterSchema = z.object({
   status: taskStatusEnum.optional(),
   priority: taskPriorityEnum.optional(),
-  projectId: z.string().cuid().optional(),
-  assigneeId: z.string().cuid().optional(),
+  projectId: z.string().min(1).optional(),
+  assigneeId: z.string().min(1).optional(),
   search: z.string().max(255).optional(),
   tags: z.array(z.string()).optional(),
   hasDueDate: z.coerce.boolean().optional(),
