@@ -169,7 +169,7 @@ export function CreateTaskDialog({
           </div>
 
           {/* Status and Priority */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="status">Estado</Label>
               <Select
@@ -261,7 +261,7 @@ export function CreateTaskDialog({
           </div>
 
           {/* Due Date and Estimated Hours */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="dueDate">Fecha limite</Label>
               <Input

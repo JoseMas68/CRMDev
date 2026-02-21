@@ -5,6 +5,8 @@
 
 "use client";
 
+import { motion } from "framer-motion";
+
 import { StatsWidget } from "./stats-widget";
 import { ProjectsHealthWidget } from "./projects-health-widget";
 import { getWidgetLayout } from "./widget-storage";
@@ -25,13 +27,40 @@ export function WidgetGrid() {
   const layout = getWidgetLayout();
   const visibleWidgets = layout.filter((w) => w.visible).sort((a, b) => a.order - b.order);
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    show: {
+      opacity: 1,
+      y: 0,
+    }
+  };
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="show"
+      className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+    >
       {visibleWidgets.map((widget) => {
         const WidgetComponent = WIDGET_COMPONENTS[widget.id];
         if (!WidgetComponent) return null;
-        return <WidgetComponent key={widget.id} />;
+        return (
+          <motion.div key={widget.id} variants={itemVariants} className="h-full">
+            <WidgetComponent />
+          </motion.div>
+        );
       })}
-    </div>
+    </motion.div>
   );
 }

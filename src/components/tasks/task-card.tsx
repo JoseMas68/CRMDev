@@ -16,6 +16,7 @@ import {
   GripVertical,
 } from "lucide-react";
 import { toast } from "sonner";
+import { motion } from "framer-motion";
 
 import { cn, formatDate } from "@/lib/utils";
 import { updateTask, deleteTask } from "@/actions/tasks";
@@ -147,204 +148,210 @@ export function TaskCard({ task, isDragging, projects, members, onClick, useDrag
         {...(!useDragHandle ? attributes : {})}
         {...(!useDragHandle ? listeners : {})}
         className={cn(
-          "bg-card border rounded-lg p-3 shadow-sm group relative",
+          "bg-card border rounded-lg shadow-sm group relative overflow-hidden",
           !useDragHandle && "cursor-grab active:cursor-grabbing",
           "hover:shadow-md transition-shadow",
           (isDragging || isSortableDragging) && "shadow-lg opacity-50",
           isOverdue && "border-destructive/50"
         )}
       >
-        {/* Drag Handle - Only shown when useDragHandle is true */}
-        {useDragHandle && (
-          <div
-            ref={setHandleRef}
-            {...attributes}
-            {...listeners}
-            className="cursor-grab active:cursor-grabbing touch-none absolute top-2 right-2 p-1 hover:bg-muted rounded"
-          >
-            <GripVertical className="h-4 w-4 text-muted-foreground" />
-          </div>
-        )}
-        {/* Header */}
-        <div className="flex items-start justify-between gap-2 mb-2">
-          <h4
-            className={cn(
-              "font-medium text-sm line-clamp-2",
-              onClick && "cursor-pointer hover:text-primary transition-colors"
-            )}
-            onClick={(e) => {
-              if (onClick) {
-                e.stopPropagation();
-                onClick();
-              }
-            }}
-          >
-            {task.title}
-          </h4>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {onClick && (
+        <motion.div
+          whileHover={{ scale: 1.015 }}
+          transition={{ type: "spring", stiffness: 400, damping: 25 }}
+          className="p-3 h-full flex flex-col"
+        >
+          {/* Drag Handle - Only shown when useDragHandle is true */}
+          {useDragHandle && (
+            <div
+              ref={setHandleRef}
+              {...attributes}
+              {...listeners}
+              className="cursor-grab active:cursor-grabbing touch-none absolute top-2 right-2 p-1 hover:bg-muted rounded"
+            >
+              <GripVertical className="h-4 w-4 text-muted-foreground" />
+            </div>
+          )}
+          {/* Header */}
+          <div className="flex items-start justify-between gap-2 mb-2">
+            <h4
+              className={cn(
+                "font-medium text-sm line-clamp-2",
+                onClick && "cursor-pointer hover:text-primary transition-colors"
+              )}
+              onClick={(e) => {
+                if (onClick) {
+                  e.stopPropagation();
+                  onClick();
+                }
+              }}
+            >
+              {task.title}
+            </h4>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {onClick && (
+                  <DropdownMenuItem
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onClick();
+                    }}
+                  >
+                    <Eye className="mr-2 h-4 w-4" />
+                    Ver Detalles
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem
                   onClick={(e) => {
                     e.stopPropagation();
-                    onClick();
+                    handleMarkAsDone();
                   }}
+                  disabled={isLoading}
                 >
-                  <Eye className="mr-2 h-4 w-4" />
-                  Ver Detalles
+                  <CheckCircle2 className="mr-2 h-4 w-4 text-green-500" />
+                  Marcar como Completada
                 </DropdownMenuItem>
-              )}
-              <DropdownMenuItem
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleMarkAsDone();
-                }}
-                disabled={isLoading}
-              >
-                <CheckCircle2 className="mr-2 h-4 w-4 text-green-500" />
-                Marcar como Completada
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowDeleteDialog(true);
-                }}
-                disabled={isLoading}
-                className="text-destructive focus:text-destructive"
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Eliminar
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowDeleteDialog(true);
+                  }}
+                  disabled={isLoading}
+                  className="text-destructive focus:text-destructive"
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Eliminar
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
 
-        {/* Description preview */}
-        {task.description && (
-          <p className="text-xs text-muted-foreground line-clamp-2 mb-2">
-            {task.description}
-          </p>
-        )}
-
-        {/* Metadata */}
-        <div className="flex flex-wrap items-center gap-2">
-          <Badge
-            variant="secondary"
-            className={cn("text-xs font-normal", priorityColors[task.priority])}
-          >
-            {priorityLabels[task.priority]}
-          </Badge>
-
-          {task.project && (
-            <span className="text-xs text-muted-foreground flex items-center gap-1">
-              <FolderKanban className="h-3 w-3" />
-              {task.project.name}
-            </span>
+          {/* Description preview */}
+          {task.description && (
+            <p className="text-xs text-muted-foreground line-clamp-2 mb-2">
+              {task.description}
+            </p>
           )}
-        </div>
 
-        {/* GitHub Links - CRMDev */}
-        {(task.issueUrl || task.prUrl || task.commitHash) && (
-          <div className="flex flex-wrap items-center gap-2 mt-2">
-            {task.issueUrl && (
-              <a
-                href={task.issueUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs text-muted-foreground hover:text-primary flex items-center gap-1"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <GitBranch className="h-3 w-3" />
-                Issue
-                <ExternalLink className="h-2 w-2" />
-              </a>
-            )}
-            {task.prUrl && (
-              <a
-                href={task.prUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs text-muted-foreground hover:text-primary flex items-center gap-1"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <GitPullRequest className="h-3 w-3" />
-                PR
-                <ExternalLink className="h-2 w-2" />
-              </a>
-            )}
-            {task.commitHash && (
-              <code className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded font-mono">
-                {task.commitHash.slice(0, 7)}
-              </code>
-            )}
-          </div>
-        )}
-
-        {/* Dev Labels - CRMDev */}
-        {task.labels && task.labels.length > 0 && (
-          <div className="flex flex-wrap gap-1 mt-2">
-            {task.labels.map((label) => (
-              <Badge
-                key={label}
-                variant={label as "bug" | "feature" | "enhancement" | "documentation" | "refactor" | "hotfix"}
-                className="text-[10px] px-1.5 py-0"
-              >
-                {label}
-              </Badge>
-            ))}
-          </div>
-        )}
-
-        {/* Footer */}
-        <div className="flex items-center justify-between mt-3 pt-2 border-t">
-          {task.dueDate ? (
-            <span
-              className={cn(
-                "text-xs flex items-center gap-1",
-                isOverdue ? "text-destructive" : "text-muted-foreground"
-              )}
+          {/* Metadata */}
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge
+              variant="secondary"
+              className={cn("text-xs font-normal", priorityColors[task.priority])}
             >
-              <Calendar className="h-3 w-3" />
-              {formatDate(task.dueDate)}
-            </span>
-          ) : (
-            <span />
-          )}
+              {priorityLabels[task.priority]}
+            </Badge>
 
-          {task.assignee && (
-            <Avatar className="h-6 w-6">
-              <AvatarImage
-                src={task.assignee.image || undefined}
-                alt={task.assignee.name}
-              />
-              <AvatarFallback className="text-xs">
-                {task.assignee.name
-                  .split(" ")
-                  .map((n) => n[0])
-                  .join("")
-                  .toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-          )}
-        </div>
-
-        {/* Subtasks count */}
-        {task._count.subtasks > 0 && (
-          <div className="mt-2 text-xs text-muted-foreground">
-            {task._count.subtasks} subtarea{task._count.subtasks > 1 ? "s" : ""}
+            {task.project && (
+              <span className="text-xs text-muted-foreground flex items-center gap-1">
+                <FolderKanban className="h-3 w-3" />
+                {task.project.name}
+              </span>
+            )}
           </div>
-        )}
+
+          {/* GitHub Links - CRMDev */}
+          {(task.issueUrl || task.prUrl || task.commitHash) && (
+            <div className="flex flex-wrap items-center gap-2 mt-2">
+              {task.issueUrl && (
+                <a
+                  href={task.issueUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-muted-foreground hover:text-primary flex items-center gap-1"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <GitBranch className="h-3 w-3" />
+                  Issue
+                  <ExternalLink className="h-2 w-2" />
+                </a>
+              )}
+              {task.prUrl && (
+                <a
+                  href={task.prUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-muted-foreground hover:text-primary flex items-center gap-1"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <GitPullRequest className="h-3 w-3" />
+                  PR
+                  <ExternalLink className="h-2 w-2" />
+                </a>
+              )}
+              {task.commitHash && (
+                <code className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded font-mono">
+                  {task.commitHash.slice(0, 7)}
+                </code>
+              )}
+            </div>
+          )}
+
+          {/* Dev Labels - CRMDev */}
+          {task.labels && task.labels.length > 0 && (
+            <div className="flex flex-wrap gap-1 mt-2">
+              {task.labels.map((label) => (
+                <Badge
+                  key={label}
+                  variant={label as "bug" | "feature" | "enhancement" | "documentation" | "refactor" | "hotfix"}
+                  className="text-[10px] px-1.5 py-0"
+                >
+                  {label}
+                </Badge>
+              ))}
+            </div>
+          )}
+
+          {/* Footer */}
+          <div className="flex items-center justify-between mt-3 pt-2 border-t">
+            {task.dueDate ? (
+              <span
+                className={cn(
+                  "text-xs flex items-center gap-1",
+                  isOverdue ? "text-destructive" : "text-muted-foreground"
+                )}
+              >
+                <Calendar className="h-3 w-3" />
+                {formatDate(task.dueDate)}
+              </span>
+            ) : (
+              <span />
+            )}
+
+            {task.assignee && (
+              <Avatar className="h-6 w-6">
+                <AvatarImage
+                  src={task.assignee.image || undefined}
+                  alt={task.assignee.name}
+                />
+                <AvatarFallback className="text-xs">
+                  {task.assignee.name
+                    .split(" ")
+                    .map((n) => n[0])
+                    .join("")
+                    .toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+            )}
+          </div>
+
+          {/* Subtasks count */}
+          {task._count.subtasks > 0 && (
+            <div className="mt-2 text-xs text-muted-foreground">
+              {task._count.subtasks} subtarea{task._count.subtasks > 1 ? "s" : ""}
+            </div>
+          )}
+        </motion.div>
       </div>
 
       {/* Delete dialog */}

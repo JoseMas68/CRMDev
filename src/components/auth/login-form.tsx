@@ -8,6 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Loader2, Github } from "lucide-react";
 import { toast } from "sonner";
+import { motion } from "framer-motion";
 
 import { signIn } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
@@ -78,7 +79,12 @@ export function LoginForm() {
   }
 
   return (
-    <div className="space-y-6">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      className="space-y-6"
+    >
       <div className="space-y-2 text-center">
         <div className="flex justify-center items-center gap-2 mb-4">
           <span className="font-mono text-2xl font-semibold text-neon-violet tech-glow-text tracking-tight">
@@ -173,6 +179,6 @@ export function LoginForm() {
           Regístrate gratis
         </Link>
       </p>
-    </div>
+    </motion.div>
   );
 }
