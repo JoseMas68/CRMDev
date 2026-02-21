@@ -35,7 +35,8 @@ export const auth = betterAuth({
   // Email and Password authentication
   emailAndPassword: {
     enabled: true,
-    requireEmailVerification: true, // Enable email verification with Resend
+    // Only require email verification in production where Resend is configured
+    requireEmailVerification: process.env.NODE_ENV === "production",
     autoSignIn: true, // Auto sign in after registration
     minPasswordLength: 8,
     maxPasswordLength: 128,
