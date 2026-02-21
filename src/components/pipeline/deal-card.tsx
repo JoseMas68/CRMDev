@@ -12,6 +12,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
+import { motion } from "framer-motion";
 
 import { cn, formatCurrency, formatDate } from "@/lib/utils";
 import { markDealAsWon, markDealAsLost, deleteDeal } from "@/actions/deals";
@@ -127,79 +128,85 @@ export function DealCard({ deal, isDragging, clients }: DealCardProps) {
         {...attributes}
         {...listeners}
         className={cn(
-          "kanban-card group",
+          "kanban-card group p-0 overflow-hidden",
           (isDragging || isSortableDragging) && "kanban-card-dragging"
         )}
       >
-        {/* Header with title and menu */}
-        <div className="flex items-start justify-between gap-2 mb-2">
-          <h4 className="font-medium text-sm line-clamp-2">{deal.title}</h4>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleMarkAsWon();
-                }}
-                disabled={isLoading}
-              >
-                <Trophy className="mr-2 h-4 w-4 text-green-500" />
-                Marcar como Ganado
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowLostDialog(true);
-                }}
-                disabled={isLoading}
-              >
-                <X className="mr-2 h-4 w-4 text-red-500" />
-                Marcar como Perdido
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowDeleteDialog(true);
-                }}
-                disabled={isLoading}
-                className="text-destructive focus:text-destructive"
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Eliminar
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-
-        {/* Value */}
-        <div className="text-lg font-bold text-primary mb-2">
-          {formatCurrency(deal.value)}
-        </div>
-
-        {/* Client */}
-        <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
-          <User className="h-3 w-3" />
-          <span className="truncate">{deal.client.name}</span>
-        </div>
-
-        {/* Expected close date */}
-        {deal.expectedCloseDate && (
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <Calendar className="h-3 w-3" />
-            <span>{formatDate(deal.expectedCloseDate)}</span>
+        <motion.div
+          whileHover={{ scale: 1.015 }}
+          transition={{ type: "spring", stiffness: 400, damping: 25 }}
+          className="p-3 shadow-sm h-full flex flex-col"
+        >
+          {/* Header with title and menu */}
+          <div className="flex items-start justify-between gap-2 mb-2">
+            <h4 className="font-medium text-sm line-clamp-2">{deal.title}</h4>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleMarkAsWon();
+                  }}
+                  disabled={isLoading}
+                >
+                  <Trophy className="mr-2 h-4 w-4 text-green-500" />
+                  Marcar como Ganado
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowLostDialog(true);
+                  }}
+                  disabled={isLoading}
+                >
+                  <X className="mr-2 h-4 w-4 text-red-500" />
+                  Marcar como Perdido
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowDeleteDialog(true);
+                  }}
+                  disabled={isLoading}
+                  className="text-destructive focus:text-destructive"
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Eliminar
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
-        )}
+
+          {/* Value */}
+          <div className="text-lg font-bold text-primary mb-2">
+            {formatCurrency(deal.value)}
+          </div>
+
+          {/* Client */}
+          <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
+            <User className="h-3 w-3" />
+            <span className="truncate">{deal.client.name}</span>
+          </div>
+
+          {/* Expected close date */}
+          {deal.expectedCloseDate && (
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <Calendar className="h-3 w-3" />
+              <span>{formatDate(deal.expectedCloseDate)}</span>
+            </div>
+          )}
+        </motion.div>
       </div>
 
       {/* Lost confirmation dialog */}

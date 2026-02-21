@@ -43,7 +43,7 @@ export function KanbanColumn({ stage, deals, clients }: KanbanColumnProps) {
     <div
       ref={setNodeRef}
       className={cn(
-        "kanban-column transition-colors lg:flex-shrink-0 lg:w-80 w-full",
+        "kanban-column transition-colors flex-shrink-0 w-[85vw] sm:w-80 snap-center lg:snap-align-none",
         isOver && "bg-muted/50 ring-2 ring-primary/20"
       )}
     >

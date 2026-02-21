@@ -208,7 +208,7 @@ export function KanbanBoard({ initialStages, clients }: KanbanBoardProps) {
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >
-      <div className="lg:flex lg:gap-4 lg:overflow-x-auto lg:pb-4 lg:min-h-[600px] flex flex-col gap-4">
+      <div className="flex overflow-x-auto gap-4 pb-4 min-h-[600px] snap-x">
         <SortableContext
           items={stages.map((s) => s.id)}
           strategy={horizontalListSortingStrategy}
