@@ -1,6 +1,15 @@
-import Link from "next/link";
-import { Mail, Phone, Building2 } from "lucide-react";
+"use client";
 
+import Link from "next/link";
+import { Mail, Phone, Building2, MoreVertical, Eye, Edit, Trash2 } from "lucide-react";
+import { motion } from "framer-motion";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -29,50 +38,100 @@ interface ClientCardProps {
     phone: string | null;
     status: string;
   };
+  onDelete?: (id: string) => void;
+  index?: number;
 }
 
-export function ClientCard({ client }: ClientCardProps) {
+export function ClientCard({ client, onDelete, index = 0 }: ClientCardProps) {
   return (
-    <Card>
-      <CardContent className="p-4">
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex-1 min-w-0">
-            <h3 className="font-semibold truncate">{client.name}</h3>
-            {client.company && (
-              <p className="text-sm text-muted-foreground truncate">
-                {client.company}
-              </p>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.05, duration: 0.3 }}
+      whileHover={{ scale: 1.02, y: -2 }}
+      whileTap={{ scale: 0.98 }}
+    >
+      <Card className="overflow-hidden hover:shadow-lg transition-shadow">
+        <CardContent className="p-4">
+          <div className="flex items-start justify-between gap-3">
+            <Link
+              href={`/clients/${client.id}`}
+              className="flex-1 min-w-0 group"
+            >
+              <h3 className="font-semibold truncate group-hover:text-primary transition-colors">
+                {client.name}
+              </h3>
+              {client.company && (
+                <p className="text-sm text-muted-foreground truncate flex items-center gap-1">
+                  <Building2 className="h-3 w-3" />
+                  {client.company}
+                </p>
+              )}
+            </Link>
+            <div className="flex items-center gap-2">
+              <Badge
+                variant="secondary"
+                className={statusColors[client.status]}
+              >
+                {statusLabels[client.status]}
+              </Badge>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <MoreVertical className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem asChild>
+                    <Link href={`/clients/${client.id}`} className="cursor-pointer">
+                      <Eye className="mr-2 h-4 w-4" />
+                      Ver Detalles
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href={`/clients/${client.id}/edit`} className="cursor-pointer">
+                      <Edit className="mr-2 h-4 w-4" />
+                      Editar
+                    </Link>
+                  </DropdownMenuItem>
+                  {onDelete && (
+                    <DropdownMenuItem
+                      onClick={() => onDelete(client.id)}
+                      className="text-destructive focus:text-destructive"
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Eliminar
+                    </DropdownMenuItem>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
+
+          <div className="mt-4 space-y-2 text-sm">
+            {client.email && (
+              <a
+                href={`mailto:${client.email}`}
+                className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors active:scale-95 transform"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <Mail className="h-4 w-4 shrink-0" />
+                <span className="truncate">{client.email}</span>
+              </a>
+            )}
+            {client.phone && (
+              <a
+                href={`tel:${client.phone}`}
+                className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors active:scale-95 transform"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <Phone className="h-4 w-4 shrink-0" />
+                <span className="truncate">{client.phone}</span>
+              </a>
             )}
           </div>
-          <Badge
-            variant="secondary"
-            className={statusColors[client.status]}
-          >
-            {statusLabels[client.status]}
-          </Badge>
-        </div>
-
-        <div className="mt-4 space-y-2 text-sm">
-          {client.email && (
-            <a
-              href={`mailto:${client.email}`}
-              className="flex items-center gap-2 text-muted-foreground hover:text-primary"
-            >
-              <Mail className="h-4 w-4" />
-              {client.email}
-            </a>
-          )}
-          {client.phone && (
-            <a
-              href={`tel:${client.phone}`}
-              className="flex items-center gap-2 text-muted-foreground hover:text-primary"
-            >
-              <Phone className="h-4 w-4" />
-              {client.phone}
-            </a>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 }

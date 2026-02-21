@@ -51,23 +51,23 @@ export default async function PipelinePage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-start gap-4">
-        <CreateDealDialog
-          stages={stages}
-          clients={clients.map((c) => ({ id: c.id, name: c.name }))}
-        >
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            Nuevo Deal
-          </Button>
-        </CreateDealDialog>
-
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Pipeline de Ventas</h1>
           <p className="text-muted-foreground">
             {formatCurrency(totalValue)} en oportunidades abiertas
           </p>
         </div>
+
+        <CreateDealDialog
+          stages={stages}
+          clients={clients.map((c) => ({ id: c.id, name: c.name }))}
+        >
+          <Button className="w-full sm:w-auto">
+            <Plus className="mr-2 h-4 w-4" />
+            Nuevo Deal
+          </Button>
+        </CreateDealDialog>
       </div>
 
       {/* Kanban Board */}

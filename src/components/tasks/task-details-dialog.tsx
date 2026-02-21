@@ -143,7 +143,7 @@ export function TaskDetailsDialog({ task, open, onOpenChange }: TaskDetailsDialo
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+        <DialogContent className="w-[95vw] sm:max-w-[600px] max-h-[95vh] overflow-y-auto p-4 sm:p-6">
           <DialogHeader>
             <DialogTitle className="text-xl pr-8">{task.title}</DialogTitle>
           </DialogHeader>
@@ -280,7 +280,7 @@ export function TaskDetailsDialog({ task, open, onOpenChange }: TaskDetailsDialo
             )}
 
             {/* Actions */}
-            <div className="flex gap-2 pt-4 border-t">
+            <div className="flex flex-col sm:flex-row gap-2 pt-4 border-t">
               {task.status !== "DONE" && (
                 <Button
                   onClick={handleMarkAsDone}
@@ -288,15 +288,17 @@ export function TaskDetailsDialog({ task, open, onOpenChange }: TaskDetailsDialo
                   className="flex-1"
                 >
                   <CheckCircle2 className="mr-2 h-4 w-4" />
-                  Marcar como Completada
+                  Completar Tarea
                 </Button>
               )}
               <Button
                 variant="destructive"
                 onClick={() => setShowDeleteDialog(true)}
                 disabled={isLoading}
+                className="w-full sm:w-auto"
               >
-                <Trash2 className="h-4 w-4" />
+                <Trash2 className="h-4 w-4 sm:mr-0 mr-2" />
+                <span className="sm:hidden">Eliminar</span>
               </Button>
             </div>
           </div>

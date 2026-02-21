@@ -108,19 +108,19 @@ export default async function IntegrationsPage() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 border rounded-lg">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border rounded-lg gap-4">
               <div className="flex items-center gap-4">
                 <div className="p-2 rounded-lg bg-primary/10">
                   <Github className="h-5 w-5 text-primary" />
                 </div>
                 <div>
                   <p className="font-medium">Webhooks de GitHub</p>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-muted-foreground break-all">
                     Endpoint: /api/webhooks/github
                   </p>
                 </div>
               </div>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" className="w-full sm:w-auto">
                 Configurar
               </Button>
             </div>
@@ -195,8 +195,8 @@ function IntegrationCard({
           {status === "connected"
             ? "Administrar"
             : status === "coming_soon"
-            ? "Próximamente"
-            : "Conectar"}
+              ? "Próximamente"
+              : "Conectar"}
         </Button>
       </CardContent>
     </Card>

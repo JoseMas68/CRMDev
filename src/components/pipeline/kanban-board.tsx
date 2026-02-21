@@ -208,17 +208,19 @@ export function KanbanBoard({ initialStages, clients }: KanbanBoardProps) {
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >
-      <div className="flex overflow-x-auto gap-4 pb-4 min-h-[600px] snap-x">
+      <div className="flex md:flex-row overflow-x-auto md:overflow-x-visible snap-x snap-mandatory gap-4 pb-4 md:gap-6 md:min-h-[600px] scrollbar-hide">
         <SortableContext
           items={stages.map((s) => s.id)}
           strategy={horizontalListSortingStrategy}
         >
-          {stages.map((stage) => (
+          {stages.map((stage, index) => (
             <KanbanColumn
               key={stage.id}
               stage={stage}
               deals={stage.deals}
               clients={clients}
+              columnIndex={index}
+              totalColumns={stages.length}
             />
           ))}
         </SortableContext>

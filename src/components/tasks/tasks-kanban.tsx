@@ -227,14 +227,16 @@ export function TasksKanban({
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >
-      <div className="flex overflow-x-auto gap-4 pb-4 min-h-[500px] snap-x">
-        {columns.map((column) => (
+      <div className="flex md:flex-row overflow-x-auto md:overflow-x-visible snap-x snap-mandatory gap-4 pb-4 md:gap-6 md:min-h-[500px] scrollbar-hide">
+        {columns.map((column, index) => (
           <TaskColumn
             key={column.id}
             column={column}
             projects={projects}
             members={members}
             onTaskClick={handleTaskClick}
+            columnIndex={index}
+            totalColumns={columns.length}
           />
         ))}
       </div>
@@ -265,11 +267,15 @@ function TaskColumn({
   projects,
   members,
   onTaskClick,
+  columnIndex,
+  totalColumns,
 }: {
   column: Column;
   projects: { id: string; name: string }[];
   members: { id: string; name: string; image: string | null }[];
   onTaskClick: (task: Task, columnId: string) => void;
+  columnIndex: number;
+  totalColumns: number;
 }) {
   const { setNodeRef, isOver } = useDroppable({
     id: column.id,
@@ -282,11 +288,15 @@ function TaskColumn({
     DONE: "border-t-green-400",
   };
 
+  // On mobile, show column indicator
+  const showIndicator = totalColumns > 1;
+
   return (
     <div
       ref={setNodeRef}
       className={cn(
-        "bg-muted/30 rounded-lg p-4 border-t-4 transition-colors flex-shrink-0 w-[85vw] sm:w-80 snap-center lg:snap-align-none",
+        "bg-muted/30 rounded-lg p-4 border-t-4 transition-colors flex-shrink-0 snap-center",
+        "min-w-full md:min-w-0 md:w-80",
         columnColors[column.id] || "border-t-gray-400",
         isOver && "bg-muted/50 ring-2 ring-primary/20"
       )}

@@ -51,6 +51,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
+import { ClientCard } from "./client-card";
 
 interface Client {
   id: string;
@@ -206,8 +207,32 @@ export function ClientsTable({
         </div>
       </div>
 
-      {/* Table */}
-      <div className="rounded-md border">
+      {/* Table (Desktop) / Cards (Mobile) */}
+      {/* Mobile: Cards */}
+      <div className="md:hidden space-y-3">
+        {clients.length === 0 ? (
+          <div className="text-center py-12 text-muted-foreground">
+            {hasFilters
+              ? "No se encontraron clientes con estos filtros"
+              : "No hay clientes aun. Crea el primero."}
+          </div>
+        ) : (
+          clients.map((client, index) => (
+            <ClientCard
+              key={client.id}
+              client={client}
+              index={index}
+              onDelete={() => {
+                setClientToDelete(client);
+                setDeleteDialogOpen(true);
+              }}
+            />
+          ))
+        )}
+      </div>
+
+      {/* Desktop: Table */}
+      <div className="hidden md:block rounded-md border">
         <Table>
           <TableHeader>
             <TableRow className="data-table-header">

@@ -30,9 +30,11 @@ interface KanbanColumnProps {
   stage: Stage;
   deals: Deal[];
   clients: { id: string; name: string }[];
+  columnIndex: number;
+  totalColumns: number;
 }
 
-export function KanbanColumn({ stage, deals, clients }: KanbanColumnProps) {
+export function KanbanColumn({ stage, deals, clients, columnIndex, totalColumns }: KanbanColumnProps) {
   const { setNodeRef, isOver } = useDroppable({
     id: stage.id,
   });
@@ -43,7 +45,8 @@ export function KanbanColumn({ stage, deals, clients }: KanbanColumnProps) {
     <div
       ref={setNodeRef}
       className={cn(
-        "kanban-column transition-colors flex-shrink-0 w-[85vw] sm:w-80 snap-center lg:snap-align-none",
+        "kanban-column transition-colors flex-shrink-0 snap-center",
+        "min-w-full md:min-w-0 md:w-80",
         isOver && "bg-muted/50 ring-2 ring-primary/20"
       )}
     >

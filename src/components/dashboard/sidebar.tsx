@@ -104,7 +104,7 @@ const secondaryNavigation = [
   },
   {
     name: "Configuración",
-    href: "/settings",
+    href: "/settings/profile",
     icon: Settings,
   },
 ];
@@ -294,7 +294,7 @@ export function DashboardSidebar({ user, activeOrgId }: SidebarProps) {
                 <DropdownMenuLabel>Mi Cuenta</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <Link href="/settings">
+                  <Link href="/settings/profile">
                     <Settings className="mr-2 h-4 w-4" />
                     Configuración
                   </Link>
