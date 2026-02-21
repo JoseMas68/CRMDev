@@ -15,8 +15,12 @@ import {
   CheckSquare,
   Github,
   ExternalLink,
+  FolderKanban,
+  Users,
+  ChevronRight,
 } from "lucide-react";
 import { toast } from "sonner";
+import { motion } from "framer-motion";
 
 import { cn, formatDate, formatCurrency, getInitials } from "@/lib/utils";
 import { deleteProject } from "@/actions/projects";
@@ -83,11 +87,11 @@ interface ProjectsGridProps {
 }
 
 const statusColors: Record<string, string> = {
-  NOT_STARTED: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200",
-  IN_PROGRESS: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
-  ON_HOLD: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
-  COMPLETED: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
-  CANCELLED: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
+  NOT_STARTED: "bg-gray-500 text-white",
+  IN_PROGRESS: "bg-blue-500 text-white",
+  ON_HOLD: "bg-yellow-500 text-white",
+  COMPLETED: "bg-green-500 text-white",
+  CANCELLED: "bg-red-500 text-white",
 };
 
 const statusLabels: Record<string, string> = {
@@ -172,29 +176,29 @@ export function ProjectsGrid({
   return (
     <div className="space-y-6">
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-4">
-        <form onSubmit={handleSearch} className="flex-1 flex gap-2">
+      <div className="flex flex-col gap-4">
+        <form onSubmit={handleSearch} className="flex gap-2">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <Input
               placeholder="Buscar proyectos..."
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}
-              className="pl-9"
+              className="pl-12 h-14 text-lg"
             />
           </div>
-          <Button type="submit" variant="secondary">
+          <Button type="submit" className="h-14 px-6">
             Buscar
           </Button>
         </form>
 
-        <div className="flex gap-2">
+        <div className="flex gap-2 overflow-x-auto pb-2">
           <Select
             value={currentStatus || "all"}
             onValueChange={handleStatusChange}
           >
-            <SelectTrigger className="w-[160px]">
-              <Filter className="mr-2 h-4 w-4" />
+            <SelectTrigger className="w-full">
+              <Filter className="mr-2 h-5 w-5" />
               <SelectValue placeholder="Estado" />
             </SelectTrigger>
             <SelectContent>
@@ -208,8 +212,8 @@ export function ProjectsGrid({
           </Select>
 
           {hasFilters && (
-            <Button variant="ghost" onClick={clearFilters}>
-              <X className="mr-2 h-4 w-4" />
+            <Button variant="outline" onClick={clearFilters} className="flex-shrink-0 h-14">
+              <X className="mr-2 h-5 w-5" />
               Limpiar
             </Button>
           )}
@@ -218,164 +222,26 @@ export function ProjectsGrid({
 
       {/* Projects Grid */}
       {projects.length === 0 ? (
-        <div className="text-center py-12 text-muted-foreground">
-          {hasFilters
-            ? "No se encontraron proyectos con estos filtros"
-            : "No hay proyectos aun. Crea el primero."}
+        <div className="text-center py-16 text-muted-foreground">
+          <FolderKanban className="h-16 w-16 mx-auto mb-4 opacity-50" />
+          <p className="text-lg">
+            {hasFilters
+              ? "No se encontraron proyectos con estos filtros"
+              : "No hay proyectos aun. Crea el primero."}
+          </p>
         </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {projects.map((project) => (
-            <Card key={project.id} className="dashboard-card group lg:hover:shadow-md transition-shadow">
-              <CardHeader className="pb-2">
-                <div className="flex items-start justify-between gap-3 lg:gap-4">
-                  <div className="flex items-start justify-between">
-                    <div className="space-y-1 flex-1 min-w-0">
-                      <Link
-                        href={`/projects/${project.id}`}
-                        className="font-semibold hover:underline line-clamp-1"
-                      >
-                        {project.name}
-                      </Link>
-                      {project.client && (
-                        <p className="text-sm text-muted-foreground truncate">
-                          {project.client.name}
-                        </p>
-                      )}
-                    </div>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity"
-                        >
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem asChild>
-                          <Link href={`/projects/${project.id}`}>
-                            <Eye className="mr-2 h-4 w-4" />
-                            Ver detalles
-                          </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                          <Link href={`/projects/${project.id}/edit`}>
-                            <Pencil className="mr-2 h-4 w-4" />
-                            Editar
-                          </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          className="text-destructive focus:text-destructive"
-                          onClick={() => {
-                            setProjectToDelete(project);
-                            setDeleteDialogOpen(true);
-                          }}
-                        >
-                          <Trash2 className="mr-2 h-4 w-4" />
-                          Eliminar
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Status and GitHub badges */}
-                <div className="flex flex-wrap items-center gap-2">
-                  <Badge
-                    variant="secondary"
-                    className={cn("font-normal", statusColors[project.status])}
-                  >
-                    {statusLabels[project.status]}
-                  </Badge>
-                  {project.repoUrl && (
-                    <a
-                      href={project.repoUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-800 text-xs font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <Github className="h-3 w-3" />
-                      GitHub
-                      <ExternalLink className="h-2.5 w-2.5" />
-                    </a>
-                  )}
-                  {project.techStack?.length > 0 && (
-                    <Badge variant="outline" className="text-xs font-normal">
-                      {project.techStack[0]}
-                    </Badge>
-                  )}
-                </div>
-
-                {/* Progress */}
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Progreso</span>
-                    <span className="font-medium">{project.progress}%</span>
-                  </div>
-                  <Progress value={project.progress} className="h-2" />
-                </div>
-
-                {/* Metadata */}
-                <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-                  {project.deadline && (
-                    <div className="flex items-center gap-1">
-                      <Calendar className="h-3.5 w-3.5" />
-                      {formatDate(project.deadline)}
-                    </div>
-                  )}
-                  <div className="flex items-center gap-1">
-                    <CheckSquare className="h-3.5 w-3.5" />
-                    {project._count.tasks} tareas
-                  </div>
-                </div>
-
-                {/* Project Members Avatars */}
-                {project.projectMembers && project.projectMembers.length > 0 && (
-                  <div className="flex items-center gap-2">
-                    <TooltipProvider>
-                      <div className="flex -space-x-2">
-                        {project.projectMembers.slice(0, 3).map((pm) => (
-                          <Tooltip key={pm.user.id}>
-                            <TooltipTrigger asChild>
-                              <Avatar className="h-7 w-7 border-2 border-background">
-                                <AvatarImage src={pm.user.image || undefined} />
-                                <AvatarFallback className="text-xs">
-                                  {getInitials(pm.user.name)}
-                                </AvatarFallback>
-                              </Avatar>
-                            </TooltipTrigger>
-                            <TooltipContent>{pm.user.name}</TooltipContent>
-                          </Tooltip>
-                        ))}
-                        {project.projectMembers.length > 3 && (
-                          <div className="h-7 w-7 rounded-full border-2 border-background bg-muted flex items-center justify-center text-xs font-medium text-muted-foreground">
-                            +{project.projectMembers.length - 3}
-                          </div>
-                        )}
-                      </div>
-                    </TooltipProvider>
-                  </div>
-                )}
-
-                {/* Budget (if exists) */}
-                {project.budget && (
-                  <div className="pt-2 border-t">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">Presupuesto</span>
-                      <span className="font-medium">
-                        {formatCurrency(project.spent, project.currency)} /{" "}
-                        {formatCurrency(project.budget, project.currency)}
-                      </span>
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+          {projects.map((project, index) => (
+            <ProjectCard
+              key={project.id}
+              project={project}
+              index={index}
+              onDelete={() => {
+                setProjectToDelete(project);
+                setDeleteDialogOpen(true);
+              }}
+            />
           ))}
         </div>
       )}
@@ -432,5 +298,288 @@ export function ProjectsGrid({
         </AlertDialogContent>
       </AlertDialog>
     </div>
+  );
+}
+
+// Mobile-first Project Card
+function ProjectCard({
+  project,
+  index,
+  onDelete,
+}: {
+  project: Project;
+  index: number;
+  onDelete: () => void;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.05, duration: 0.3 }}
+    >
+      {/* MOBILE: Full card design */}
+      <Link href={`/projects/${project.id}`} className="block md:hidden">
+        <div className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl p-5 shadow-lg border border-gray-200 dark:border-gray-700 active:scale-[0.98] transition-transform">
+          {/* Header */}
+          <div className="flex items-start justify-between gap-3 mb-4">
+            <div className="flex-1 min-w-0">
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 line-clamp-1">
+                {project.name}
+              </h3>
+              {project.client && (
+                <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
+                  {project.client.name}
+                </p>
+              )}
+            </div>
+            <ChevronRight className="h-6 w-6 text-gray-400 flex-shrink-0" />
+          </div>
+
+          {/* Status badge */}
+          <div className="mb-4">
+            <Badge
+              className={cn(
+                "text-sm font-bold px-4 py-2 rounded-full shadow-sm",
+                statusColors[project.status]
+              )}
+            >
+              {statusLabels[project.status]}
+            </Badge>
+          </div>
+
+          {/* Progress */}
+          <div className="mb-4">
+            <div className="flex items-center justify-between text-sm mb-2">
+              <span className="text-gray-600 dark:text-gray-400">Progreso</span>
+              <span className="font-bold text-lg text-gray-900 dark:text-white">
+                {project.progress}%
+              </span>
+            </div>
+            <Progress value={project.progress} className="h-3" />
+          </div>
+
+          {/* Quick stats */}
+          <div className="grid grid-cols-2 gap-3 mb-4">
+            <div className="bg-gray-100 dark:bg-gray-700 rounded-xl p-3">
+              <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400 mb-1">
+                <CheckSquare className="h-4 w-4" />
+                <span className="text-xs">Tareas</span>
+              </div>
+              <p className="text-xl font-bold text-gray-900 dark:text-white">
+                {project._count.tasks}
+              </p>
+            </div>
+
+            {project.deadline && (
+              <div className="bg-gray-100 dark:bg-gray-700 rounded-xl p-3">
+                <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400 mb-1">
+                  <Calendar className="h-4 w-4" />
+                  <span className="text-xs">Fecha límite</span>
+                </div>
+                <p className="text-sm font-bold text-gray-900 dark:text-white">
+                  {formatDate(project.deadline)}
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Team members */}
+          {project.projectMembers && project.projectMembers.length > 0 && (
+            <div className="flex items-center gap-2 mb-4">
+              <div className="flex -space-x-3">
+                {project.projectMembers.slice(0, 3).map((pm) => (
+                  <Avatar key={pm.user.id} className="h-10 w-10 border-2 border-background">
+                    <AvatarImage src={pm.user.image || undefined} />
+                    <AvatarFallback className="text-sm font-semibold">
+                      {getInitials(pm.user.name)}
+                    </AvatarFallback>
+                  </Avatar>
+                ))}
+                {project.projectMembers.length > 3 && (
+                  <div className="h-10 w-10 rounded-full border-2 border-background bg-primary flex items-center justify-center text-sm font-bold text-primary-foreground">
+                    +{project.projectMembers.length - 3}
+                  </div>
+                )}
+              </div>
+              <span className="text-sm text-gray-500 dark:text-gray-400 ml-2">
+                {project.projectMembers.length === 1
+                  ? "1 miembro"
+                  : `${project.projectMembers.length} miembros`}
+              </span>
+            </div>
+          )}
+
+          {/* Tech stack */}
+          {project.techStack && project.techStack.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {project.techStack.slice(0, 3).map((tech) => (
+                <span
+                  key={tech}
+                  className="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full text-xs font-semibold"
+                >
+                  {tech}
+                </span>
+              ))}
+              {project.techStack.length > 3 && (
+                <span className="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full text-xs font-semibold">
+                  +{project.techStack.length - 3}
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+      </Link>
+
+      {/* DESKTOP: Original card design */}
+      <div className="hidden md:block">
+        <Card className="dashboard-card group hover:shadow-md transition-shadow">
+          <CardHeader className="pb-2">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-start justify-between w-full">
+                <div className="space-y-1 flex-1 min-w-0">
+                  <Link
+                    href={`/projects/${project.id}`}
+                    className="font-semibold hover:underline line-clamp-1"
+                  >
+                    {project.name}
+                  </Link>
+                  {project.client && (
+                    <p className="text-sm text-muted-foreground truncate">
+                      {project.client.name}
+                    </p>
+                  )}
+                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem asChild>
+                      <Link href={`/projects/${project.id}`}>
+                        <Eye className="mr-2 h-4 w-4" />
+                        Ver detalles
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href={`/projects/${project.id}/edit`}>
+                        <Pencil className="mr-2 h-4 w-4" />
+                        Editar
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      className="text-destructive focus:text-destructive"
+                      onClick={onDelete}
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Eliminar
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Status and GitHub badges */}
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge
+                variant="secondary"
+                className={cn("font-normal", statusColors[project.status])}
+              >
+                {statusLabels[project.status]}
+              </Badge>
+              {project.repoUrl && (
+                <a
+                  href={project.repoUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-800 text-xs font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <Github className="h-3 w-3" />
+                  GitHub
+                  <ExternalLink className="h-2.5 w-2.5" />
+                </a>
+              )}
+              {project.techStack?.length > 0 && (
+                <Badge variant="outline" className="text-xs font-normal">
+                  {project.techStack[0]}
+                </Badge>
+              )}
+            </div>
+
+            {/* Progress */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Progreso</span>
+                <span className="font-medium">{project.progress}%</span>
+              </div>
+              <Progress value={project.progress} className="h-2" />
+            </div>
+
+            {/* Metadata */}
+            <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+              {project.deadline && (
+                <div className="flex items-center gap-1">
+                  <Calendar className="h-3.5 w-3.5" />
+                  {formatDate(project.deadline)}
+                </div>
+              )}
+              <div className="flex items-center gap-1">
+                <CheckSquare className="h-3.5 w-3.5" />
+                {project._count.tasks} tareas
+              </div>
+            </div>
+
+            {/* Project Members Avatars */}
+            {project.projectMembers && project.projectMembers.length > 0 && (
+              <div className="flex items-center gap-2">
+                <TooltipProvider>
+                  <div className="flex -space-x-2">
+                    {project.projectMembers.slice(0, 3).map((pm) => (
+                      <Tooltip key={pm.user.id}>
+                        <TooltipTrigger asChild>
+                          <Avatar className="h-7 w-7 border-2 border-background">
+                            <AvatarImage src={pm.user.image || undefined} />
+                            <AvatarFallback className="text-xs">
+                              {getInitials(pm.user.name)}
+                            </AvatarFallback>
+                          </Avatar>
+                        </TooltipTrigger>
+                        <TooltipContent>{pm.user.name}</TooltipContent>
+                      </Tooltip>
+                    ))}
+                    {project.projectMembers.length > 3 && (
+                      <div className="h-7 w-7 rounded-full border-2 border-background bg-muted flex items-center justify-center text-xs font-medium text-muted-foreground">
+                        +{project.projectMembers.length - 3}
+                      </div>
+                    )}
+                  </div>
+                </TooltipProvider>
+              </div>
+            )}
+
+            {/* Budget (if exists) */}
+            {project.budget && (
+              <div className="pt-2 border-t">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Presupuesto</span>
+                  <span className="font-medium">
+                    {formatCurrency(project.spent, project.currency)} /{" "}
+                    {formatCurrency(project.budget, project.currency)}
+                  </span>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </motion.div>
   );
 }

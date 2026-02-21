@@ -6,11 +6,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Globe, GitBranch, Server, AlertCircle, CheckCircle2, Clock, FolderOpen } from "lucide-react";
+import { Globe, GitBranch, Server, AlertCircle, CheckCircle2, Clock, FolderOpen, ChevronRight } from "lucide-react";
 import { WidgetCard } from "./widget-card";
 import { getProjects } from "@/actions/projects";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 type ProjectType = "GITHUB" | "WORDPRESS" | "VERCEL" | "OTHER";
 type HealthStatus = "healthy" | "warning" | "critical" | null;
@@ -68,9 +70,9 @@ export function ProjectsHealthWidget() {
     if (!healthStatus) return null;
 
     const statusConfig = {
-      healthy: { icon: CheckCircle2, color: "text-green-600", bg: "bg-green-50 dark:bg-green-950", label: "Saludable" },
-      warning: { icon: AlertCircle, color: "text-yellow-600", bg: "bg-yellow-50 dark:bg-yellow-950", label: "Atención" },
-      critical: { icon: AlertCircle, color: "text-red-600", bg: "bg-red-50 dark:bg-red-950", label: "Crítico" },
+      healthy: { icon: CheckCircle2, color: "text-green-600", bg: "bg-green-50 dark:bg-green-950", label: "Saludable", mobileBg: "bg-green-500", mobileText: "text-white" },
+      warning: { icon: AlertCircle, color: "text-yellow-600", bg: "bg-yellow-50 dark:bg-yellow-950", label: "Atención", mobileBg: "bg-yellow-500", mobileText: "text-white" },
+      critical: { icon: AlertCircle, color: "text-red-600", bg: "bg-red-50 dark:bg-red-950", label: "Crítico", mobileBg: "bg-red-500", mobileText: "text-white" },
     };
 
     return statusConfig[healthStatus];
@@ -99,67 +101,131 @@ export function ProjectsHealthWidget() {
       }
     >
       {projects.length === 0 ? (
-        <div className="text-center py-8 text-muted-foreground">
-          No hay proyectos aún
+        <div className="text-center py-12 text-muted-foreground">
+          <FolderOpen className="h-12 w-12 mx-auto mb-3 opacity-50" />
+          <p className="text-lg">No hay proyectos aún</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {projects.map((project) => {
-            const Icon = getProjectIcon(project.type);
-            const health = getHealthStatus(project.healthStatus);
-            const HealthIcon = health?.icon;
+        <>
+          {/* Mobile: Lista vertical de cards grandes */}
+          <div className="space-y-3 md:hidden">
+            {projects.map((project) => {
+              const Icon = getProjectIcon(project.type);
+              const health = getHealthStatus(project.healthStatus);
+              const HealthIcon = health?.icon;
 
-            return (
-              <div
-                key={project.id}
-                className="p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
-              >
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <Icon className="h-4 w-4 text-muted-foreground" />
-                    <span className="font-medium text-sm">{project.name}</span>
+              return (
+                <Link
+                  key={project.id}
+                  href={`/projects/${project.id}`}
+                  className="block"
+                >
+                  <div className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl p-5 shadow-md border border-gray-200 dark:border-gray-700 active:scale-[0.98] transition-transform">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="bg-primary/10 p-3 rounded-xl">
+                          <Icon className="h-6 w-6 text-primary" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-bold text-lg text-gray-900 dark:text-white truncate">
+                            {project.name}
+                          </h3>
+                          <Badge
+                            variant="outline"
+                            className="text-xs mt-1"
+                          >
+                            {project.type}
+                          </Badge>
+                        </div>
+                      </div>
+                      <ChevronRight className="h-6 w-6 text-gray-400" />
+                    </div>
+
+                    {/* Progress */}
+                    <div className="mb-3">
+                      <div className="flex items-center justify-between text-sm mb-2">
+                        <span className="text-gray-600 dark:text-gray-400">Progreso</span>
+                        <span className="font-bold text-lg text-gray-900 dark:text-white">
+                          {project.progress}%
+                        </span>
+                      </div>
+                      <Progress value={project.progress} className="h-3" />
+                    </div>
+
+                    {/* Health status */}
+                    {HealthIcon && health && (
+                      <div className={cn("flex items-center gap-2 px-4 py-2 rounded-xl", health.mobileBg)}>
+                        <HealthIcon className={cn("h-5 w-5", health.mobileText)} />
+                        <span className={cn("font-semibold text-sm", health.mobileText)}>
+                          {health.label}
+                        </span>
+                      </div>
+                    )}
                   </div>
-                  <Badge
-                    variant="outline"
-                    className={cn("text-xs", health?.color, health?.bg)}
-                  >
-                    {project.type}
-                  </Badge>
+                </Link>
+              );
+            })}
+          </div>
+
+          {/* Desktop: Grid original */}
+          <div className="hidden md:grid grid-cols-2 lg:grid-cols-3 gap-4">
+            {projects.map((project) => {
+              const Icon = getProjectIcon(project.type);
+              const health = getHealthStatus(project.healthStatus);
+              const HealthIcon = health?.icon;
+
+              return (
+                <div
+                  key={project.id}
+                  className="p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <Icon className="h-4 w-4 text-muted-foreground" />
+                      <span className="font-medium text-sm">{project.name}</span>
+                    </div>
+                    <Badge
+                      variant="outline"
+                      className={cn("text-xs", health?.color, health?.bg)}
+                    >
+                      {project.type}
+                    </Badge>
+                  </div>
+
+                  <div className="space-y-2">
+                    {/* Health status */}
+                    {HealthIcon && health && (
+                      <div className={cn("flex items-center gap-1 text-xs", health.color)}>
+                        <HealthIcon className="h-3 w-3" />
+                        <span>{health.label}</span>
+                      </div>
+                    )}
+
+                    {/* Progress bar */}
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between text-xs text-muted-foreground">
+                        <span>Progreso</span>
+                        <span>{project.progress}%</span>
+                      </div>
+                      <div className="h-2 bg-muted rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-primary transition-all"
+                          style={{ width: `${project.progress}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Status badge */}
+                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <Clock className="h-3 w-3" />
+                      <span className="capitalize">{project.status.toLowerCase().replace("_", " ")}</span>
+                    </div>
+                  </div>
                 </div>
-
-                <div className="space-y-2">
-                  {/* Health status */}
-                  {HealthIcon && health && (
-                    <div className={cn("flex items-center gap-1 text-xs", health.color)}>
-                      <HealthIcon className="h-3 w-3" />
-                      <span>{health.label}</span>
-                    </div>
-                  )}
-
-                  {/* Progress bar */}
-                  <div className="space-y-1">
-                    <div className="flex items-center justify-between text-xs text-muted-foreground">
-                      <span>Progreso</span>
-                      <span>{project.progress}%</span>
-                    </div>
-                    <div className="h-2 bg-muted rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-primary transition-all"
-                        style={{ width: `${project.progress}%` }}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Status badge */}
-                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                    <Clock className="h-3 w-3" />
-                    <span className="capitalize">{project.status.toLowerCase().replace("_", " ")}</span>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        </>
       )}
     </WidgetCard>
   );

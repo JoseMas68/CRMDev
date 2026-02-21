@@ -27,12 +27,12 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      {/* Welcome section */}
-      <div>
-        <h2 className="text-3xl font-bold tracking-tight">
+      {/* Welcome section - Mobile optimized */}
+      <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent dark:from-primary/20 dark:via-primary/10 rounded-2xl p-6 md:p-8 border border-primary/20">
+        <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-2">
           Hola, {session.user.name?.split(" ")[0] ?? "Developer"}
         </h2>
-        <p className="text-muted-foreground">
+        <p className="text-muted-foreground text-base md:text-lg">
           Este es el resumen de tu CRM para hoy
         </p>
       </div>

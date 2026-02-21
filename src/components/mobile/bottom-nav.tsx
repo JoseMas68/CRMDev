@@ -53,7 +53,7 @@ export function BottomNav() {
       initial={{ y: 100 }}
       animate={{ y: 0 }}
       transition={{ type: "spring", damping: 25, stiffness: 400 }}
-      className="fixed bottom-0 left-0 right-0 z-50 lg:hidden bg-background/80 backdrop-blur-lg border-t border-border"
+      className="fixed bottom-0 left-0 right-0 z-50 lg:hidden bg-background border-t-4 border-primary shadow-lg"
     >
       <div className="flex items-center justify-around h-16 safe-area-bottom">
         {navItems.map((item) => {

@@ -6,7 +6,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { BarChart3, DollarSign, FolderOpen, CheckCircle } from "lucide-react";
+import { BarChart3, DollarSign, FolderOpen, CheckCircle, TrendingUp, Users } from "lucide-react";
 import { WidgetCard } from "./widget-card";
 import { getProjectStats } from "@/actions/projects";
 import { getClients } from "@/actions/clients";
@@ -83,30 +83,30 @@ export function StatsWidget() {
     {
       label: "Clientes",
       value: data?.totalClients ?? 0,
-      icon: CheckCircle,
-      color: "text-green-600",
-      bgColor: "bg-green-50 dark:bg-green-950",
+      icon: Users,
+      color: "text-white",
+      bgColor: "bg-gradient-to-br from-green-500 to-green-600",
     },
     {
       label: "Pipeline",
       value: `$${((data?.pipelineValue ?? 0) / 1000).toFixed(0)}k`,
       icon: DollarSign,
-      color: "text-blue-600",
-      bgColor: "bg-blue-50 dark:bg-blue-950",
+      color: "text-white",
+      bgColor: "bg-gradient-to-br from-blue-500 to-blue-600",
     },
     {
       label: "Proyectos",
       value: data?.activeProjects ?? 0,
       icon: FolderOpen,
-      color: "text-purple-600",
-      bgColor: "bg-purple-50 dark:bg-purple-950",
+      color: "text-white",
+      bgColor: "bg-gradient-to-br from-purple-500 to-purple-600",
     },
     {
       label: "Tareas",
       value: data?.openTasks ?? 0,
       icon: BarChart3,
-      color: "text-orange-600",
-      bgColor: "bg-orange-50 dark:bg-orange-950",
+      color: "text-white",
+      bgColor: "bg-gradient-to-br from-orange-500 to-orange-600",
     },
   ];
 
@@ -118,7 +118,31 @@ export function StatsWidget() {
       loading={loading}
       error={error ?? undefined}
     >
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      {/* Mobile: Grid de 2 columnas con cards grandes */}
+      <div className="grid grid-cols-2 gap-3 md:hidden">
+        {stats.map((stat) => (
+          <div
+            key={stat.label}
+            className={`${stat.bgColor} rounded-2xl p-4 shadow-lg`}
+          >
+            <div className="flex items-center justify-between mb-3">
+              <div className="bg-white/20 p-2 rounded-xl">
+                <stat.icon className={`h-5 w-5 ${stat.color}`} />
+              </div>
+              <TrendingUp className="h-4 w-4 text-white/60" />
+            </div>
+            <div className="text-3xl font-bold text-white mb-1">
+              {stat.value}
+            </div>
+            <div className="text-xs text-white/80 font-medium">
+              {stat.label}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Desktop: Grid original */}
+      <div className="hidden md:grid grid-cols-4 gap-4">
         {stats.map((stat) => (
           <div
             key={stat.label}
