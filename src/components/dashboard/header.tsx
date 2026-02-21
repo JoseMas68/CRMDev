@@ -4,26 +4,16 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
-  Menu,
   Search,
   Bell,
   Settings,
   LogOut,
   User,
-  Building2,
-  LayoutDashboard,
-  Users,
-  Kanban,
-  FolderKanban,
-  CheckSquare,
   Github,
   RefreshCw,
-  Clock,
-  Link2,
-  UserPlus,
 } from "lucide-react";
-import { cn, getInitials } from "@/lib/utils";
-import { signOut, useActiveOrganization } from "@/lib/auth-client";
+import { getInitials } from "@/lib/utils";
+import { signOut } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -35,13 +25,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { MobileSidebar } from "@/components/dashboard/mobile-sidebar";
 import { toast } from "sonner";
 
 interface HeaderProps {
@@ -53,28 +37,41 @@ interface HeaderProps {
   };
 }
 
-const navigation = [
-  { name: "Panel", href: "/dashboard", icon: LayoutDashboard },
-  { name: "Clientes", href: "/clients", icon: Users },
-  { name: "Pipeline", href: "/pipeline", icon: Kanban },
-  { name: "Proyectos", href: "/projects", icon: FolderKanban },
-  { name: "Tareas", href: "/tasks", icon: CheckSquare },
-  { name: "Control de Tiempo", href: "/time", icon: Clock },
-  { name: "Equipo", href: "/members", icon: UserPlus },
-  { name: "Integraciones", href: "/integrations", icon: Link2 },
-  { name: "Configuración", href: "/settings", icon: Settings },
-];
-
 export function DashboardHeader({ user }: HeaderProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { data: activeOrg } = useActiveOrganization();
 
   // Get page title from pathname
-  const pageTitle = navigation.find(
-    (item) => pathname === item.href || pathname.startsWith(item.href + "/")
-  )?.name || "Panel";
+  const getPageTitle = () => {
+    const pathMap: Record<string, string> = {
+      "/dashboard": "Panel",
+      "/clients": "Clientes",
+      "/pipeline": "Pipeline",
+      "/projects": "Proyectos",
+      "/tasks": "Tareas",
+      "/time": "Control de Tiempo",
+      "/members": "Equipo",
+      "/integrations": "Integraciones",
+      "/settings": "Configuración",
+      "/support": "Soporte",
+    };
+
+    // Try exact match first
+    if (pathMap[pathname]) {
+      return pathMap[pathname];
+    }
+
+    // Try prefix match
+    for (const [path, title] of Object.entries(pathMap)) {
+      if (pathname.startsWith(path + "/")) {
+        return title;
+      }
+    }
+
+    return "Panel";
+  };
+
+  const pageTitle = getPageTitle();
 
   async function handleSignOut() {
     try {
@@ -94,100 +91,14 @@ export function DashboardHeader({ user }: HeaderProps) {
     <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="flex h-16 items-center gap-2 md:gap-4 px-4 md:px-6">
         {/* Mobile menu button */}
-        <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-          <SheetTrigger asChild>
-            <Button variant="ghost" size="icon" className="lg:hidden">
-              <Menu className="h-5 w-5" />
-              <span className="sr-only">Abrir menú</span>
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="left" className="w-72 p-0">
-            <SheetHeader className="p-6 border-b">
-              <SheetTitle className="flex items-center gap-2">
-                <span className="font-mono text-xl font-semibold text-neon-violet tech-glow-text tracking-tight">
-                  {"{ √ }"}
-                </span>
-                <span className="font-mono text-xl font-semibold text-gradient tech-glow-text">
-                  CRMDev
-                </span>
-                <span className="font-mono text-xl font-semibold text-neon-violet terminal-cursor">|</span>
-              </SheetTitle>
-            </SheetHeader>
-
-            {/* Organization info */}
-            <div className="p-4 border-b">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  {activeOrg?.logo ? (
-                    <img
-                      src={activeOrg.logo}
-                      alt={activeOrg.name}
-                      className="h-10 w-10 rounded-lg object-cover"
-                    />
-                  ) : (
-                    <Building2 className="h-5 w-5 text-primary" />
-                  )}
-                </div>
-                <div className="min-w-0">
-                  <p className="font-medium truncate">
-                    {activeOrg?.name || "Cargando..."}
-                  </p>
-                  <p className="text-sm text-muted-foreground truncate">
-                    {activeOrg?.slug}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Mobile navigation */}
-            <nav className="p-4">
-              <ul className="space-y-1">
-                {navigation.map((item) => {
-                  const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
-                  return (
-                    <li key={item.name}>
-                      <Link
-                        href={item.href}
-                        onClick={() => setMobileMenuOpen(false)}
-                        className={cn(
-                          "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:text-primary",
-                          isActive && "bg-primary/10 text-primary"
-                        )}
-                      >
-                        <item.icon className="h-5 w-5" />
-                        {item.name}
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            </nav>
-
-            {/* Mobile user section */}
-            <div className="absolute bottom-0 left-0 right-0 p-4 border-t">
-              <div className="flex items-center gap-3 mb-4">
-                <Avatar className="h-10 w-10">
-                  <AvatarImage src={user.image || undefined} alt={user.name} />
-                  <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
-                </Avatar>
-                <div className="min-w-0 flex-1">
-                  <p className="font-medium truncate">{user.name}</p>
-                  <p className="text-sm text-muted-foreground truncate">
-                    {user.email}
-                  </p>
-                </div>
-              </div>
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={handleSignOut}
-              >
-                <LogOut className="mr-2 h-4 w-4" />
-                Cerrar Sesión
-              </Button>
-            </div>
-          </SheetContent>
-        </Sheet>
+        <MobileSidebar
+          user={{
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            image: user.image,
+          }}
+        />
 
         {/* Page title */}
         <h1 className="text-xl font-semibold hidden sm:block">{pageTitle}</h1>
