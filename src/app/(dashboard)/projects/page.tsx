@@ -50,28 +50,42 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
   const clients = clientsResult.success ? clientsResult.data.clients : [];
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Proyectos</h1>
-          <p className="text-muted-foreground">
-            Gestiona tus proyectos y trackea su progreso
-          </p>
+    <div className="space-y-4 sm:space-y-6">
+      {/* Header - Mobile optimized */}
+      <div className="flex flex-col gap-3 sm:gap-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Proyectos</h1>
+            <p className="text-sm sm:text-base text-muted-foreground mt-1">
+              Gestiona tus proyectos y su progreso
+            </p>
+          </div>
+
+          <CreateProjectDialog
+            clients={clients.map((c) => ({ id: c.id, name: c.name }))}
+          >
+            <Button size="default" className="sm:hidden">
+              <Plus className="h-5 w-5" />
+            </Button>
+          </CreateProjectDialog>
         </div>
 
-        <CreateProjectDialog
-          clients={clients.map((c) => ({ id: c.id, name: c.name }))}
-        >
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            Nuevo Proyecto
-          </Button>
-        </CreateProjectDialog>
+        <div className="hidden sm:block">
+          <CreateProjectDialog
+            clients={clients.map((c) => ({ id: c.id, name: c.name }))}
+          >
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              Nuevo Proyecto
+            </Button>
+          </CreateProjectDialog>
+        </div>
       </div>
 
-      {/* Stats */}
-      {stats && <ProjectStats stats={stats} />}
+      {/* Stats - Hide on mobile to save space */}
+      <div className="hidden sm:block">
+        {stats && <ProjectStats stats={stats} />}
+      </div>
 
       {/* Projects Grid */}
       <ProjectsGrid

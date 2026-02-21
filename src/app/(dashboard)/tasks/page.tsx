@@ -58,30 +58,46 @@ export default async function TasksPage({ searchParams }: TasksPageProps) {
   const members = membersResult.map((m) => m.user);
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Tareas</h1>
-          <p className="text-muted-foreground">
-            {stats ? `${stats.myTasks} tareas asignadas a ti` : "Gestiona tus tareas"}
-          </p>
+    <div className="space-y-4 sm:space-y-6">
+      {/* Header - Mobile optimized */}
+      <div className="flex flex-col gap-3 sm:gap-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Tareas</h1>
+            <p className="text-sm sm:text-base text-muted-foreground mt-1">
+              {stats ? `${stats.myTasks} asignadas a ti` : "Gestiona tus tareas"}
+            </p>
+          </div>
+
+          <CreateTaskDialog
+            projects={projects.map((p) => ({ id: p.id, name: p.name }))}
+            members={members}
+            defaultProjectId={projectId}
+          >
+            <Button size="default" className="sm:hidden">
+              <Plus className="h-5 w-5" />
+            </Button>
+          </CreateTaskDialog>
         </div>
 
-        <CreateTaskDialog
-          projects={projects.map((p) => ({ id: p.id, name: p.name }))}
-          members={members}
-          defaultProjectId={projectId}
-        >
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            Nueva Tarea
-          </Button>
-        </CreateTaskDialog>
+        <div className="hidden sm:block">
+          <CreateTaskDialog
+            projects={projects.map((p) => ({ id: p.id, name: p.name }))}
+            members={members}
+            defaultProjectId={projectId}
+          >
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              Nueva Tarea
+            </Button>
+          </CreateTaskDialog>
+        </div>
       </div>
 
-      {/* Stats */}
-      {stats && <TaskStats stats={stats} />}
+      {/* Stats - Hide on mobile to save space */}
+      <div className="hidden sm:block">
+        {stats && <TaskStats stats={stats} />}
+      </div>
 
       {/* Kanban Board */}
       <TasksKanban

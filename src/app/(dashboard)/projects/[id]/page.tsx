@@ -98,9 +98,9 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
   const canManageMembers = orgMember?.role === "owner" || orgMember?.role === "admin";
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col gap-4">
+    <div className="space-y-4 sm:space-y-6">
+      {/* Header - Mobile optimized */}
+      <div className="flex flex-col gap-3 sm:gap-4">
         <Link
           href="/projects"
           className="inline-flex items-center text-sm text-muted-foreground hover:text-primary"
@@ -109,33 +109,35 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           Volver a proyectos
         </Link>
 
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div className="space-y-1">
-            <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold tracking-tight">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
                 {project.name}
               </h1>
               <Badge
                 variant="secondary"
-                className={cn("font-normal", statusColors[project.status])}
+                className={cn("font-normal text-xs sm:text-sm", statusColors[project.status])}
               >
                 {statusLabels[project.status]}
               </Badge>
             </div>
             {project.description && (
-              <p className="text-muted-foreground">{project.description}</p>
+              <p className="text-sm sm:text-base text-muted-foreground">
+                {project.description}
+              </p>
             )}
           </div>
 
-          <div className="flex gap-2">
-            <Link href={`/projects/${id}/edit`}>
-              <Button variant="outline">Editar</Button>
-            </Link>
-          </div>
+          <Link href={`/projects/${id}/edit`} className="sm:self-center">
+            <Button variant="outline" size="sm" className="w-full sm:w-auto">
+              Editar
+            </Button>
+          </Link>
         </div>
       </div>
 
-      {/* Mobile tabs - solo visible en móvil */}
+      {/* Mobile tabs - visible on mobile/tablet */}
       <MobileTabNavigation
         tabs={[
           { value: "overview", label: "Resumen", icon: ListTodo },
@@ -145,30 +147,35 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
         ]}
         defaultValue="overview"
       >
+        {/* OVERVIEW TAB */}
         <TabsContent value="overview">
           <div className="lg:hidden space-y-4">
-            <div className="grid gap-4 grid-cols-2">
+            {/* Stats Grid */}
+            <div className="grid gap-3 grid-cols-2">
               {/* Progress */}
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">
+              <Card className="border-2">
+                <CardHeader className="pb-2 px-4 pt-4">
+                  <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    <div className="h-2 w-2 rounded-full bg-primary"></div>
                     Progreso
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{project.progress}%</div>
+                <CardContent className="px-4 pb-4">
+                  <div className="text-3xl font-bold mb-2">{project.progress}%</div>
+                  <Progress value={project.progress} className="h-2" />
                 </CardContent>
               </Card>
 
               {/* Tasks */}
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">
+              <Card className="border-2">
+                <CardHeader className="pb-2 px-4 pt-4">
+                  <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    <CheckSquare className="h-4 w-4" />
                     Tareas
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{project.tasks.length}</div>
+                <CardContent className="px-4 pb-4">
+                  <div className="text-3xl font-bold">{project.tasks.length}</div>
                   <p className="text-sm text-muted-foreground">
                     {project.tasks.filter((t) => t.status === "DONE").length}{" "}
                     completadas
@@ -176,23 +183,119 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                 </CardContent>
               </Card>
             </div>
+
+            {/* Full width cards */}
+            <div className="grid gap-3">
+              {/* Deadline */}
+              {project.deadline && (
+                <Card className="border-2">
+                  <CardHeader className="pb-2 px-4 pt-4">
+                    <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                      <Calendar className="h-4 w-4" />
+                      Fecha Límite
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="px-4 pb-4">
+                    <div className="text-xl font-bold mb-1">
+                      {formatDate(project.deadline)}
+                    </div>
+                    {new Date(project.deadline) < new Date() &&
+                      project.status !== "COMPLETED" && (
+                        <p className="text-sm text-destructive">Vencido</p>
+                      )}
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Budget */}
+              {project.budget && (
+                <Card className="border-2">
+                  <CardHeader className="pb-2 px-4 pt-4">
+                    <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                      <DollarSign className="h-4 w-4" />
+                      Presupuesto
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="px-4 pb-4">
+                    <div className="text-xl font-bold mb-1">
+                      {formatCurrency(project.spent, project.currency)}
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      de {formatCurrency(project.budget, project.currency)}
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+
+            {/* Client */}
+            {project.client && (
+              <Card className="border-2">
+                <CardHeader className="pb-2 px-4 pt-4">
+                  <CardTitle className="text-base font-semibold flex items-center gap-2">
+                    <Building2 className="h-5 w-5" />
+                    Cliente
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="px-4 pb-4">
+                  <Link
+                    href={`/clients/${project.client.id}`}
+                    className="flex items-center gap-3 hover:bg-muted/50 -mx-2 px-2 py-2 rounded-lg transition-colors"
+                  >
+                    <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                      <User className="h-6 w-6 text-primary" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-base">{project.client.name}</p>
+                      {project.client.email && (
+                        <p className="text-sm text-muted-foreground">
+                          {project.client.email}
+                        </p>
+                      )}
+                    </div>
+                  </Link>
+                </CardContent>
+              </Card>
+            )}
           </div>
         </TabsContent>
 
+        {/* TASKS TAB */}
         <TabsContent value="tasks">
           <div className="lg:hidden">
-            <ProjectTaskList tasks={project.tasks} projectId={id} />
+            <Card className="border-2">
+              <CardHeader className="flex flex-row items-center justify-between px-4 pt-4">
+                <CardTitle className="text-lg">Tareas</CardTitle>
+                <div className="flex gap-2">
+                  {project.repoUrl && (
+                    <ImportIssuesButton projectId={id} repoUrl={project.repoUrl} />
+                  )}
+                  <Link href={`/tasks?projectId=${id}`}>
+                    <Button size="sm">
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </Link>
+                </div>
+              </CardHeader>
+              <CardContent className="px-4 pb-4">
+                <ProjectTaskList tasks={project.tasks} projectId={id} />
+              </CardContent>
+            </Card>
           </div>
         </TabsContent>
 
+        {/* GITHUB TAB */}
         <TabsContent value="github">
           <div className="lg:hidden">
             {project.repoUrl && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">GitHub Commits</CardTitle>
+              <Card className="border-2">
+                <CardHeader className="px-4 pt-4">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Github className="h-5 w-5" />
+                    GitHub Commits
+                  </CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="px-4 pb-4">
                   <GitHubCommitsCanvas
                     repoUrl={project.repoUrl}
                     projectName={project.name}
@@ -203,6 +306,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           </div>
         </TabsContent>
 
+        {/* MEMBERS TAB */}
         <TabsContent value="members">
           <div className="lg:hidden">
             <ProjectMembersSection
@@ -214,186 +318,189 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
         </TabsContent>
       </MobileTabNavigation>
 
-      {/* Project info cards - desktop */}
-      <div className="hidden lg:grid lg:gap-4 lg:grid-cols-4">
-        {/* Progress */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Progreso
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold mb-2">{project.progress}%</div>
-            <Progress value={project.progress} className="h-2" />
-          </CardContent>
-        </Card>
+      {/* Desktop layout */}
+      <div className="hidden lg:space-y-6 lg:block">
+        {/* Stats Grid */}
+        <div className="grid gap-4 grid-cols-4">
+          {/* Progress */}
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Progreso
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold mb-2">{project.progress}%</div>
+              <Progress value={project.progress} className="h-2" />
+            </CardContent>
+          </Card>
 
-        {/* Tasks */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <CheckSquare className="h-4 w-4" />
-              Tareas
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{project.tasks.length}</div>
-            <p className="text-sm text-muted-foreground">
-              {project.tasks.filter((t) => t.status === "DONE").length}{" "}
-              completadas
-            </p>
-          </CardContent>
-        </Card>
+          {/* Tasks */}
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <CheckSquare className="h-4 w-4" />
+                Tareas
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{project.tasks.length}</div>
+              <p className="text-sm text-muted-foreground">
+                {project.tasks.filter((t) => t.status === "DONE").length}{" "}
+                completadas
+              </p>
+            </CardContent>
+          </Card>
 
-        {/* Deadline */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <Calendar className="h-4 w-4" />
-              Fecha Limite
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {project.deadline ? (
-              <>
-                <div className="text-2xl font-bold">
-                  {formatDate(project.deadline)}
-                </div>
-                {new Date(project.deadline) < new Date() &&
-                  project.status !== "COMPLETED" && (
-                    <p className="text-sm text-destructive">Vencido</p>
-                  )}
-              </>
-            ) : (
-              <div className="text-muted-foreground">Sin fecha limite</div>
-            )}
-          </CardContent>
-        </Card>
+          {/* Deadline */}
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <Calendar className="h-4 w-4" />
+                Fecha Limite
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {project.deadline ? (
+                <>
+                  <div className="text-2xl font-bold">
+                    {formatDate(project.deadline)}
+                  </div>
+                  {new Date(project.deadline) < new Date() &&
+                    project.status !== "COMPLETED" && (
+                      <p className="text-sm text-destructive">Vencido</p>
+                    )}
+                </>
+              ) : (
+                <div className="text-muted-foreground">Sin fecha limite</div>
+              )}
+            </CardContent>
+          </Card>
 
-        {/* Budget */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <DollarSign className="h-4 w-4" />
-              Presupuesto
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {project.budget ? (
-              <>
-                <div className="text-2xl font-bold">
-                  {formatCurrency(project.spent, project.currency)}
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  de {formatCurrency(project.budget, project.currency)}
-                </p>
-              </>
-            ) : (
-              <div className="text-muted-foreground">Sin presupuesto</div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Client info */}
-      {project.client && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Building2 className="h-5 w-5" />
-              Cliente
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Link
-              href={`/clients/${project.client.id}`}
-              className="flex items-center gap-4 hover:bg-muted/50 -mx-2 px-2 py-2 rounded-lg transition-colors"
-            >
-              <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                <User className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <p className="font-medium">{project.client.name}</p>
-                {project.client.email && (
+          {/* Budget */}
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <DollarSign className="h-4 w-4" />
+                Presupuesto
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {project.budget ? (
+                <>
+                  <div className="text-2xl font-bold">
+                    {formatCurrency(project.spent, project.currency)}
+                  </div>
                   <p className="text-sm text-muted-foreground">
-                    {project.client.email}
+                    de {formatCurrency(project.budget, project.currency)}
                   </p>
-                )}
-              </div>
-            </Link>
-          </CardContent>
-        </Card>
-      )}
+                </>
+              ) : (
+                <div className="text-muted-foreground">Sin presupuesto</div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
 
-      {/* WordPress Monitoring */}
-      <WpMonitoringCard projectId={id} wpUrl={project.wpUrl} />
+        {/* Client info */}
+        {project.client && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Building2 className="h-5 w-5" />
+                Cliente
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Link
+                href={`/clients/${project.client.id}`}
+                className="flex items-center gap-4 hover:bg-muted/50 -mx-2 px-2 py-2 rounded-lg transition-colors"
+              >
+                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                  <User className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <p className="font-medium">{project.client.name}</p>
+                  {project.client.email && (
+                    <p className="text-sm text-muted-foreground">
+                      {project.client.email}
+                    </p>
+                  )}
+                </div>
+              </Link>
+            </CardContent>
+          </Card>
+        )}
 
-      {/* Project Members */}
-      <ProjectMembersSection
-        projectId={id}
-        members={project.projectMembers}
-        canManage={canManageMembers}
-      />
+        {/* WordPress Monitoring */}
+        <WpMonitoringCard projectId={id} wpUrl={project.wpUrl} />
 
-      {/* GitHub Commits - only for GitHub projects */}
-      {project.repoUrl && (
-        <GitHubCommitsCanvas
-          repoUrl={project.repoUrl}
-          projectName={project.name}
+        {/* Project Members */}
+        <ProjectMembersSection
+          projectId={id}
+          members={project.projectMembers}
+          canManage={canManageMembers}
         />
-      )}
 
-      {/* Tasks section */}
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-lg">Tareas</CardTitle>
-          <div className="flex gap-2">
-            {project.repoUrl && (
-              <ImportIssuesButton projectId={id} repoUrl={project.repoUrl} />
-            )}
-            <Link href={`/tasks?projectId=${id}`}>
-              <Button size="sm">
-                <Plus className="mr-2 h-4 w-4" />
-                Nueva Tarea
-              </Button>
-            </Link>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <ProjectTaskList tasks={project.tasks} projectId={id} />
-        </CardContent>
-      </Card>
+        {/* GitHub Commits */}
+        {project.repoUrl && (
+          <GitHubCommitsCanvas
+            repoUrl={project.repoUrl}
+            projectName={project.name}
+          />
+        )}
 
-      {/* Activity section */}
-      {project.activities.length > 0 && (
+        {/* Tasks section */}
         <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Actividad Reciente</CardTitle>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="text-lg">Tareas</CardTitle>
+            <div className="flex gap-2">
+              {project.repoUrl && (
+                <ImportIssuesButton projectId={id} repoUrl={project.repoUrl} />
+              )}
+              <Link href={`/tasks?projectId=${id}`}>
+                <Button size="sm">
+                  <Plus className="mr-2 h-4 w-4" />
+                  Nueva Tarea
+                </Button>
+              </Link>
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {project.activities.map((activity) => (
-                <div key={activity.id} className="flex items-start gap-4">
-                  <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-xs font-medium">
-                    {activity.user.name
-                      .split(" ")
-                      .map((n) => n[0])
-                      .join("")
-                      .toUpperCase()}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm">{activity.title}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {activity.user.name} • {formatDate(activity.createdAt)}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <ProjectTaskList tasks={project.tasks} projectId={id} />
           </CardContent>
         </Card>
-      )}
+
+        {/* Activity section */}
+        {project.activities.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Actividad Reciente</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {project.activities.map((activity) => (
+                  <div key={activity.id} className="flex items-start gap-4">
+                    <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-xs font-medium">
+                      {activity.user.name
+                        .split(" ")
+                        .map((n) => n[0])
+                        .join("")
+                        .toUpperCase()}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm">{activity.title}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {activity.user.name} • {formatDate(activity.createdAt)}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
     </div>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Table2, LayoutGrid } from "lucide-react";
+import { Plus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { ClientsTable } from "@/components/clients/clients-table";
@@ -28,42 +28,35 @@ export function ClientsClientView({
   currentSearch,
   children,
 }: ClientsClientViewProps) {
-  const [view, setView] = useState<"table" | "cards">("table");
+  // En móvil siempre usar cards, en desktop usar tabla
+  const isMobile = typeof window !== "undefined" ? window.innerWidth < 768 : false;
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Clientes</h1>
-          <p className="text-muted-foreground">
-            Gestiona tus clientes, leads y contactos
-          </p>
+    <div className="space-y-4 sm:space-y-6">
+      {/* Header - Mobile optimized */}
+      <div className="flex flex-col gap-3 sm:gap-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Clientes</h1>
+            <p className="text-sm sm:text-base text-muted-foreground mt-1">
+              Gestiona tus clientes, leads y contactos
+            </p>
+          </div>
+
+          {/* Mobile: Icon only button */}
+          <div className="sm:hidden">
+            {children}
+          </div>
         </div>
 
-        {children}
+        {/* Desktop: Full button */}
+        <div className="hidden sm:block">
+          {children}
+        </div>
       </div>
 
-      {/* View toggle - solo móvil */}
-      <div className="flex gap-2 lg:hidden mb-4">
-        <Button
-          variant={view === "table" ? "default" : "outline"}
-          size="icon"
-          onClick={() => setView("table")}
-        >
-          <Table2 className="h-4 w-4" />
-        </Button>
-        <Button
-          variant={view === "cards" ? "default" : "outline"}
-          size="icon"
-          onClick={() => setView("cards")}
-        >
-          <LayoutGrid className="h-4 w-4" />
-        </Button>
-      </div>
-
-      {/* Table - desktop */}
-      <div className={view === "cards" ? "hidden" : ""}>
+      {/* Table - desktop only */}
+      <div className="hidden md:block">
         <ClientsTable
           clients={clients}
           total={total}
@@ -74,14 +67,12 @@ export function ClientsClientView({
         />
       </div>
 
-      {/* Cards - móvil */}
-      {view === "cards" && (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {clients.map((client) => (
-            <ClientCard key={client.id} client={client} />
-          ))}
-        </div>
-      )}
+      {/* Cards - mobile only */}
+      <div className="md:hidden space-y-3">
+        {clients.map((client) => (
+          <ClientCard key={client.id} client={client} />
+        ))}
+      </div>
     </div>
   );
 }
