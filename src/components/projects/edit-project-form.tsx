@@ -228,7 +228,7 @@ export function EditProjectForm({ project, clients }: EditProjectFormProps) {
           </div>
 
           {/* Dates */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="startDate">Fecha de inicio</Label>
               <Input
@@ -256,8 +256,8 @@ export function EditProjectForm({ project, clients }: EditProjectFormProps) {
           <CardTitle>Presupuesto</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-3 gap-4">
-            <div className="col-span-2 space-y-2">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="sm:col-span-2 space-y-2">
               <Label htmlFor="budget">Presupuesto</Label>
               <Input
                 id="budget"
