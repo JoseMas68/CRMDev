@@ -11,6 +11,8 @@ import {
   Search,
   Filter,
   X,
+  Mail,
+  Phone,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -210,7 +212,7 @@ export function ClientsTable({
           <TableHeader>
             <TableRow className="data-table-header">
               <TableHead>Nombre</TableHead>
-              <TableHead>Email</TableHead>
+              <TableHead>Contacto</TableHead>
               <TableHead>Empresa</TableHead>
               <TableHead>Estado</TableHead>
               <TableHead>Creado</TableHead>
@@ -238,15 +240,28 @@ export function ClientsTable({
                     </Link>
                   </TableCell>
                   <TableCell>
-                    {client.email && (
-                      <a
-                        href={`mailto:${client.email}`}
-                        className="text-muted-foreground hover:text-primary transition-colors"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        {client.email}
-                      </a>
-                    )}
+                    <div className="flex flex-col gap-1.5">
+                      {client.email && (
+                        <a
+                          href={`mailto:${client.email}`}
+                          className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <Mail className="h-4 w-4 shrink-0" />
+                          <span className="truncate max-w-[180px]">{client.email}</span>
+                        </a>
+                      )}
+                      {client.phone && (
+                        <a
+                          href={`tel:${client.phone}`}
+                          className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <Phone className="h-4 w-4 shrink-0" />
+                          <span className="truncate max-w-[150px]">{client.phone}</span>
+                        </a>
+                      )}
+                    </div>
                   </TableCell>
                   <TableCell>{client.company || "-"}</TableCell>
                   <TableCell>

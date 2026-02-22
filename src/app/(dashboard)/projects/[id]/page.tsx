@@ -109,29 +109,29 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           Volver a proyectos
         </Link>
 
-        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-          <div className="space-y-2">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="space-y-2 flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight truncate">
                 {project.name}
               </h1>
               <Badge
                 variant="secondary"
-                className={cn("font-normal text-xs sm:text-sm", statusColors[project.status])}
+                className={cn("font-normal text-xs sm:text-sm whitespace-nowrap", statusColors[project.status])}
               >
                 {statusLabels[project.status]}
               </Badge>
             </div>
             {project.description && (
-              <p className="text-sm sm:text-base text-muted-foreground">
+              <p className="text-sm sm:text-base text-muted-foreground line-clamp-2">
                 {project.description}
               </p>
             )}
           </div>
 
-          <Link href={`/projects/${id}/edit`} className="sm:self-center">
+          <Link href={`/projects/${id}/edit`} className="w-full sm:w-auto shrink-0 mt-2 sm:mt-0">
             <Button variant="outline" size="sm" className="w-full sm:w-auto">
-              Editar
+              Editar Proyecto
             </Button>
           </Link>
         </div>

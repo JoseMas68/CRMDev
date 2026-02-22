@@ -179,15 +179,15 @@ export function ProjectsGrid({
       <div className="flex flex-col gap-4">
         <form onSubmit={handleSearch} className="flex gap-2">
           <div className="relative flex-1">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+            <Search className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
             <Input
               placeholder="Buscar proyectos..."
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}
-              className="pl-12 h-14 text-lg"
+              className="pl-9 sm:pl-12 h-10 sm:h-14 text-sm sm:text-lg"
             />
           </div>
-          <Button type="submit" className="h-14 px-6">
+          <Button type="submit" className="h-10 sm:h-14 px-4 sm:px-6">
             Buscar
           </Button>
         </form>
@@ -197,8 +197,8 @@ export function ProjectsGrid({
             value={currentStatus || "all"}
             onValueChange={handleStatusChange}
           >
-            <SelectTrigger className="w-full">
-              <Filter className="mr-2 h-5 w-5" />
+            <SelectTrigger className="w-full h-10 sm:h-14">
+              <Filter className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
               <SelectValue placeholder="Estado" />
             </SelectTrigger>
             <SelectContent>
@@ -212,8 +212,8 @@ export function ProjectsGrid({
           </Select>
 
           {hasFilters && (
-            <Button variant="outline" onClick={clearFilters} className="flex-shrink-0 h-14">
-              <X className="mr-2 h-5 w-5" />
+            <Button variant="outline" onClick={clearFilters} className="flex-shrink-0 h-10 sm:h-14">
+              <X className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
               Limpiar
             </Button>
           )}

@@ -184,80 +184,7 @@ export default async function ClientPage({ params }: ClientPageProps) {
         </div>
       </div>
 
-      {/* Stats cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {/* Total Deals Value */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <DollarSign className="h-4 w-4" />
-              Valor Total
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {formatCurrency(totalDealsValue)}
-            </div>
-            <p className="text-sm text-muted-foreground">
-              {client.deals?.length || 0} oportunidades
-            </p>
-          </CardContent>
-        </Card>
 
-        {/* Open Deals */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Oportunidades Abiertas
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{openDeals.length}</div>
-            <p className="text-sm text-muted-foreground">
-              {formatCurrency(
-                openDeals.reduce((sum, d) => sum + Number(d.value), 0)
-              )}
-            </p>
-          </CardContent>
-        </Card>
-
-        {/* Won Deals */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Oportunidades Ganadas
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">
-              {wonDeals.length}
-            </div>
-            <p className="text-sm text-muted-foreground">
-              {formatCurrency(
-                wonDeals.reduce((sum, d) => sum + Number(d.value), 0)
-              )}
-            </p>
-          </CardContent>
-        </Card>
-
-        {/* Projects */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <FolderKanban className="h-4 w-4" />
-              Proyectos
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {client.projects?.length || 0}
-            </div>
-            <p className="text-sm text-muted-foreground">
-              {client.projects?.filter((p) => p.status === "IN_PROGRESS").length || 0} en progreso
-            </p>
-          </CardContent>
-        </Card>
-      </div>
 
       {/* Mobile tabs - solo visible en móvil */}
       <MobileTabNavigation
@@ -562,8 +489,8 @@ export default async function ClientPage({ params }: ClientPageProps) {
                       {deal.status === "WON"
                         ? "Ganada"
                         : deal.status === "LOST"
-                        ? "Perdida"
-                        : "Abierta"}
+                          ? "Perdida"
+                          : "Abierta"}
                     </span>
                   </div>
                 </div>
@@ -605,6 +532,77 @@ export default async function ClientPage({ params }: ClientPageProps) {
           </CardContent>
         </Card>
       )}
+
+      {/* Stats cards moved to the bottom */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+              <DollarSign className="h-4 w-4" />
+              Valor Total
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {formatCurrency(totalDealsValue)}
+            </div>
+            <p className="text-sm text-muted-foreground">
+              {client.deals?.length || 0} oportunidades
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Oportunidades Abiertas
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{openDeals.length}</div>
+            <p className="text-sm text-muted-foreground">
+              {formatCurrency(
+                openDeals.reduce((sum, d) => sum + Number(d.value), 0)
+              )}
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Oportunidades Ganadas
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-green-600">
+              {wonDeals.length}
+            </div>
+            <p className="text-sm text-muted-foreground">
+              {formatCurrency(
+                wonDeals.reduce((sum, d) => sum + Number(d.value), 0)
+              )}
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+              <FolderKanban className="h-4 w-4" />
+              Proyectos
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {client.projects?.length || 0}
+            </div>
+            <p className="text-sm text-muted-foreground">
+              {client.projects?.filter((p) => p.status === "IN_PROGRESS").length || 0} en progreso
+            </p>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Activity section */}
       {client.activities && client.activities.length > 0 && (

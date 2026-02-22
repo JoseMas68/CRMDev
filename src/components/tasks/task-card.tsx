@@ -329,19 +329,25 @@ export function TaskCard({ task, isDragging, projects, members, onClick, useDrag
             )}
 
             {task.assignee && (
-              <Avatar className="h-6 w-6">
-                <AvatarImage
-                  src={task.assignee.image || undefined}
-                  alt={task.assignee.name}
-                />
-                <AvatarFallback className="text-xs">
-                  {task.assignee.name
-                    .split(" ")
-                    .map((n) => n[0])
-                    .join("")
-                    .toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
+              <div className="flex items-center gap-1.5" title={`Asignado a: ${task.assignee.name}`}>
+                <Avatar className="h-6 w-6">
+                  <AvatarImage
+                    src={task.assignee.image || undefined}
+                    alt={task.assignee.name}
+                  />
+                  <AvatarFallback className="text-[10px]">
+                    {task.assignee.name
+                      .split(" ")
+                      .map((n) => n[0])
+                      .join("")
+                      .toUpperCase()
+                      .slice(0, 2)}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="text-xs text-muted-foreground truncate max-w-[100px]">
+                  {task.assignee.name.split(" ")[0]}
+                </span>
+              </div>
             )}
           </div>
 
