@@ -77,3 +77,14 @@ export async function GET(req: NextRequest) {
         },
     });
 }
+
+// OPTIONS for CORS (Claude / other web-based clients sending preflights)
+export async function OPTIONS() {
+    return new Response(null, {
+        headers: {
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type, Authorization",
+        }
+    });
+}
