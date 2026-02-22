@@ -21,7 +21,7 @@ import {
 } from "@dnd-kit/sortable";
 import { useDroppable } from "@dnd-kit/core";
 import { toast } from "sonner";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, GripVertical } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 import { cn } from "@/lib/utils";
@@ -224,21 +224,41 @@ export function TasksKanban({
 
   return (
     <>
-      {/* MOBILE VIEW - List style with accordion */}
+      {/* MOBILE VIEW - Accordion with drag & drop */}
       <div className="lg:hidden">
-        <AnimatePresence mode="popLayout">
-          {columns.map((column) => (
-            <MobileTaskColumn
-              key={column.id}
-              column={column}
-              projects={projects}
-              members={members}
-              onTaskClick={handleTaskClick}
-              isExpanded={selectedColumnId === column.id}
-              onToggle={() => setSelectedColumnId(selectedColumnId === column.id ? null : column.id)}
-            />
-          ))}
-        </AnimatePresence>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCorners}
+          onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
+          onDragEnd={handleDragEnd}
+        >
+          <AnimatePresence mode="popLayout">
+            {columns.map((column) => (
+              <MobileTaskColumn
+                key={column.id}
+                column={column}
+                projects={projects}
+                members={members}
+                onTaskClick={handleTaskClick}
+                isExpanded={selectedColumnId === column.id}
+                onToggle={() => setSelectedColumnId(selectedColumnId === column.id ? null : column.id)}
+              />
+            ))}
+          </AnimatePresence>
+
+          <DragOverlay>
+            {activeTask ? (
+              <TaskCard
+                task={activeTask}
+                isDragging
+                projects={projects}
+                members={members}
+                useDragHandle={true}
+              />
+            ) : null}
+          </DragOverlay>
+        </DndContext>
       </div>
 
       {/* DESKTOP VIEW - Traditional Kanban */}
@@ -285,7 +305,7 @@ export function TasksKanban({
   );
 }
 
-// Mobile Column - Accordion style
+// Mobile Column - Accordion style with drag & drop
 function MobileTaskColumn({
   column,
   projects,
@@ -301,11 +321,22 @@ function MobileTaskColumn({
   isExpanded: boolean;
   onToggle: () => void;
 }) {
+  const { setNodeRef, isOver } = useDroppable({
+    id: column.id,
+  });
+
   const columnColors: Record<string, string> = {
     TODO: "from-gray-500 to-gray-600",
     IN_PROGRESS: "from-blue-500 to-blue-600",
     IN_REVIEW: "from-yellow-500 to-yellow-600",
     DONE: "from-green-500 to-green-600",
+  };
+
+  const columnGradients: Record<string, string> = {
+    TODO: "bg-gray-500",
+    IN_PROGRESS: "bg-blue-500",
+    IN_REVIEW: "bg-yellow-500",
+    DONE: "bg-green-500",
   };
 
   return (
@@ -316,18 +347,27 @@ function MobileTaskColumn({
       className="mb-3 overflow-hidden"
     >
       <div
-        onClick={onToggle}
-        className="bg-gradient-to-r dark:from-gray-800 dark:to-gray-900 rounded-2xl shadow-lg overflow-hidden cursor-pointer active:scale-[0.99] transition-transform"
+        ref={setNodeRef}
+        className={cn(
+          "bg-gradient-to-br dark:from-gray-800 dark:to-gray-900 rounded-2xl shadow-lg overflow-hidden transition-transform",
+          isOver && "ring-2 ring-primary ring-offset-2"
+        )}
       >
-        {/* Header siempre visible */}
-        <div className="bg-gradient-to-r p-5 flex items-center justify-between">
+        {/* Header - Always visible, also droppable */}
+        <div
+          onClick={onToggle}
+          className="bg-gradient-to-r p-5 flex items-center justify-between cursor-pointer active:scale-[0.99] transition-transform"
+        >
           <div className="flex items-center gap-3">
-            <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center text-white text-xl font-bold shadow-lg", columnColors[column.id]?.split(" ")[0].replace("from-", "bg-") || "bg-gray-500")}>
+            <div className={cn("w-14 h-14 rounded-xl flex items-center justify-center text-white text-2xl font-bold shadow-lg", columnGradients[column.id] || "bg-gray-500")}>
               {column.tasks.length}
             </div>
             <div>
               <h3 className="text-xl font-bold text-white">{column.title}</h3>
-              <p className="text-white/80 text-sm">{column.tasks.length} {column.tasks.length === 1 ? 'tarea' : 'tareas'}</p>
+              <p className="text-white/80 text-sm">
+                {column.tasks.length} {column.tasks.length === 1 ? 'tarea' : 'tareas'}
+                {isExpanded && ' - Arrastra aquí'}
+              </p>
             </div>
           </div>
           <motion.div
@@ -338,7 +378,7 @@ function MobileTaskColumn({
           </motion.div>
         </div>
 
-        {/* Tasks - expandible */}
+        {/* Tasks - Expandible */}
         <AnimatePresence>
           {isExpanded && (
             <motion.div
@@ -352,52 +392,24 @@ function MobileTaskColumn({
                 {column.tasks.length === 0 ? (
                   <div className="text-center py-12 text-gray-400">
                     <p className="text-base">Sin tareas</p>
+                    <p className="text-xs mt-1">Arrastra tareas aquí desde otras columnas</p>
                   </div>
                 ) : (
-                  column.tasks.map((task, index) => (
-                    <motion.div
-                      key={task.id}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                    >
-                      <div
+                  <SortableContext
+                    items={column.tasks.map((t) => t.id)}
+                    strategy={verticalListSortingStrategy}
+                  >
+                    {column.tasks.map((task, index) => (
+                      <TaskCard
+                        key={task.id}
+                        task={task}
+                        projects={projects}
+                        members={members}
                         onClick={() => onTaskClick(task, column.id)}
-                        className="bg-gradient-to-r from-gray-50 to-white dark:from-gray-800 dark:to-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 active:scale-95 transition-transform cursor-pointer shadow-sm hover:shadow-md"
-                      >
-                        <div className="flex items-start justify-between gap-3 mb-2">
-                          <h4 className="font-semibold text-base flex-1 text-gray-900 dark:text-white">
-                            {task.title}
-                          </h4>
-                          <span className={cn("text-xs font-bold px-2 py-1 rounded-full", task.priority === "HIGH" ? "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300" : task.priority === "MEDIUM" ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300" : "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300")}>
-                            {task.priority === "HIGH" ? "Alta" : task.priority === "MEDIUM" ? "Media" : "Baja"}
-                          </span>
-                        </div>
-
-                        {task.description && (
-                          <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 mb-2">
-                            {task.description}
-                          </p>
-                        )}
-
-                        <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                          {task.assignee && (
-                            <span className="flex items-center gap-1">
-                              <span className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-primary font-semibold">
-                                {task.assignee.name.charAt(0)}
-                              </span>
-                              {task.assignee.name}
-                            </span>
-                          )}
-                          {task._count.subtasks > 0 && (
-                            <span className="ml-auto">
-                              {task._count.subtasks} {task._count.subtasks === 1 ? 'subtarea' : 'subtareas'}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </motion.div>
-                  ))
+                        useDragHandle={true}
+                      />
+                    ))}
+                  </SortableContext>
                 )}
               </div>
             </motion.div>
