@@ -15,6 +15,10 @@ const sidebarNavItems = [
         href: "/settings/account",
     },
     {
+        title: "Organizaciones",
+        href: "/settings/organizations",
+    },
+    {
         title: "Notificaciones",
         href: "/settings/notifications",
     }

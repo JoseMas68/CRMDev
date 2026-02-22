@@ -193,6 +193,15 @@ export function DealCard({ deal, isDragging, clients }: DealCardProps) {
                   <DropdownMenuItem
                     onClick={(e) => {
                       e.stopPropagation();
+                      router.push(`/pipeline/${deal.id}`);
+                    }}
+                  >
+                    <ChevronRight className="mr-2 h-4 w-4" />
+                    Ver Detalles
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={(e) => {
+                      e.stopPropagation();
                       handleMarkAsWon();
                     }}
                     disabled={isLoading}

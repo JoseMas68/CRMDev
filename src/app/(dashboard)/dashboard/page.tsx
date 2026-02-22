@@ -133,8 +133,8 @@ export default async function DashboardPage() {
       </div>
 
       {/* Mobile quick action */}
-      <div className="flex sm:hidden">
-        <Link href="/tasks" className="w-full">
+      <div className="flex sm:hidden w-full">
+        <Link href="/tasks" className="block w-full">
           <Button size="lg" className="w-full gap-2">
             <Plus className="h-4 w-4" />
             Nueva Tarea
