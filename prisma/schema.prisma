@@ -36,6 +36,7 @@ model User {
   sessions      Session[]
   accounts      Account[]
   members       Member[]
+  sentInvitations Invitation[] @relation("InvitationSender")
 
   // CRM Relations
   assignedTasks Task[]    @relation("TaskAssignee")
@@ -159,6 +160,7 @@ model Invitation {
   status         String       @default("pending") // pending, accepted, expired
   expiresAt      DateTime
   inviterId      String
+  inviter        User         @relation("InvitationSender", fields: [inviterId], references: [id], onDelete: Cascade)
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 
