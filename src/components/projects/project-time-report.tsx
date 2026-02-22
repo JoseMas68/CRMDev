@@ -53,7 +53,7 @@ export function ProjectTimeReport({ projectId, projectName }: ProjectTimeReportP
         return acc;
     }, {} as Record<string, { user: any; totalMinutes: number }>);
 
-    const userStatsArray = Object.values(userStats).sort((a, b) => b.totalMinutes - a.totalMinutes);
+    const userStatsArray = (Object.values(userStats) as { user: any; totalMinutes: number }[]).sort((a, b) => b.totalMinutes - a.totalMinutes);
 
     const handleExportPDF = async () => {
         if (!reportRef.current) return;

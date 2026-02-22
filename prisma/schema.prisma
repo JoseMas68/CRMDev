@@ -46,6 +46,7 @@ model User {
   timeEntries   TimeEntry[]
   projectMembers ProjectMember[]
   ticketComments TicketComment[] @relation("TicketCommentAuthor")
+  apiKeys       ApiKey[]
 
   @@map("users")
 }
@@ -132,6 +133,9 @@ model Organization {
   // Billing
   subscription  Subscription?
 
+  // API Keys (MCP Integrations)
+  apiKeys       ApiKey[]
+
   @@map("organizations")
 }
 
@@ -167,6 +171,27 @@ model Invitation {
   @@index([organizationId])
   @@index([email])
   @@map("invitations")
+}
+
+model ApiKey {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  name           String       // E.g., "Claude Desktop", "Zapier Integration"
+  key            String       @unique // The actual API key (hashed or plain depending on strategy, here plain for simplicity in MVP)
+  lastUsedAt     DateTime?
+  expiresAt      DateTime?
+  
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@index([organizationId])
+  @@index([userId])
+  @@index([key])
+  @@map("api_keys")
 }
 
 // ===========================================

@@ -9,7 +9,7 @@ import { TimeTracker } from "@/components/time/time-tracker";
 import { getTasks } from "@/actions/tasks";
 import { getTimeStats } from "@/actions/time";
 import { prisma } from "@/lib/prisma";
-import { formatCurrency, formatDuration } from "@/lib/utils";
+import { formatCurrency } from "@/lib/utils";
 
 export default async function TimeTrackingPage() {
   const session = await auth.api.getSession({

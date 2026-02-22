@@ -1,5 +1,6 @@
 import { Separator } from "@/components/ui/separator";
 import { SidebarNav } from "./components/sidebar-nav";
+import { KeyRound } from "lucide-react";
 
 const sidebarNavItems = [
     {
@@ -21,6 +22,11 @@ const sidebarNavItems = [
     {
         title: "Notificaciones",
         href: "/settings/notifications",
+    },
+    {
+        title: "API Keys",
+        href: "/settings/api-keys",
+        icon: KeyRound,
     }
 ];
 
