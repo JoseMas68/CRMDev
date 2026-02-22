@@ -195,37 +195,16 @@ export function LoginForm() {
               <li>Revisa tu bandeja de entrada y carpeta SPAM</li>
               <li>Busca el email de verificación de CRMDev</li>
               <li>Haz clic en el enlace de verificación del email</li>
+              <li>Si no encuentras el email, intenta iniciar sesión nuevamente para recibir otro</li>
             </ol>
-            <div className="flex gap-2 pt-2">
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex-1"
-                onClick={() => setShowVerificationHelp(false)}
-              >
-                Entendido
-              </Button>
-              <Button
-                size="sm"
-                className="flex-1"
-                onClick={async () => {
-                  try {
-                    const response = await fetch("/api/auth/resend-verification", {
-                      method: "POST",
-                    });
-                    if (response.ok) {
-                      toast.success("Email de verificación reenviado");
-                    } else {
-                      toast.error("Error al reenviar email");
-                    }
-                  } catch {
-                    toast.error("Error al reenviar email");
-                  }
-                }}
-              >
-                Reenviar Email
-              </Button>
-            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              className="mt-2"
+              onClick={() => setShowVerificationHelp(false)}
+            >
+              Entendido
+            </Button>
           </AlertDescription>
         </Alert>
       )}
