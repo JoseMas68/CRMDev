@@ -219,7 +219,7 @@ export default async function DealDetailPage({ params }: Props) {
                 <CardTitle className="text-destructive text-base">Acciones</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                <Link href={`/pipeline/${deal.id}/edit` className="block">
+                <Link href={`/pipeline/${deal.id}/edit`} className="block">
                   <Button variant="outline" className="w-full gap-2">
                     <Edit className="h-4 w-4" />
                     Editar Deal
