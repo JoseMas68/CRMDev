@@ -2,25 +2,14 @@ import { Metadata } from "next";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import {
-  CheckSquare,
-  FolderKanban,
-  Users,
-  Clock,
-  Calendar,
-  ArrowUpRight,
-  Plus,
-  Ticket,
-  TrendingUp,
-} from "lucide-react";
+import { Plus } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
 import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
@@ -37,6 +26,86 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
+  const orgId = session.session.activeOrganizationId;
+
+  // Get real data from database
+  const [
+    tasks,
+    projects,
+    clients,
+    timeEntriesToday,
+    recentTasks,
+    recentTickets,
+  ] = await Promise.all([
+    // Task statistics
+    prisma.task.findMany({
+      where: { organizationId: orgId },
+      select: { status: true },
+    }),
+    // Projects
+    prisma.project.findMany({
+      where: { organizationId: orgId },
+      select: { id: true, status: true },
+    }),
+    // Clients
+    prisma.client.count({
+      where: { organizationId: orgId },
+    }),
+    // Time entries for today
+    prisma.timeEntry.findMany({
+      where: {
+        organizationId: orgId,
+        userId: session.user.id,
+        startTime: {
+          gte: new Date(new Date().setHours(0, 0, 0, 0)),
+        },
+      },
+    }),
+    // Recent tasks
+    prisma.task.findMany({
+      where: { organizationId: orgId },
+      orderBy: { updatedAt: "desc" },
+      take: 5,
+      select: {
+        id: true,
+        title: true,
+        status: true,
+        priority: true,
+        updatedAt: true,
+        project: {
+          select: { name: true },
+        },
+      },
+    }),
+    // Recent tickets
+    prisma.ticket.findMany({
+      where: { organizationId: orgId },
+      orderBy: { createdAt: "desc" },
+      take: 3,
+      select: {
+        id: true,
+        title: true,
+        status: true,
+        createdAt: true,
+      },
+    }),
+  ]);
+
+  // Calculate statistics
+  const activeTasks = tasks.filter(t => t.status !== "DONE" && t.status !== "CANCELLED").length;
+  const activeProjects = projects.filter(p => p.status === "IN_PROGRESS").length;
+
+  // Calculate time today
+  const totalSecondsToday = timeEntriesToday.reduce((acc, entry) => {
+    const start = new Date(entry.startTime).getTime();
+    const end = entry.endTime ? new Date(entry.endTime).getTime() : Date.now();
+    return acc + (end - start) / 1000;
+  }, 0);
+
+  const hoursToday = Math.floor(totalSecondsToday / 3600);
+  const minutesToday = Math.floor((totalSecondsToday % 3600) / 60);
+  const timeTodayStr = `${hoursToday}h ${minutesToday}m`;
+
   // Get today's date for display
   const today = new Date();
   const formattedDate = format(today, "EEEE, d 'de' MMMM", { locale: es });
@@ -47,7 +116,7 @@ export default async function DashboardPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
-            Hola, {session.user.name?.split(" ")[0] ?? "Developer"} 👋
+            Hola, {session.user.name?.split(" ")[0] ?? "Developer"}
           </h1>
           <p className="text-muted-foreground text-base md:text-lg mt-1">
             {formattedDate} • Aquí está tu resumen
@@ -76,63 +145,58 @@ export default async function DashboardPage() {
       {/* Stats Overview - Mobile cards, Desktop grid */}
       <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4">
         <Card className="border-l-4 border-l-blue-500 shadow-sm">
-          <CardHeader className="flex flex-row items-center justify-between pb-2 px-4 pt-4">
+          <CardHeader className="pb-2 px-4 pt-4">
             <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
               Tareas Activas
             </CardTitle>
-            <CheckSquare className="h-4 w-4 text-blue-500" />
           </CardHeader>
           <CardContent className="px-4 pb-4">
-            <div className="text-xl sm:text-2xl font-bold">12</div>
+            <div className="text-xl sm:text-2xl font-bold">{activeTasks}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              <span className="text-green-600">+3</span> esta semana
+              Tareas pendientes
             </p>
           </CardContent>
         </Card>
 
         <Card className="border-l-4 border-l-green-500 shadow-sm">
-          <CardHeader className="flex flex-row items-center justify-between pb-2 px-4 pt-4">
+          <CardHeader className="pb-2 px-4 pt-4">
             <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
               Proyectos
             </CardTitle>
-            <FolderKanban className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent className="px-4 pb-4">
-            <div className="text-xl sm:text-2xl font-bold">5</div>
+            <div className="text-xl sm:text-2xl font-bold">{projects.length}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              2 activos
+              {activeProjects} activos
             </p>
           </CardContent>
         </Card>
 
         <Card className="border-l-4 border-l-purple-500 shadow-sm">
-          <CardHeader className="flex flex-row items-center justify-between pb-2 px-4 pt-4">
+          <CardHeader className="pb-2 px-4 pt-4">
             <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
               Clientes
             </CardTitle>
-            <Users className="h-4 w-4 text-purple-500" />
           </CardHeader>
           <CardContent className="px-4 pb-4">
-            <div className="text-xl sm:text-2xl font-bold">23</div>
+            <div className="text-xl sm:text-2xl font-bold">{clients}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              <span className="text-green-600">+2</span> nuevos
+              Total clientes
             </p>
           </CardContent>
         </Card>
 
         <Card className="border-l-4 border-l-orange-500 shadow-sm">
-          <CardHeader className="flex flex-row items-center justify-between pb-2 px-4 pt-4">
+          <CardHeader className="pb-2 px-4 pt-4">
             <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
               Tiempo Hoy
             </CardTitle>
-            <Clock className="h-4 w-4 text-orange-500" />
           </CardHeader>
           <CardContent className="px-4 pb-4">
-            <div className="text-xl sm:text-2xl font-bold">4h 32m</div>
+            <div className="text-xl sm:text-2xl font-bold">{timeTodayStr}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              Meta: 8h
+              Tiempo registrado hoy
             </p>
-            <Progress value={57} className="h-1 mt-2" />
           </CardContent>
         </Card>
       </div>
@@ -146,51 +210,70 @@ export default async function DashboardPage() {
               <div>
                 <CardTitle>Tareas Recientes</CardTitle>
                 <CardDescription>
-                  Tus últimas tareas actualizadas
+                  {recentTasks.length > 0 ? "Tus últimas tareas actualizadas" : "No hay tareas todavía"}
                 </CardDescription>
               </div>
-              <Link href="/tasks">
-                <Button variant="ghost" size="sm">
-                  Ver todas
-                  <ArrowUpRight className="ml-1 h-4 w-4" />
-                </Button>
-              </Link>
+              {recentTasks.length > 0 && (
+                <Link href="/tasks">
+                  <Button variant="ghost" size="sm">
+                    Ver todas
+                  </Button>
+                </Link>
+              )}
             </div>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2 sm:space-y-3">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <Link
-                  key={i}
-                  href="/tasks"
-                  className="block"
-                >
-                  <div className="flex items-center justify-between p-3 sm:p-4 rounded-lg border hover:bg-muted/50 transition-colors">
-                    <div className="flex items-center gap-3 flex-1 min-w-0">
-                      <div className={cn(
-                        "w-2 h-2 rounded-full flex-shrink-0",
-                        i <= 2 ? "bg-green-500" : i <= 4 ? "bg-yellow-500" : "bg-red-500"
-                      )} />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">
-                          {i === 1 && "Implementar autenticación con GitHub OAuth"}
-                          {i === 2 && "Diseñar responsive para móvil"}
-                          {i === 3 && "Configurar base de datos PostgreSQL"}
-                          {i === 4 && "Crear componentes de UI con shadcn"}
-                          {i === 5 && "Implementar control de tiempo"}
-                        </p>
-                        <p className="text-xs text-muted-foreground truncate">
-                          {i === 1 ? "Frontend" : i === 2 ? "Mobile" : i === 3 ? "Backend" : i === 4 ? "UI" : "Feature"}
-                        </p>
+            {recentTasks.length === 0 ? (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground">No hay tareas. Crea tu primera tarea.</p>
+              </div>
+            ) : (
+              <div className="space-y-2 sm:space-y-3">
+                {recentTasks.map((task) => {
+                  const statusColors: Record<string, string> = {
+                    TODO: "bg-gray-500",
+                    IN_PROGRESS: "bg-blue-500",
+                    IN_REVIEW: "bg-yellow-500",
+                    DONE: "bg-green-500",
+                    CANCELLED: "bg-red-500",
+                  };
+
+                  const statusLabels: Record<string, string> = {
+                    TODO: "Por Hacer",
+                    IN_PROGRESS: "En Progreso",
+                    IN_REVIEW: "En Revisión",
+                    DONE: "Completada",
+                    CANCELLED: "Cancelada",
+                  };
+
+                  return (
+                    <Link
+                      key={task.id}
+                      href={`/tasks?taskId=${task.id}`}
+                      className="block"
+                    >
+                      <div className="flex items-center justify-between p-3 sm:p-4 rounded-lg border hover:bg-muted/50 transition-colors">
+                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                          <div className={cn(
+                            "w-2 h-2 rounded-full flex-shrink-0",
+                            statusColors[task.status]
+                          )} />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium truncate">{task.title}</p>
+                            <p className="text-xs text-muted-foreground truncate">
+                              {task.project?.name || "Sin proyecto"}
+                            </p>
+                          </div>
+                        </div>
+                        <span className="text-xs text-muted-foreground flex-shrink-0">
+                          {statusLabels[task.status]}
+                        </span>
                       </div>
-                    </div>
-                    <Badge variant="outline" className="text-xs flex-shrink-0">
-                      {i <= 2 ? "Completada" : i <= 4 ? "En progreso" : "Pendiente"}
-                    </Badge>
-                  </div>
-                </Link>
-              ))}
-            </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -207,36 +290,21 @@ export default async function DashboardPage() {
                   </CardDescription>
                 </div>
                 <Link href="/time">
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <ArrowUpRight className="h-4 w-4" />
+                  <Button variant="ghost" size="sm">
+                    Ver todo
                   </Button>
                 </Link>
               </div>
             </CardHeader>
             <CardContent className="space-y-3">
-              {/* Current Timer */}
-              <div className="bg-gradient-to-r from-primary/10 to-primary/5 rounded-xl p-4 border border-primary/20">
-                <div className="flex items-center justify-between mb-2">
-                  <p className="text-sm font-medium">Trabajando en:</p>
-                  <Button size="sm" className="gap-2 h-8" disabled>
-                    <Plus className="h-3 w-3" />
-                    Seleccionar
-                  </Button>
-                </div>
-                <div className="text-2xl sm:text-3xl font-bold text-center py-3">
-                  00:00:00
-                </div>
-              </div>
-
               {/* Today's Progress */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Hoy</span>
-                  <span className="font-semibold">4h 32m</span>
+                  <span className="font-semibold">{timeTodayStr}</span>
                 </div>
-                <Progress value={57} className="h-2" />
-                <p className="text-xs text-muted-foreground text-right">
-                  Meta: 8h • 57% completado
+                <p className="text-xs text-muted-foreground">
+                  Tiempo total registrado hoy
                 </p>
               </div>
             </CardContent>
@@ -249,43 +317,59 @@ export default async function DashboardPage() {
                 <div>
                   <CardTitle className="text-base">Soporte</CardTitle>
                   <CardDescription className="text-xs">
-                    Tickets recientes
+                    {recentTickets.length > 0 ? "Tickets recientes" : "No hay tickets"}
                   </CardDescription>
                 </div>
-                <Link href="/support">
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <ArrowUpRight className="h-4 w-4" />
-                  </Button>
-                </Link>
+                {recentTickets.length > 0 && (
+                  <Link href="/support">
+                    <Button variant="ghost" size="sm">
+                      Ver todo
+                    </Button>
+                  </Link>
+                )}
               </div>
             </CardHeader>
             <CardContent>
-              <div className="space-y-2">
-                {[
-                  { title: "Error en login", status: "Abierto", time: "2h" },
-                  { title: "No crear proyecto", status: "En progreso", time: "5h" },
-                  { title: "Integración GitHub", status: "Resuelto", time: "1d" },
-                ].map((ticket) => (
-                  <Link
-                    key={ticket.title}
-                    href="/support"
-                    className="block p-2 rounded-lg border hover:bg-muted/50 transition-colors"
-                  >
-                    <p className="text-xs font-medium truncate mb-1">{ticket.title}</p>
-                    <div className="flex items-center justify-between">
-                      <Badge variant="outline" className={cn(
-                        "text-[10px]",
-                        ticket.status === "Resuelto" ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300" :
-                        ticket.status === "En progreso" ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300" :
-                        "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300"
-                      )}>
-                        {ticket.status}
-                      </Badge>
-                      <span className="text-[10px] text-muted-foreground">{ticket.time}</span>
-                    </div>
-                  </Link>
-                ))}
-              </div>
+              {recentTickets.length === 0 ? (
+                <div className="text-center py-4">
+                  <p className="text-xs text-muted-foreground">No hay tickets de soporte</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {recentTickets.map((ticket) => {
+                    const statusColors: Record<string, string> = {
+                      OPEN: "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300",
+                      IN_PROGRESS: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300",
+                      RESOLVED: "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300",
+                    };
+
+                    const statusLabels: Record<string, string> = {
+                      OPEN: "Abierto",
+                      IN_PROGRESS: "En progreso",
+                      RESOLVED: "Resuelto",
+                    };
+
+                    const timeDiff = Math.floor((Date.now() - new Date(ticket.createdAt).getTime()) / (1000 * 60 * 60));
+                    const timeAgo = timeDiff < 1 ? "hace un momento" : timeDiff < 24 ? `hace ${timeDiff}h` : `hace ${Math.floor(timeDiff / 24)}d`;
+
+                    return (
+                      <Link
+                        key={ticket.id}
+                        href={`/support/${ticket.id}`}
+                        className="block p-2 rounded-lg border hover:bg-muted/50 transition-colors"
+                      >
+                        <p className="text-xs font-medium truncate mb-1">{ticket.title}</p>
+                        <div className="flex items-center justify-between">
+                          <span className={cn("text-[10px] px-2 py-0.5 rounded", statusColors[ticket.status])}>
+                            {statusLabels[ticket.status]}
+                          </span>
+                          <span className="text-[10px] text-muted-foreground">{timeAgo}</span>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -296,7 +380,6 @@ export default async function DashboardPage() {
         <Link href="/projects" className="group">
           <Card className="transition-all hover:shadow-lg hover:border-primary/50">
             <CardContent className="p-4 sm:p-6">
-              <FolderKanban className="h-6 w-6 sm:h-8 sm:w-8 text-primary mb-2 sm:mb-3" />
               <h3 className="font-semibold text-sm sm:text-base mb-1">Proyectos</h3>
               <p className="text-xs sm:text-sm text-muted-foreground">Gestiona tus proyectos</p>
             </CardContent>
@@ -306,7 +389,6 @@ export default async function DashboardPage() {
         <Link href="/clients" className="group">
           <Card className="transition-all hover:shadow-lg hover:border-primary/50">
             <CardContent className="p-4 sm:p-6">
-              <Users className="h-6 w-6 sm:h-8 sm:w-8 text-primary mb-2 sm:mb-3" />
               <h3 className="font-semibold text-sm sm:text-base mb-1">Clientes</h3>
               <p className="text-xs sm:text-sm text-muted-foreground">Base de clientes</p>
             </CardContent>
@@ -316,7 +398,6 @@ export default async function DashboardPage() {
         <Link href="/pipeline" className="group">
           <Card className="transition-all hover:shadow-lg hover:border-primary/50">
             <CardContent className="p-4 sm:p-6">
-              <TrendingUp className="h-6 w-6 sm:h-8 sm:w-8 text-primary mb-2 sm:mb-3" />
               <h3 className="font-semibold text-sm sm:text-base mb-1">Pipeline</h3>
               <p className="text-xs sm:text-sm text-muted-foreground">Ventas y oportunidades</p>
             </CardContent>
@@ -326,7 +407,6 @@ export default async function DashboardPage() {
         <Link href="/tasks" className="group">
           <Card className="transition-all hover:shadow-lg hover:border-primary/50">
             <CardContent className="p-4 sm:p-6">
-              <CheckSquare className="h-6 w-6 sm:h-8 sm:w-8 text-primary mb-2 sm:mb-3" />
               <h3 className="font-semibold text-sm sm:text-base mb-1">Tareas</h3>
               <p className="text-xs sm:text-sm text-muted-foreground">Kanban de tareas</p>
             </CardContent>
