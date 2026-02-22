@@ -70,7 +70,7 @@ export function PasswordForm() {
             const { error } = await authClient.changePassword({
                 currentPassword: data.currentPassword,
                 newPassword: data.newPassword,
-                revokeAllSessions: true, // Sign out from all other devices
+                revokeOtherSessions: true, // Sign out from all other devices
             });
 
             if (error) {

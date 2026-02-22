@@ -14,6 +14,7 @@ import {
   CheckCircle2,
   Trash2,
   X,
+  ArrowUpDown,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -38,6 +39,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 
 interface Task {
   id: string;
@@ -96,6 +105,7 @@ export function TaskDetailsDialog({ task, open, onOpenChange }: TaskDetailsDialo
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
 
   if (!task) return null;
 
@@ -137,6 +147,24 @@ export function TaskDetailsDialog({ task, open, onOpenChange }: TaskDetailsDialo
       toast.error("Error al eliminar tarea");
     } finally {
       setIsLoading(false);
+    }
+  }
+
+  async function handleStatusChange(newStatus: string) {
+    if (!task || newStatus === task.status) return;
+    setIsUpdatingStatus(true);
+    try {
+      const result = await updateTask(task.id, { status: newStatus as "TODO" | "IN_PROGRESS" | "IN_REVIEW" | "DONE" | "CANCELLED" });
+      if (result.success) {
+        toast.success(`Estado cambiado a ${statusLabels[newStatus]}`);
+        router.refresh();
+      } else {
+        toast.error(result.error);
+      }
+    } catch (error) {
+      toast.error("Error al cambiar estado");
+    } finally {
+      setIsUpdatingStatus(false);
     }
   }
 
@@ -278,6 +306,60 @@ export function TaskDetailsDialog({ task, open, onOpenChange }: TaskDetailsDialo
                 </div>
               </div>
             )}
+
+            {/* Status Changer - Mobile */}
+            <div className="lg:hidden pt-4 border-t">
+              <div className="space-y-2">
+                <Label htmlFor="status-select" className="flex items-center gap-2">
+                  <ArrowUpDown className="h-4 w-4" />
+                  Cambiar Estado
+                </Label>
+                <Select
+                  value={task.status}
+                  onValueChange={handleStatusChange}
+                  disabled={isUpdatingStatus}
+                >
+                  <SelectTrigger id="status-select" className="w-full">
+                    <SelectValue placeholder="Seleccionar estado" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="TODO">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-gray-500" />
+                        Por Hacer
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="IN_PROGRESS">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-blue-500" />
+                        En Progreso
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="IN_REVIEW">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-yellow-500" />
+                        En Revisión
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="DONE">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-green-500" />
+                        Completada
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="CANCELLED">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-red-500" />
+                        Cancelada
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                {isUpdatingStatus && (
+                  <p className="text-xs text-muted-foreground">Actualizando estado...</p>
+                )}
+              </div>
+            </div>
 
             {/* Actions */}
             <div className="flex flex-col sm:flex-row gap-2 pt-4 border-t">

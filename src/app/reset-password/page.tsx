@@ -1,9 +1,8 @@
 import { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { KeyRound, CheckCircle } from "lucide-react";
+import { KeyRound } from "lucide-react";
 
-import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,40 +25,6 @@ export default async function ResetPasswordPage({
     redirect("/login");
   }
 
-  async function handleSubmit(formData: FormData) {
-    "use server";
-
-    const password = formData.get("password") as string;
-    const confirmPassword = formData.get("confirmPassword") as string;
-
-    if (!password || !confirmPassword) {
-      return { error: "Todos los campos son requeridos" };
-    }
-
-    if (password !== confirmPassword) {
-      return { error: "Las contraseñas no coinciden" };
-    }
-
-    if (password.length < 8) {
-      return { error: "La contraseña debe tener al menos 8 caracteres" };
-    }
-
-    try {
-      const { error } = await authClient.resetPassword({
-        password,
-        token,
-      });
-
-      if (error) {
-        return { error: error.message || "Error al restablecer la contraseña" };
-      }
-
-      return { success: true };
-    } catch (error: any) {
-      return { error: error.message || "Error al restablecer la contraseña" };
-    }
-  }
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted p-4">
       <Card className="w-full max-w-md">
@@ -75,24 +40,13 @@ export default async function ResetPasswordPage({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form action={handleSubmit} className="space-y-4">
+          <form action="/api/auth/reset-password" method="POST" className="space-y-4">
+            <input type="hidden" name="token" value={token} />
             <div className="space-y-2">
-              <Label htmlFor="password">Nueva Contraseña</Label>
+              <Label htmlFor="newPassword">Nueva Contraseña</Label>
               <Input
-                id="password"
-                name="password"
-                type="password"
-                placeholder="••••••••"
-                required
-                minLength={8}
-                autoComplete="new-password"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirmar Contraseña</Label>
-              <Input
-                id="confirmPassword"
-                name="confirmPassword"
+                id="newPassword"
+                name="newPassword"
                 type="password"
                 placeholder="••••••••"
                 required
