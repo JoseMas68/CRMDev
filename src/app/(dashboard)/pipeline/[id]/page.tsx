@@ -74,6 +74,14 @@ export default async function DealDetailPage({ params }: Props) {
             {deal.title}
           </h1>
         </div>
+
+        {deal.status === "OPEN" && (
+          <Link href={`/pipeline/${deal.id}/edit`} className="shrink-0 block lg:hidden">
+            <Button variant="outline" size="icon" className="h-9 w-9">
+              <Edit className="h-4 w-4 text-muted-foreground" />
+            </Button>
+          </Link>
+        )}
       </div>
 
       {/* Main Content */}

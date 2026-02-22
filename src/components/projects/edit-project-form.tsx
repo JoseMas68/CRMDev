@@ -4,10 +4,10 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, Github, ExternalLink } from "lucide-react";
+import { Loader2, Github, ExternalLink, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
-import { updateProject } from "@/actions/projects";
+import { updateProject, deleteProject } from "@/actions/projects";
 import {
   updateProjectSchema,
   type UpdateProjectInput,
@@ -25,6 +25,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface Project {
   id: string;
@@ -50,6 +60,8 @@ interface EditProjectFormProps {
 export function EditProjectForm({ project, clients }: EditProjectFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const formatDateForInput = (date: Date | null) => {
     if (!date) return "";
@@ -97,6 +109,25 @@ export function EditProjectForm({ project, clients }: EditProjectFormProps) {
       toast.error("Error al actualizar proyecto");
     } finally {
       setIsLoading(false);
+    }
+  }
+
+  async function handleDelete() {
+    setIsDeleting(true);
+    try {
+      const result = await deleteProject(project.id);
+      if (result.success) {
+        toast.success("Proyecto eliminado correctamente");
+        router.push("/projects");
+        router.refresh();
+      } else {
+        toast.error(result.error);
+      }
+    } catch (error) {
+      toast.error("Error al eliminar proyecto");
+    } finally {
+      setIsDeleting(false);
+      setDeleteDialogOpen(false);
     }
   }
 
@@ -293,20 +324,55 @@ export function EditProjectForm({ project, clients }: EditProjectFormProps) {
       </Card>
 
       {/* Actions */}
-      <div className="flex gap-4">
+      <div className="flex flex-col sm:flex-row gap-4 justify-between">
+        <div className="flex gap-4">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => router.back()}
+            disabled={isLoading || isDeleting}
+          >
+            Cancelar
+          </Button>
+          <Button type="submit" disabled={isLoading || isDeleting}>
+            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Guardar Cambios
+          </Button>
+        </div>
+
         <Button
           type="button"
-          variant="outline"
-          onClick={() => router.back()}
-          disabled={isLoading}
+          variant="destructive"
+          onClick={() => setDeleteDialogOpen(true)}
+          disabled={isLoading || isDeleting}
+          className="sm:w-auto w-full"
         >
-          Cancelar
-        </Button>
-        <Button type="submit" disabled={isLoading}>
-          {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          Guardar Cambios
+          <Trash2 className="mr-2 h-4 w-4" />
+          Cortar por lo sano (Eliminar Proyecto)
         </Button>
       </div>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar proyecto?</AlertDialogTitle>
+            <AlertDialogDescription>
+              ¿Estás seguro de que quieres eliminar <strong>{project.name}</strong>? Esta acción eliminará
+              todas las tareas asociadas y no se puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              disabled={isDeleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isDeleting ? "Eliminando..." : "Eliminar Permanentemente"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </form>
   );
 }

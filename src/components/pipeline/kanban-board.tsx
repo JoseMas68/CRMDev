@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
+import Link from "next/link";
 import {
   DndContext,
   DragOverlay,
@@ -347,30 +348,32 @@ function MobileStageColumn({
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.05 }}
                     >
-                      <div className="bg-gradient-to-r from-gray-50 to-white dark:from-gray-800 dark:to-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow">
-                        <div className="flex items-start justify-between gap-3 mb-3">
-                          <div className="flex-1">
-                            <h4 className="font-bold text-lg text-gray-900 dark:text-white mb-1">
-                              {deal.title}
-                            </h4>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">
-                              {deal.client?.name || "Sin cliente"}
-                            </p>
-                          </div>
-                          <div className="text-right">
-                            <div className="flex items-center justify-end gap-1 text-green-600 dark:text-green-400 font-bold">
-                              <DollarSign className="h-4 w-4" />
-                              <span className="text-lg">{deal.value.toLocaleString()}</span>
+                      <Link href={`/pipeline/${deal.id}`} className="block">
+                        <div className="bg-gradient-to-r from-gray-50 to-white dark:from-gray-800 dark:to-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow active:scale-[0.98]">
+                          <div className="flex items-start justify-between gap-3 mb-3">
+                            <div className="flex-1">
+                              <h4 className="font-bold text-lg text-gray-900 dark:text-white mb-1">
+                                {deal.title}
+                              </h4>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">
+                                {deal.client?.name || "Sin cliente"}
+                              </p>
+                            </div>
+                            <div className="text-right">
+                              <div className="flex items-center justify-end gap-1 text-green-600 dark:text-green-400 font-bold">
+                                <DollarSign className="h-4 w-4" />
+                                <span className="text-lg">{deal.value.toLocaleString()}</span>
+                              </div>
                             </div>
                           </div>
-                        </div>
 
-                        {deal.expectedCloseDate && (
-                          <div className="text-xs text-gray-500 dark:text-gray-400">
-                            Cierre: {new Date(deal.expectedCloseDate).toLocaleDateString()}
-                          </div>
-                        )}
-                      </div>
+                          {deal.expectedCloseDate && (
+                            <div className="text-xs text-gray-500 dark:text-gray-400">
+                              Cierre: {new Date(deal.expectedCloseDate).toLocaleDateString()}
+                            </div>
+                          )}
+                        </div>
+                      </Link>
                     </motion.div>
                   ))
                 )}

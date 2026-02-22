@@ -22,7 +22,7 @@ import { cn } from "@/lib/utils";
 import { signOut } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { UserBadge } from "@/components/ui/user-badge";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -135,6 +135,7 @@ export function MobileSidebar({ user, children }: MobileSidebarProps) {
         )}
       </SheetTrigger>
       <SheetContent side="left" className="w-80 p-0">
+        <SheetTitle className="sr-only">Menú principal</SheetTitle>
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b">
