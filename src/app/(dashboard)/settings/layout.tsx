@@ -7,6 +7,10 @@ const sidebarNavItems = [
         href: "/settings/profile",
     },
     {
+        title: "Contraseña",
+        href: "/settings/password",
+    },
+    {
         title: "Cuenta",
         href: "/settings/account",
     },

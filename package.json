@@ -14,6 +14,7 @@
     "db:migrate": "prisma migrate dev",
     "db:migrate:deploy": "prisma migrate deploy",
     "db:setup": "prisma generate && prisma db push",
+    "db:cleanup-users": "tsx prisma/cleanup-users.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -74,6 +75,7 @@
     "prisma": "^6.2.0",
     "tailwindcss": "^3.4.17",
     "tailwindcss-animate": "^1.0.7",
+    "tsx": "^4.21.0",
     "typescript": "^5.7.2"
   },
   "optionalDependencies": {
