@@ -30,6 +30,7 @@ import { ProjectMembersSection } from "@/components/projects/project-members-sec
 import { WpMonitoringCard } from "@/components/projects/wp-monitoring-card";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { MobileTabNavigation } from "@/components/mobile/tab-navigation";
+import { ProjectTimeReport } from "@/components/projects/project-time-report"; // Added ProjectTimeReport import
 
 interface ProjectPageProps {
   params: Promise<{ id: string }>;
@@ -142,6 +143,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
         tabs={[
           { value: "overview", label: "Resumen", icon: ListTodo },
           { value: "tasks", label: "Tareas", icon: CheckSquare },
+          { value: "time", label: "Horas", icon: Clock }, // Added "Horas" tab
           { value: "github", label: "GitHub", icon: Github },
           { value: "members", label: "Miembros", icon: Users },
         ]}
@@ -279,6 +281,17 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
               </CardHeader>
               <CardContent className="px-4 pb-4">
                 <ProjectTaskList tasks={project.tasks} projectId={id} />
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        {/* TIME TRACKING TAB */}
+        <TabsContent value="time">
+          <div className="lg:hidden">
+            <Card className="border-2 mt-4">
+              <CardContent className="px-4 py-4">
+                <ProjectTimeReport projectId={id} projectName={project.name} />
               </CardContent>
             </Card>
           </div>
@@ -468,6 +481,13 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           </CardHeader>
           <CardContent>
             <ProjectTaskList tasks={project.tasks} projectId={id} />
+          </CardContent>
+        </Card>
+
+        {/* Time Tracking Report section (Desktop) */}
+        <Card>
+          <CardContent className="pt-6">
+            <ProjectTimeReport projectId={id} projectName={project.name} />
           </CardContent>
         </Card>
 

@@ -20,6 +20,7 @@ import { toast } from "sonner";
 
 import { cn, formatDate } from "@/lib/utils";
 import { updateTask, deleteTask } from "@/actions/tasks";
+import { addManualTimeEntry } from "@/actions/time";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -40,13 +41,12 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 interface Task {
   id: string;
@@ -107,6 +107,13 @@ export function TaskDetailsDialog({ task, open, onOpenChange }: TaskDetailsDialo
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
 
+  // Time Tracking State
+  const [showTimeDialog, setShowTimeDialog] = useState(false);
+  const [isSavingTime, setIsSavingTime] = useState(false);
+  const [timeHours, setTimeHours] = useState("1");
+  const [timeMinutes, setTimeMinutes] = useState("0");
+  const [timeDesc, setTimeDesc] = useState("");
+
   if (!task) return null;
 
   const isOverdue = task.dueDate && new Date(task.dueDate) < new Date() && task.status !== "DONE";
@@ -165,6 +172,43 @@ export function TaskDetailsDialog({ task, open, onOpenChange }: TaskDetailsDialo
       toast.error("Error al cambiar estado");
     } finally {
       setIsUpdatingStatus(false);
+    }
+  }
+
+  async function handleSaveTime() {
+    if (!task) return;
+    const hours = parseInt(timeHours) || 0;
+    const mins = parseInt(timeMinutes) || 0;
+    const totalMins = (hours * 60) + mins;
+
+    if (totalMins <= 0) {
+      toast.error("El tiempo debe ser mayor a 0");
+      return;
+    }
+
+    setIsSavingTime(true);
+    try {
+      const res = await addManualTimeEntry({
+        taskId: task.id,
+        duration: totalMins,
+        description: timeDesc,
+        date: new Date()
+      });
+
+      if (res.success) {
+        toast.success("Tiempo registrado correctamente");
+        setShowTimeDialog(false);
+        setTimeHours("1");
+        setTimeMinutes("0");
+        setTimeDesc("");
+        router.refresh();
+      } else {
+        toast.error(res.error || "Error al guardar el tiempo");
+      }
+    } catch (error) {
+      toast.error("Error al registrar tiempo");
+    } finally {
+      setIsSavingTime(false);
     }
   }
 
@@ -363,6 +407,16 @@ export function TaskDetailsDialog({ task, open, onOpenChange }: TaskDetailsDialo
 
             {/* Actions */}
             <div className="flex flex-col sm:flex-row gap-2 pt-4 border-t">
+              <Button
+                variant="outline"
+                onClick={() => setShowTimeDialog(true)}
+                disabled={isLoading}
+                className="w-full sm:w-auto text-blue-600 border-blue-200 hover:bg-blue-50 dark:text-blue-400 dark:border-blue-900 dark:hover:bg-blue-900/50"
+              >
+                <Clock className="h-4 w-4 sm:mr-0 mr-2" />
+                <span className="sm:hidden">Añadir Tiempo</span>
+              </Button>
+
               {task.status !== "DONE" && (
                 <Button
                   onClick={handleMarkAsDone}
@@ -409,6 +463,57 @@ export function TaskDetailsDialog({ task, open, onOpenChange }: TaskDetailsDialo
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Time Tracking Manual Dialog */}
+      <Dialog open={showTimeDialog} onOpenChange={setShowTimeDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Registrar Tiempo Manual</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="hours">Horas</Label>
+                <Input
+                  id="hours"
+                  type="number"
+                  min="0"
+                  value={timeHours}
+                  onChange={(e) => setTimeHours(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="minutes">Minutos</Label>
+                <Input
+                  id="minutes"
+                  type="number"
+                  min="0"
+                  max="59"
+                  value={timeMinutes}
+                  onChange={(e) => setTimeMinutes(e.target.value)}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="description">Descripción (opcional)</Label>
+              <Textarea
+                id="description"
+                placeholder="¿Qué hiciste en este tiempo?"
+                value={timeDesc}
+                onChange={(e) => setTimeDesc(e.target.value)}
+              />
+            </div>
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setShowTimeDialog(false)} disabled={isSavingTime}>
+              Cancelar
+            </Button>
+            <Button onClick={handleSaveTime} disabled={isSavingTime}>
+              {isSavingTime ? "Guardando..." : "Guardar Tiempo"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
