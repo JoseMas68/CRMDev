@@ -34,7 +34,7 @@ export const createDealSchema = z.object({
 
   stageId: z.string().cuid("Invalid stage ID"),
 
-  clientId: z.string().cuid("Invalid client ID"),
+  clientId: z.string().cuid("Invalid client ID").optional().nullable(),
 
   expectedCloseDate: z.preprocess(
     (val) => (val === "" || val === null || val === undefined ? undefined : val),

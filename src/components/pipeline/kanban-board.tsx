@@ -33,7 +33,7 @@ interface Deal {
   value: number;
   status: string;
   order: number;
-  client: { id: string; name: string };
+  client: { id: string; name: string } | null;
   expectedCloseDate: Date | null;
 }
 
@@ -354,7 +354,7 @@ function MobileStageColumn({
                               {deal.title}
                             </h4>
                             <p className="text-sm text-gray-500 dark:text-gray-400">
-                              {deal.client.name}
+                              {deal.client?.name || "Sin cliente"}
                             </p>
                           </div>
                           <div className="text-right">

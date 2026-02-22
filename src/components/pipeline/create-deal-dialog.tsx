@@ -135,31 +135,24 @@ export function CreateDealDialog({
             )}
           </div>
 
-          {/* Client */}
+          {/* Client - Optional */}
           <div className="space-y-2">
-            <Label htmlFor="clientId">
-              Cliente <span className="text-destructive">*</span>
-            </Label>
+            <Label htmlFor="clientId">Cliente (opcional)</Label>
             <Select
-              value={selectedClient}
-              onValueChange={(value) => setValue("clientId", value)}
+              value={selectedClient || ""}
+              onValueChange={(value) => setValue("clientId", value === "_none" ? null : value)}
               disabled={isLoading}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Selecciona un cliente" />
+                <SelectValue placeholder="Sin cliente asignado" />
               </SelectTrigger>
               <SelectContent>
-                {clients.length === 0 ? (
-                  <SelectItem value="_empty" disabled>
-                    No hay clientes. Crea uno primero.
+                <SelectItem value="_none">Sin cliente</SelectItem>
+                {clients.map((client) => (
+                  <SelectItem key={client.id} value={client.id}>
+                    {client.name}
                   </SelectItem>
-                ) : (
-                  clients.map((client) => (
-                    <SelectItem key={client.id} value={client.id}>
-                      {client.name}
-                    </SelectItem>
-                  ))
-                )}
+                ))}
               </SelectContent>
             </Select>
             {errors.clientId && (
@@ -275,7 +268,7 @@ export function CreateDealDialog({
             >
               Cancelar
             </Button>
-            <Button type="submit" disabled={isLoading || clients.length === 0}>
+            <Button type="submit" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Crear Deal
             </Button>

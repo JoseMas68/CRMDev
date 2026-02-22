@@ -272,8 +272,8 @@ model Deal {
   lostReason     String?
 
   // Relations
-  clientId       String
-  client         Client        @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId       String?
+  client         Client?       @relation(fields: [clientId], references: [id], onDelete: SetNull)
 
   creatorId      String
   creator        User          @relation("DealCreator", fields: [creatorId], references: [id])

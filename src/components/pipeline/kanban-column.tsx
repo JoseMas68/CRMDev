@@ -14,7 +14,7 @@ interface Deal {
   value: number;
   status: string;
   order: number;
-  client: { id: string; name: string };
+  client: { id: string; name: string } | null;
   expectedCloseDate: Date | null;
 }
 

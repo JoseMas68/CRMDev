@@ -102,7 +102,7 @@ export default async function PipelinePage() {
                     >
                       <div>
                         <p className="font-medium text-sm">{deal.title}</p>
-                        <p className="text-xs text-muted-foreground">{deal.client.name}</p>
+                        <p className="text-xs text-muted-foreground">{deal.client?.name || "Sin cliente"}</p>
                       </div>
                       <p className="font-semibold text-green-500">
                         {formatCurrency(deal.value)}
@@ -138,7 +138,7 @@ export default async function PipelinePage() {
                       <div>
                         <p className="font-medium text-sm">{deal.title}</p>
                         <p className="text-xs text-muted-foreground">
-                          {deal.client.name}
+                          {deal.client?.name || "Sin cliente"}
                           {deal.lostReason && ` - ${deal.lostReason}`}
                         </p>
                       </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Mail, Phone, Building2, ChevronRight, User } from "lucide-react";
+import { Mail, Phone, Building2, ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -44,109 +44,108 @@ export function ClientCard({ client, onDelete, index = 0 }: ClientCardProps) {
       transition={{ delay: index * 0.05, duration: 0.3 }}
       className="w-full"
     >
-      {/* MOBILE DESIGN - App-like card */}
+      {/* MOBILE DESIGN - Compact card */}
       <Link href={`/clients/${client.id}`} className="block md:hidden">
-        <div className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 rounded-2xl p-5 shadow-lg border border-gray-200 dark:border-gray-700 active:scale-95 transition-transform">
-          {/* Header con avatar y nombre */}
-          <div className="flex items-center gap-4 mb-4">
-            {/* Avatar grande */}
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center text-white text-2xl font-bold shadow-md">
+        <div className="bg-white dark:bg-gray-900 rounded-lg p-3 shadow-sm border border-gray-200 dark:border-gray-700 active:scale-[0.98] transition-transform">
+          {/* Header compacto */}
+          <div className="flex items-center gap-3">
+            {/* Avatar pequeño */}
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center text-white text-sm font-bold shadow-sm flex-shrink-0">
               {client.name.charAt(0).toUpperCase()}
             </div>
 
             <div className="flex-1 min-w-0">
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white truncate">
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-white truncate">
                 {client.name}
               </h3>
               {client.company && (
-                <p className="text-sm text-gray-500 dark:text-gray-400 truncate flex items-center gap-1 mt-1">
-                  <Building2 className="h-4 w-4" />
+                <p className="text-xs text-gray-500 dark:text-gray-400 truncate flex items-center gap-1">
+                  <Building2 className="h-3 w-3" />
                   {client.company}
                 </p>
               )}
             </div>
 
-            <ChevronRight className="h-6 w-6 text-gray-400" />
-          </div>
-
-          {/* Status badge prominente */}
-          <div className="mb-4">
+            {/* Status badge pequeño */}
             <Badge
               className={cn(
-                "text-sm font-bold px-4 py-2 rounded-full shadow-sm",
+                "text-[10px] font-semibold px-2 py-0.5 rounded-md flex-shrink-0",
                 statusColors[client.status]
               )}
             >
               {statusLabels[client.status]}
             </Badge>
+
+            <ChevronRight className="h-4 w-4 text-gray-400 flex-shrink-0" />
           </div>
 
-          {/* Acciones directas - botones grandes */}
-          <div className="grid grid-cols-2 gap-3">
+          {/* Iconos de contacto - solo visuales, no clickeables */}
+          <div className="flex gap-3 mt-2 ml-13 opacity-50">
             {client.email && (
-              <a
-                href={`mailto:${client.email}`}
-                onClick={(e) => e.stopPropagation()}
-                className="flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white rounded-xl py-3 px-4 font-semibold transition-colors shadow-md"
-              >
-                <Mail className="h-5 w-5" />
-                <span>Email</span>
-              </a>
+              <Mail className="h-3.5 w-3.5 text-gray-400" />
             )}
             {client.phone && (
-              <a
-                href={`tel:${client.phone}`}
-                onClick={(e) => e.stopPropagation()}
-                className="flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 active:bg-green-700 text-white rounded-xl py-3 px-4 font-semibold transition-colors shadow-md"
-              >
-                <Phone className="h-5 w-5" />
-                <span>Llamar</span>
-              </a>
+              <Phone className="h-3.5 w-3.5 text-gray-400" />
             )}
           </div>
         </div>
       </Link>
 
-      {/* DESKTOP DESIGN - Original card style */}
+      {/* DESKTOP DESIGN - Table row style */}
       <div className="hidden md:block">
-        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all p-4">
-          <div className="flex items-start justify-between gap-4 mb-4">
-            <Link
-              href={`/clients/${client.id}`}
-              className="flex-1 min-w-0 group"
-            >
-              <h3 className="font-semibold text-base truncate group-hover:text-primary transition-colors">
-                {client.name}
-              </h3>
-              {client.company && (
-                <p className="text-sm text-muted-foreground truncate flex items-center gap-2 mt-1">
-                  <Building2 className="h-4 w-4" />
-                  {client.company}
-                </p>
-              )}
-            </Link>
-            <Badge variant="secondary" className={cn("text-xs", statusColors[client.status])}>
-              {statusLabels[client.status]}
-            </Badge>
-          </div>
+        <div className="border rounded-lg p-4 hover:bg-muted/50 transition-colors">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center text-white font-bold">
+                {client.name.charAt(0).toUpperCase()}
+              </div>
+              <div>
+                <h3 className="font-semibold">{client.name}</h3>
+                {client.company && (
+                  <p className="text-sm text-muted-foreground flex items-center gap-1">
+                    <Building2 className="h-3 w-3" />
+                    {client.company}
+                  </p>
+                )}
+              </div>
+            </div>
 
-          <div className="flex gap-2">
-            {client.email && (
-              <a
-                href={`mailto:${client.email}`}
-                className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded transition-colors"
+            <div className="flex items-center gap-4">
+              <Badge
+                className={cn(
+                  statusColors[client.status]
+                )}
               >
-                <Mail className="h-4 w-4" />
-              </a>
-            )}
-            {client.phone && (
-              <a
-                href={`tel:${client.phone}`}
-                className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded transition-colors"
-              >
-                <Phone className="h-4 w-4" />
-              </a>
-            )}
+                {statusLabels[client.status]}
+              </Badge>
+
+              <div className="flex gap-2 text-sm text-muted-foreground">
+                {client.email && (
+                  <a
+                    href={`mailto:${client.email}`}
+                    onClick={(e) => e.stopPropagation()}
+                    className="hover:text-foreground"
+                  >
+                    <Mail className="h-4 w-4" />
+                  </a>
+                )}
+                {client.phone && (
+                  <a
+                    href={`tel:${client.phone}`}
+                    onClick={(e) => e.stopPropagation()}
+                    className="hover:text-foreground"
+                  >
+                    <Phone className="h-4 w-4" />
+                  </a>
+                )}
+              </div>
+
+              <Link href={`/clients/${client.id}`}>
+                <Button variant="ghost" size="sm">
+                  Ver
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </div>

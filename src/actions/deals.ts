@@ -46,7 +46,7 @@ export async function getDealsForKanban(): Promise<
         value: number;
         status: string;
         order: number;
-        client: { id: string; name: string };
+        client: { id: string; name: string } | null;
         expectedCloseDate: Date | null;
       }>;
     }>;
@@ -145,7 +145,7 @@ export async function createDeal(
         value: validatedData.value,
         currency: validatedData.currency,
         stageId: validatedData.stageId,
-        clientId: validatedData.clientId,
+        clientId: validatedData.clientId || undefined,
         expectedCloseDate: validatedData.expectedCloseDate,
         notes: validatedData.notes || null,
         order: newOrder,
@@ -558,7 +558,7 @@ export async function getClosedDeals(): Promise<
       title: string;
       value: number;
       closedAt: Date | null;
-      client: { id: string; name: string };
+      client: { id: string; name: string } | null;
     }>;
     lost: Array<{
       id: string;
@@ -566,7 +566,7 @@ export async function getClosedDeals(): Promise<
       value: number;
       closedAt: Date | null;
       lostReason: string | null;
-      client: { id: string; name: string };
+      client: { id: string; name: string } | null;
     }>;
     totalWon: number;
     totalLost: number;

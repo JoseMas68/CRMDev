@@ -41,7 +41,7 @@ interface Deal {
   value: number;
   status: string;
   order: number;
-  client: { id: string; name: string };
+  client: { id: string; name: string } | null;
   expectedCloseDate: Date | null;
 }
 
@@ -196,7 +196,7 @@ export function DealCard({ deal, isDragging, clients }: DealCardProps) {
           {/* Client */}
           <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
             <User className="h-3 w-3" />
-            <span className="truncate">{deal.client.name}</span>
+            <span className="truncate">{deal.client?.name || "Sin cliente"}</span>
           </div>
 
           {/* Expected close date */}
