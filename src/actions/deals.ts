@@ -113,6 +113,60 @@ export async function getDealsForKanban(): Promise<
 }
 
 /**
+ * Get a single deal by ID
+ */
+export async function getDealById(id: string): Promise<
+  ActionResponse<{
+    id: string;
+    title: string;
+    value: number;
+    currency: string;
+    status: string;
+    stageId: string;
+    notes: string | null;
+    createdAt: Date;
+    expectedCloseDate: Date | null;
+    client: { id: string; name: string } | null;
+  }>
+> {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.session.activeOrganizationId) {
+      return { success: false, error: "No autorizado" };
+    }
+
+    const db = await getPrismaWithSession(session);
+
+    const deal = await db.deal.findUnique({
+      where: { id },
+      include: {
+        client: {
+          select: { id: true, name: true },
+        },
+      },
+    });
+
+    if (!deal) {
+      return { success: false, error: "Deal no encontrado" };
+    }
+
+    return {
+      success: true,
+      data: {
+        ...deal,
+        value: Number(deal.value),
+      },
+    };
+  } catch (error) {
+    console.error("[DEALS] Error fetching deal:", error);
+    return { success: false, error: "Error al obtener deal" };
+  }
+}
+
+/**
  * Create a new deal
  */
 export async function createDeal(
