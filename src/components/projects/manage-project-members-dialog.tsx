@@ -143,7 +143,7 @@ export function ManageProjectMembersDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
+      <DialogContent className="w-[95vw] sm:max-w-lg max-h-[85dvh] overflow-y-auto p-4 sm:p-6">
         <DialogHeader>
           <DialogTitle>Gestionar acceso al proyecto</DialogTitle>
           <DialogDescription>

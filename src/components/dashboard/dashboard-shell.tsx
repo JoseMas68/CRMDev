@@ -15,12 +15,12 @@ export function DashboardShell({ sidebar, header, children, bottomNav }: Dashboa
     const { isCollapsed } = useSidebarStore();
 
     return (
-        <div className="flex min-h-screen">
+        <div className="flex min-h-screen relative w-full overflow-x-hidden">
             {sidebar}
 
             <div
                 className={cn(
-                    "flex-1 flex flex-col transition-all duration-300 ease-in-out",
+                    "flex-1 flex flex-col w-full min-w-0 transition-all duration-300 ease-in-out",
                     isCollapsed ? "lg:pl-20" : "lg:pl-72"
                 )}
             >

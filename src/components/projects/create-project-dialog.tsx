@@ -159,7 +159,7 @@ export function CreateProjectDialog({
     <>
       <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogTrigger asChild>{children}</DialogTrigger>
-        <DialogContent className="sm:max-w-[550px] max-h-[90vh] overflow-y-auto">
+        <DialogContent className="w-[95vw] sm:max-w-[550px] max-h-[90dvh] overflow-y-auto p-4 sm:p-6">
           <DialogHeader>
             <DialogTitle>Nuevo Proyecto</DialogTitle>
             <DialogDescription>
@@ -178,6 +178,7 @@ export function CreateProjectDialog({
                 id="name"
                 placeholder="Nombre del proyecto"
                 disabled={isLoading}
+                required
                 {...register("name")}
               />
               {errors.name && (
@@ -436,7 +437,7 @@ export function CreateProjectDialog({
 
       {/* Nested Dialog for Repos */}
       <Dialog open={showReposDialog} onOpenChange={setShowReposDialog}>
-        <DialogContent className="sm:max-w-[700px] max-h-[80vh] z-[100]">
+        <DialogContent className="w-[95vw] sm:max-w-[700px] max-h-[85dvh] overflow-y-auto z-[100] p-4 sm:p-6">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Github className="h-5 w-5" />
