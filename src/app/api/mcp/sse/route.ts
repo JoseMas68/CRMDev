@@ -36,7 +36,8 @@ export async function GET(req: NextRequest) {
             controllerRef = controller;
             // Define the absolute POST endpoint for the client
             const url = new URL(req.url);
-            const postUrl = `${url.protocol}//${url.host}/api/mcp/message?sessionId=${sessionId}`;
+            const publicBase = process.env.NEXT_PUBLIC_MCP_PUBLIC_URL?.replace(/\/+$/, "");
+            const postUrl = `${publicBase}/api/mcp/message?sessionId=${sessionId}`;
             controller.enqueue(`event: endpoint\ndata: ${postUrl}\n\n`);
         },
         cancel() {
