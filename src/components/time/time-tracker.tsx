@@ -116,7 +116,10 @@ export function TimeTracker({ tasks }: TimeTrackerProps) {
   };
 
   const handleStop = async () => {
-    if (!startTime) return;
+    if (!startTime || !selectedTaskId) {
+      toast.error("No hay tiempo activo para guardar");
+      return;
+    }
 
     try {
       const response = await fetch("/api/time-entry", {
@@ -127,24 +130,26 @@ export function TimeTracker({ tasks }: TimeTrackerProps) {
           startTime: new Date(startTime).toISOString(),
           endTime: new Date().toISOString(),
           duration: Math.floor(elapsedTime / 60), // Convert to minutes
-          description: selectedTaskId ? tasks.find((t) => t.id === selectedTaskId)?.title : null,
+          description: tasks.find((t) => t.id === selectedTaskId)?.title,
         }),
       });
 
       if (!response.ok) {
-        throw new Error("Error al guardar entrada de tiempo");
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || "Error al guardar entrada de tiempo");
       }
 
       // Reset state
       setIsRunning(false);
       setElapsedTime(0);
       setStartTime(null);
+      setSelectedTaskId(null);
       localStorage.removeItem("timeTracker");
 
       toast.success("Tiempo guardado correctamente");
     } catch (error) {
       console.error("Error saving time entry:", error);
-      toast.error("Error al guardar el tiempo");
+      toast.error(error instanceof Error ? error.message : "Error al guardar el tiempo");
     }
   };
 

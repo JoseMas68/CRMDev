@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Loader2, Github } from "lucide-react";
+import { Loader2, Github, Mail, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 
@@ -14,6 +14,7 @@ import { signUp, signIn } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 // Esquema de validación de registro
 const signupSchema = z
@@ -43,6 +44,7 @@ export function SignupForm() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [isGitHubLoading, setIsGitHubLoading] = useState(false);
+  const [showVerificationInfo, setShowVerificationInfo] = useState(false);
 
   const {
     register,
@@ -68,9 +70,14 @@ export function SignupForm() {
         return;
       }
 
-      toast.success("Cuenta creada exitosamente");
-      router.push("/select-org");
-      router.refresh();
+      // Mostrar información de verificación
+      setShowVerificationInfo(true);
+      toast.success(
+        "¡Cuenta creada! Revisa tu email para verificar tu cuenta.",
+        {
+          duration: 6000,
+        }
+      );
     } catch (error) {
       console.error("Signup error:", error);
       toast.error("Error al crear la cuenta. Intenta de nuevo.");
@@ -211,6 +218,32 @@ export function SignupForm() {
           Crear Cuenta
         </Button>
       </form>
+
+      {/* Información de verificación de email */}
+      {showVerificationInfo && (
+        <Alert className="border-blue-200 bg-blue-50 dark:bg-blue-950/20">
+          <Mail className="h-4 w-4" />
+          <AlertTitle>Verifica tu email</AlertTitle>
+          <AlertDescription className="space-y-2">
+            <p>
+              Hemos enviado un email de verificación a <strong>tu correo electrónico</strong>.
+            </p>
+            <p className="text-xs">
+              Por favor revisa:
+            </p>
+            <ul className="text-xs space-y-1 list-disc list-inside text-muted-foreground ml-4">
+              <li>Tu bandeja de entrada principal</li>
+              <li>La carpeta <strong>SPAM</strong> o correo no deseado</li>
+            </ul>
+            <p className="text-xs font-semibold">
+              Haz clic en el enlace de verificación para activar tu cuenta.
+            </p>
+            <p className="text-[10px] text-muted-foreground">
+              Si no recibes el email en 5 minutos, revisa que hayas escrito correctamente tu dirección de correo.
+            </p>
+          </AlertDescription>
+        </Alert>
+      )}
 
       <p className="text-center text-xs text-muted-foreground">
         Al crear una cuenta, aceptas nuestros{" "}

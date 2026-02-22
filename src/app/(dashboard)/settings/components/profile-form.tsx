@@ -6,9 +6,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
-import { Loader2, Github, Trash2, User } from "lucide-react";
+import { Loader2, Github, Trash2, User, Mail, CheckCircle2, Clock, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { signIn } from "@/lib/auth-client";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -54,6 +55,7 @@ export function ProfileForm({ user }: { user?: any }) {
     const [isDeleting, setIsDeleting] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [sessionUser, setSessionUser] = useState<any>(user);
+    const [isResendingVerification, setIsResendingVerification] = useState(false);
 
     // Intentamos obtener la última sesión si no llegó por props puros
     useEffect(() => {
@@ -135,19 +137,44 @@ export function ProfileForm({ user }: { user?: any }) {
         }
     }
 
+    async function handleResendVerification() {
+        if (!sessionUser?.email) return;
+
+        setIsResendingVerification(true);
+        try {
+            const response = await fetch("/api/auth/resend-verification", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email: sessionUser.email }),
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                toast.success("Email de verificación reenviado. Revisa tu bandeja de entrada.");
+            } else {
+                toast.error(result.error || "Error al reenviar email");
+            }
+        } catch (error) {
+            toast.error("Error al reenviar email de verificación");
+        } finally {
+            setIsResendingVerification(false);
+        }
+    }
+
     return (
-        <div className="space-y-6">
+        <div className="space-y-4 md:space-y-6">
             {/* Profile Information */}
             <Card>
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                        <User className="h-5 w-5" />
+                <CardHeader className="pb-4">
+                    <CardTitle className="flex items-center gap-2 text-base md:text-lg">
+                        <User className="h-4 w-4 md:h-5 md:w-5" />
                         Información del Perfil
                     </CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="space-y-4">
                     <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 md:space-y-6">
                             <FormField
                                 control={form.control}
                                 name="name"
@@ -177,7 +204,62 @@ export function ProfileForm({ user }: { user?: any }) {
                                 </p>
                             </div>
 
-                            <Button type="submit" disabled={isLoading}>
+                            {/* Email Verification Status */}
+                            <div className="rounded-lg border p-4">
+                                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                                    <div className="flex items-start gap-3">
+                                        <Mail className="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" />
+                                        <div className="flex-1">
+                                            <p className="text-sm font-medium">Estado de Verificación</p>
+                                            <p className="text-xs text-muted-foreground mt-1">
+                                                {sessionUser?.emailVerified ? (
+                                                    <span className="text-green-600 dark:text-green-400 flex items-center gap-1">
+                                                        <CheckCircle2 className="h-3.5 w-3.5" />
+                                                        Tu email está verificado
+                                                    </span>
+                                                ) : (
+                                                    <span className="text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                                                        <Clock className="h-3.5 w-3.5" />
+                                                        Email pendiente de verificación
+                                                    </span>
+                                                )}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    {!sessionUser?.emailVerified && (
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={handleResendVerification}
+                                            disabled={isResendingVerification}
+                                            className="w-full sm:w-auto"
+                                        >
+                                            {isResendingVerification ? (
+                                                <>
+                                                    <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+                                                    Enviando...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Mail className="mr-2 h-3.5 w-3.5" />
+                                                    Reenviar
+                                                </>
+                                            )}
+                                        </Button>
+                                    )}
+                                </div>
+                                {!sessionUser?.emailVerified && (
+                                    <Alert className="mt-3 border-amber-200 bg-amber-50 dark:bg-amber-950/20">
+                                        <AlertCircle className="h-4 w-4" />
+                                        <AlertTitle className="text-sm">Email no verificado</AlertTitle>
+                                        <AlertDescription className="text-xs">
+                                            Tu cuenta aún no ha sido verificada. Revisa tu bandeja de entrada y carpeta SPAM para encontrar el email de verificación que enviamos cuando te registraste.
+                                        </AlertDescription>
+                                    </Alert>
+                                )}
+                            </div>
+
+                            <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
                                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                 Guardar cambios
                             </Button>
@@ -188,20 +270,20 @@ export function ProfileForm({ user }: { user?: any }) {
 
             {/* GitHub Association */}
             <Card>
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                        <Github className="h-5 w-5" />
+                <CardHeader className="pb-4">
+                    <CardTitle className="flex items-center gap-2 text-base md:text-lg">
+                        <Github className="h-4 w-4 md:h-5 md:w-5" />
                         Asociación de cuenta GitHub
                     </CardTitle>
                 </CardHeader>
-                <CardContent>
-                    <p className="text-sm text-muted-foreground mb-4">
+                <CardContent className="space-y-4">
+                    <p className="text-sm text-muted-foreground">
                         Conecta tu perfil de GitHub para automatizar el alta de proyectos
                         e importar información de forma fluida.
                     </p>
 
                     {!sessionUser?.githubId || !sessionUser?.isVerifiedDev ? (
-                        <Button variant="outline" type="button" onClick={linkGitHub} disabled={isGitHubLinking}>
+                        <Button variant="outline" type="button" onClick={linkGitHub} disabled={isGitHubLinking} className="w-full sm:w-auto">
                             {isGitHubLinking ? (
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                             ) : (
@@ -220,20 +302,21 @@ export function ProfileForm({ user }: { user?: any }) {
 
             {/* Danger Zone */}
             <Card className="border-destructive/50">
-                <CardHeader>
-                    <CardTitle className="text-destructive flex items-center gap-2">
-                        <Trash2 className="h-5 w-5" />
+                <CardHeader className="pb-4">
+                    <CardTitle className="text-destructive flex items-center gap-2 text-base md:text-lg">
+                        <Trash2 className="h-4 w-4 md:h-5 md:w-5" />
                         Zona de Peligro
                     </CardTitle>
                 </CardHeader>
-                <CardContent>
-                    <p className="text-sm text-muted-foreground mb-4">
+                <CardContent className="space-y-4">
+                    <p className="text-sm text-muted-foreground">
                         Una vez que elimines tu cuenta, no hay forma de recuperarla.
                         Todos tus datos serán eliminados permanentemente.
                     </p>
                     <Button
                         variant="destructive"
                         onClick={() => setShowDeleteDialog(true)}
+                        className="w-full sm:w-auto"
                     >
                         Eliminar mi cuenta
                     </Button>

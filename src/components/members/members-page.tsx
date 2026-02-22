@@ -56,12 +56,12 @@ export function MembersPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Equipo</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight">Equipo</h1>
+          <p className="text-sm text-muted-foreground sm:text-base">
             Gestiona los miembros de tu organización
           </p>
         </div>
@@ -71,9 +71,9 @@ export function MembersPage() {
             organizationId={activeOrg.id}
             onSuccess={handleRefresh}
           >
-            <Button>
+            <Button className="w-full sm:w-auto">
               <UserPlus className="mr-2 h-4 w-4" />
-              Invitar miembro
+              Invitar
             </Button>
           </InviteMemberDialog>
         )}
@@ -81,160 +81,129 @@ export function MembersPage() {
 
       {/* Tabs */}
       <Tabs defaultValue="members">
-        <TabsList>
-          <TabsTrigger value="members" className="gap-2">
+        <TabsList className="w-full sm:w-auto">
+          <TabsTrigger value="members" className="gap-2 flex-1 sm:flex-none">
             <Users className="h-4 w-4" />
-            Miembros ({members.length})
+            <span className="hidden sm:inline">Miembros</span>
+            ({members.length})
           </TabsTrigger>
-          <TabsTrigger value="invitations" className="gap-2">
+          <TabsTrigger value="invitations" className="gap-2 flex-1 sm:flex-none">
             <Mail className="h-4 w-4" />
-            Invitaciones ({invitations.length})
+            <span className="hidden sm:inline">Invitaciones</span>
+            ({invitations.length})
           </TabsTrigger>
         </TabsList>
 
         {/* Members Tab */}
-        <TabsContent value="members">
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Miembro</TableHead>
-                  <TableHead>Rol</TableHead>
-                  <TableHead className="hidden sm:table-cell">Se unió</TableHead>
-                  <TableHead className="w-[50px]"></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {members.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
-                      No hay miembros en esta organización
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  members.map((member: any) => {
-                    const roleConfig = ROLE_CONFIG[member.role] || ROLE_CONFIG.member;
-                    const RoleIcon = roleConfig.icon;
-                    return (
-                      <TableRow key={member.id}>
-                        <TableCell>
-                          <div className="flex items-center gap-3">
-                            <Avatar className="h-9 w-9">
-                              <AvatarImage
-                                src={member.user?.image || undefined}
-                                alt={member.user?.name}
-                              />
-                              <AvatarFallback>
-                                {getInitials(member.user?.name || "?")}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div className="min-w-0">
-                              <p className="font-medium truncate">
-                                {member.user?.name}
-                                {member.userId === currentUserId && (
-                                  <span className="text-xs text-muted-foreground ml-2">(tú)</span>
-                                )}
-                              </p>
-                              <p className="text-sm text-muted-foreground truncate">
-                                {member.user?.email}
-                              </p>
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge
-                            variant="outline"
-                            className={`gap-1 ${roleConfig.className} border-transparent`}
-                          >
-                            <RoleIcon className="h-3 w-3" />
-                            {roleConfig.label}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="hidden sm:table-cell text-muted-foreground">
-                          {formatDate(member.createdAt)}
-                        </TableCell>
-                        <TableCell>
-                          <MemberActions
-                            memberId={member.id}
-                            memberUserId={member.userId}
-                            memberName={member.user?.name || ""}
-                            memberRole={member.role}
-                            organizationId={activeOrg!.id}
-                            currentUserRole={currentUserRole}
-                            currentUserId={currentUserId}
-                            onSuccess={handleRefresh}
-                          />
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })
-                )}
-              </TableBody>
-            </Table>
-          </div>
+        <TabsContent value="members" className="mt-4">
+          {members.length === 0 ? (
+            <div className="rounded-lg border p-8 text-center text-muted-foreground">
+              No hay miembros en esta organización
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {members.map((member: any) => {
+                const roleConfig = ROLE_CONFIG[member.role] || ROLE_CONFIG.member;
+                const RoleIcon = roleConfig.icon;
+                return (
+                  <div
+                    key={member.id}
+                    className="flex items-center gap-3 rounded-lg border p-3 hover:bg-muted/50 transition-colors"
+                  >
+                    <Avatar className="h-10 w-10 flex-shrink-0">
+                      <AvatarImage
+                        src={member.user?.image || undefined}
+                        alt={member.user?.name}
+                      />
+                      <AvatarFallback>
+                        {getInitials(member.user?.name || "?")}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium truncate text-sm">
+                        {member.user?.name}
+                        {member.userId === currentUserId && (
+                          <span className="text-xs text-muted-foreground ml-2">(tú)</span>
+                        )}
+                      </p>
+                      <p className="text-xs text-muted-foreground truncate sm:hidden">
+                        {roleConfig.label}
+                      </p>
+                      <p className="text-xs text-muted-foreground hidden sm:block">
+                        {member.user?.email}
+                      </p>
+                    </div>
+                    <Badge
+                      variant="outline"
+                      className={`gap-1 ${roleConfig.className} border-transparent flex-shrink-0 hidden sm:flex`}
+                    >
+                      <RoleIcon className="h-3 w-3" />
+                      {roleConfig.label}
+                    </Badge>
+                    <MemberActions
+                      memberId={member.id}
+                      memberUserId={member.userId}
+                      memberName={member.user?.name || ""}
+                      memberRole={member.role}
+                      organizationId={activeOrg!.id}
+                      currentUserRole={currentUserRole}
+                      currentUserId={currentUserId}
+                      onSuccess={handleRefresh}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </TabsContent>
 
         {/* Invitations Tab */}
-        <TabsContent value="invitations">
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Rol</TableHead>
-                  <TableHead className="hidden sm:table-cell">Expira</TableHead>
-                  <TableHead className="w-[100px]"></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {invitations.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
-                      No hay invitaciones pendientes
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  invitations.map((invitation: any) => {
-                    const roleConfig = ROLE_CONFIG[invitation.role] || ROLE_CONFIG.member;
-                    const RoleIcon = roleConfig.icon;
-                    return (
-                      <TableRow key={invitation.id}>
-                        <TableCell>
-                          <div className="flex items-center gap-3">
-                            <div className="h-9 w-9 rounded-full bg-muted flex items-center justify-center">
-                              <Mail className="h-4 w-4 text-muted-foreground" />
-                            </div>
-                            <p className="font-medium truncate">{invitation.email}</p>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge
-                            variant="outline"
-                            className={`gap-1 ${roleConfig.className} border-transparent`}
-                          >
-                            <RoleIcon className="h-3 w-3" />
-                            {roleConfig.label}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="hidden sm:table-cell text-muted-foreground">
-                          {formatDate(invitation.expiresAt)}
-                        </TableCell>
-                        <TableCell>
-                          {canInvite && (
-                            <InvitationActions
-                              invitationId={invitation.id}
-                              email={invitation.email}
-                              onSuccess={handleRefresh}
-                            />
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })
-                )}
-              </TableBody>
-            </Table>
-          </div>
+        <TabsContent value="invitations" className="mt-4">
+          {invitations.length === 0 ? (
+            <div className="rounded-lg border p-8 text-center text-muted-foreground">
+              No hay invitaciones pendientes
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {invitations.map((invitation: any) => {
+                const roleConfig = ROLE_CONFIG[invitation.role] || ROLE_CONFIG.member;
+                const RoleIcon = roleConfig.icon;
+                return (
+                  <div
+                    key={invitation.id}
+                    className="flex items-center gap-3 rounded-lg border p-3 hover:bg-muted/50 transition-colors"
+                  >
+                    <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
+                      <Mail className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium truncate text-sm">{invitation.email}</p>
+                      <p className="text-xs text-muted-foreground truncate sm:hidden">
+                        {roleConfig.label}
+                      </p>
+                      <p className="text-xs text-muted-foreground hidden sm:block">
+                        Expira: {formatDate(invitation.expiresAt)}
+                      </p>
+                    </div>
+                    <Badge
+                      variant="outline"
+                      className={`gap-1 ${roleConfig.className} border-transparent flex-shrink-0 hidden sm:flex`}
+                    >
+                      <RoleIcon className="h-3 w-3" />
+                      {roleConfig.label}
+                    </Badge>
+                    {canInvite && (
+                      <InvitationActions
+                        invitationId={invitation.id}
+                        email={invitation.email}
+                        onSuccess={handleRefresh}
+                      />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </TabsContent>
       </Tabs>
     </div>

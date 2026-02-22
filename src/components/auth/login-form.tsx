@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Loader2, Github } from "lucide-react";
+import { Loader2, Github, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 
@@ -14,6 +14,7 @@ import { signIn } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 // Esquema de validación de login
 const loginSchema = z.object({
@@ -29,6 +30,7 @@ export function LoginForm() {
   const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
   const [isLoading, setIsLoading] = useState(false);
   const [isGitHubLoading, setIsGitHubLoading] = useState(false);
+  const [showVerificationHelp, setShowVerificationHelp] = useState(false);
 
   const {
     register,
@@ -49,7 +51,14 @@ export function LoginForm() {
       });
 
       if (result.error) {
-        toast.error(result.error.message || "Error al iniciar sesión");
+        // Detectar si el error es por email no verificado
+        if (result.error.message?.toLowerCase().includes("email not verified") ||
+            result.error.message?.toLowerCase().includes("email not confirmed")) {
+          setShowVerificationHelp(true);
+          toast.error("Email no verificado. Por favor revisa tu correo electrónico.");
+        } else {
+          toast.error(result.error.message || "Error al iniciar sesión");
+        }
         return;
       }
 
@@ -172,6 +181,54 @@ export function LoginForm() {
           Iniciar Sesión
         </Button>
       </form>
+
+      {/* Ayuda de email no verificado */}
+      {showVerificationHelp && (
+        <Alert variant="destructive" className="border-red-200 bg-red-50 dark:bg-red-900/20">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Email no verificado</AlertTitle>
+          <AlertDescription className="space-y-3">
+            <p>
+              Tu cuenta aún no ha sido verificada. Por favor:
+            </p>
+            <ol className="text-xs space-y-1 list-decimal list-inside text-muted-foreground ml-4">
+              <li>Revisa tu bandeja de entrada y carpeta SPAM</li>
+              <li>Busca el email de verificación de CRMDev</li>
+              <li>Haz clic en el enlace de verificación del email</li>
+            </ol>
+            <div className="flex gap-2 pt-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1"
+                onClick={() => setShowVerificationHelp(false)}
+              >
+                Entendido
+              </Button>
+              <Button
+                size="sm"
+                className="flex-1"
+                onClick={async () => {
+                  try {
+                    const response = await fetch("/api/auth/resend-verification", {
+                      method: "POST",
+                    });
+                    if (response.ok) {
+                      toast.success("Email de verificación reenviado");
+                    } else {
+                      toast.error("Error al reenviar email");
+                    }
+                  } catch {
+                    toast.error("Error al reenviar email");
+                  }
+                }}
+              >
+                Reenviar Email
+              </Button>
+            </div>
+          </AlertDescription>
+        </Alert>
+      )}
 
       <p className="text-center text-sm text-muted-foreground">
         ¿No tienes una cuenta?{" "}

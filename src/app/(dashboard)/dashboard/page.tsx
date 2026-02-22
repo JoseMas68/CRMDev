@@ -144,7 +144,7 @@ export default async function DashboardPage() {
 
       {/* Stats Overview - Mobile cards, Desktop grid */}
       <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4">
-        <Card className="border-l-4 border-l-blue-500 shadow-sm">
+        <Card className="shadow-sm">
           <CardHeader className="pb-2 px-4 pt-4">
             <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
               Tareas Activas
@@ -158,7 +158,7 @@ export default async function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card className="border-l-4 border-l-green-500 shadow-sm">
+        <Card className="shadow-sm">
           <CardHeader className="pb-2 px-4 pt-4">
             <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
               Proyectos
@@ -172,7 +172,7 @@ export default async function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card className="border-l-4 border-l-purple-500 shadow-sm">
+        <Card className="shadow-sm">
           <CardHeader className="pb-2 px-4 pt-4">
             <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
               Clientes
@@ -186,7 +186,7 @@ export default async function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card className="border-l-4 border-l-orange-500 shadow-sm">
+        <Card className="shadow-sm">
           <CardHeader className="pb-2 px-4 pt-4">
             <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
               Tiempo Hoy
