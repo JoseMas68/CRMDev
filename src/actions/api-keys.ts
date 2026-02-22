@@ -71,6 +71,11 @@ export async function createApiKey(name: string) {
                 organizationId: session.session.activeOrganizationId,
                 userId: session.user.id,
             },
+            include: {
+                user: {
+                    select: { name: true, image: true },
+                },
+            },
         });
 
         revalidatePath("/settings/api-keys");
