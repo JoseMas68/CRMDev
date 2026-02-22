@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import {
@@ -151,7 +152,17 @@ export function DealCard({ deal, isDragging, clients }: DealCardProps) {
         >
           {/* Header with title and menu */}
           <div className="flex items-start justify-between gap-2 mb-2">
-            <h4 className="font-medium text-sm line-clamp-2 flex-1">{deal.title}</h4>
+            <Link
+              href={`/pipeline/${deal.id}`}
+              className="font-medium text-sm line-clamp-2 flex-1 hover:text-primary hover:underline"
+              onClick={(e: React.MouseEvent) => {
+                if (isDragging || isSortableDragging) {
+                  e.preventDefault();
+                }
+              }}
+            >
+              {deal.title}
+            </Link>
             <div className="flex items-center gap-1">
               {/* Botón de ver detalle - visible en móvil */}
               <Button

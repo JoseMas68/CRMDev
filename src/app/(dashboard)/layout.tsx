@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { DashboardSidebar } from "@/components/dashboard/sidebar";
 import { DashboardHeader } from "@/components/dashboard/header";
 import { BottomNav } from "@/components/mobile/bottom-nav";
+import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 
 /**
  * Dashboard Layout
@@ -35,20 +36,19 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="flex min-h-screen">
-      {/* Sidebar */}
-      <DashboardSidebar
-        user={{
-          id: session.user.id,
-          name: session.user.name,
-          email: session.user.email,
-          image: session.user.image ?? null,
-        }}
-        activeOrgId={session.session.activeOrganizationId!}
-      />
-
-      {/* Main content */}
-      <div className="flex-1 flex flex-col lg:pl-72">
+    <DashboardShell
+      sidebar={
+        <DashboardSidebar
+          user={{
+            id: session.user.id,
+            name: session.user.name,
+            email: session.user.email,
+            image: session.user.image ?? null,
+          }}
+          activeOrgId={session.session.activeOrganizationId!}
+        />
+      }
+      header={
         <DashboardHeader
           user={{
             id: session.user.id,
@@ -57,12 +57,10 @@ export default async function DashboardLayout({
             image: session.user.image ?? null,
           }}
         />
-
-        <main className="flex-1 p-4 lg:p-6 pb-20 lg:pb-6">{children}</main>
-      </div>
-
-      {/* Mobile Bottom Navigation */}
-      <BottomNav />
-    </div>
+      }
+      bottomNav={<BottomNav />}
+    >
+      {children}
+    </DashboardShell>
   );
 }

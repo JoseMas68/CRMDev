@@ -18,8 +18,11 @@ import {
   Link2,
   UserPlus,
   Ticket,
+  SidebarOpen,
+  SidebarClose,
 } from "lucide-react";
 import { cn, getInitials } from "@/lib/utils";
+import { useSidebarStore } from "@/store/sidebar-store";
 import {
   useActiveOrganization,
   useListOrganizations,
@@ -112,6 +115,7 @@ const secondaryNavigation = [
 export function DashboardSidebar({ user, activeOrgId }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const { isCollapsed, toggleCollapse } = useSidebarStore();
 
   // Fetch organizations
   const { data: activeOrg } = useActiveOrganization();
@@ -140,19 +144,42 @@ export function DashboardSidebar({ user, activeOrgId }: SidebarProps) {
   return (
     <>
       {/* Desktop sidebar */}
-      <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
-        <div className="flex grow flex-col gap-y-5 overflow-y-auto border-r bg-card px-6 pb-4">
-          {/* Logo - CRMDev */}
-          <div className="flex h-16 shrink-0 items-center">
-            <Link href="/dashboard" className="flex items-center gap-2 group">
-              <span className="font-mono text-xl font-semibold text-neon-violet tech-glow-text tracking-tight">
-                {"{ √ }"}
-              </span>
-              <span className="font-mono text-xl font-semibold text-gradient tech-glow-text">
-                CRMDev
-              </span>
-              <span className="font-mono text-xl font-semibold text-neon-violet terminal-cursor">|</span>
-            </Link>
+      <div
+        className={cn(
+          "hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:flex-col transition-all duration-300 ease-in-out border-r bg-card",
+          isCollapsed ? "lg:w-20" : "lg:w-72"
+        )}
+      >
+        <div className="flex grow flex-col gap-y-5 overflow-y-auto px-4 pb-4 overflow-x-hidden">
+          {/* Header area with Logo and Toggle */}
+          <div className="flex items-center justify-between h-16 shrink-0 mt-2">
+            {!isCollapsed && (
+              <Link href="/dashboard" className="flex items-center gap-2 group overflow-hidden pl-2">
+                <span className="font-mono text-xl font-semibold text-neon-violet tech-glow-text tracking-tight shrink-0">
+                  {"{ √ }"}
+                </span>
+                <span className="font-mono text-xl font-semibold text-gradient tech-glow-text whitespace-nowrap">
+                  CRMDev
+                </span>
+              </Link>
+            )}
+            {isCollapsed && (
+              <Link href="/dashboard" className="flex items-center justify-center w-full group overflow-hidden">
+                <span className="font-mono text-xl font-semibold text-neon-violet tech-glow-text tracking-tight shrink-0">
+                  {"{ √ }"}
+                </span>
+              </Link>
+            )}
+
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleCollapse}
+              className={cn("shrink-0", isCollapsed && "mx-auto mt-4")}
+              title={isCollapsed ? "Expandir" : "Contraer"}
+            >
+              {isCollapsed ? <SidebarOpen className="h-5 w-5" /> : <SidebarClose className="h-5 w-5" />}
+            </Button>
           </div>
 
           {/* Organization Switcher */}
@@ -160,7 +187,7 @@ export function DashboardSidebar({ user, activeOrgId }: SidebarProps) {
             <DropdownMenuTrigger asChild>
               <Button
                 variant="outline"
-                className="w-full justify-between h-auto py-3"
+                className={cn("w-full justify-between h-auto py-3", isCollapsed && "px-0 justify-center border-none shadow-none")}
               >
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
@@ -174,19 +201,21 @@ export function DashboardSidebar({ user, activeOrgId }: SidebarProps) {
                       <Building2 className="h-4 w-4 text-primary" />
                     )}
                   </div>
-                  <div className="text-left min-w-0">
-                    <p className="text-sm font-medium truncate">
-                      {activeOrg?.name || "Cargando..."}
-                    </p>
-                    <p className="text-xs text-muted-foreground truncate">
-                      {activeOrg?.slug}
-                    </p>
-                  </div>
+                  {!isCollapsed && (
+                    <div className="text-left min-w-0">
+                      <p className="text-sm font-medium truncate">
+                        {activeOrg?.name || "Cargando..."}
+                      </p>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {activeOrg?.slug}
+                      </p>
+                    </div>
+                  )}
                 </div>
-                <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
+                {!isCollapsed && <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />}
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-64" align="start">
+            <DropdownMenuContent className="w-64" align={isCollapsed ? "start" : "end"} side={isCollapsed ? "right" : "bottom"}>
               <DropdownMenuLabel>Organizaciones</DropdownMenuLabel>
               <DropdownMenuSeparator />
               {organizations?.map((org) => (
@@ -225,7 +254,7 @@ export function DashboardSidebar({ user, activeOrgId }: SidebarProps) {
           </DropdownMenu>
 
           {/* Navigation */}
-          <nav className="flex flex-1 flex-col">
+          <nav className="flex flex-1 flex-col mt-2">
             <ul role="list" className="flex flex-1 flex-col gap-y-7">
               <li>
                 <ul role="list" className="-mx-2 space-y-1">
@@ -237,11 +266,13 @@ export function DashboardSidebar({ user, activeOrgId }: SidebarProps) {
                           href={item.href}
                           className={cn(
                             "sidebar-link",
-                            isActive && "sidebar-link-active"
+                            isActive && "sidebar-link-active",
+                            isCollapsed && "justify-center px-0"
                           )}
+                          title={isCollapsed ? item.name : undefined}
                         >
-                          <item.icon className="h-5 w-5 shrink-0" />
-                          {item.name}
+                          <item.icon className={cn("h-5 w-5 shrink-0", isCollapsed ? "mx-auto" : "")} />
+                          {!isCollapsed && <span>{item.name}</span>}
                         </Link>
                       </li>
                     );
@@ -259,11 +290,13 @@ export function DashboardSidebar({ user, activeOrgId }: SidebarProps) {
                           href={item.href}
                           className={cn(
                             "sidebar-link",
-                            isActive && "sidebar-link-active"
+                            isActive && "sidebar-link-active",
+                            isCollapsed && "justify-center px-0"
                           )}
+                          title={isCollapsed ? item.name : undefined}
                         >
-                          <item.icon className="h-5 w-5 shrink-0" />
-                          {item.name}
+                          <item.icon className={cn("h-5 w-5 shrink-0", isCollapsed ? "mx-auto" : "")} />
+                          {!isCollapsed && <span>{item.name}</span>}
                         </Link>
                       </li>
                     );
@@ -279,18 +312,20 @@ export function DashboardSidebar({ user, activeOrgId }: SidebarProps) {
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
-                  className="w-full justify-start h-auto py-2 hover:bg-muted/50"
+                  className={cn("w-full justify-start h-auto py-2 hover:bg-muted/50", isCollapsed && "justify-center px-0")}
                 >
-                  <UserBadge user={user} size="md" className="mr-3" />
-                  <div className="text-left min-w-0 flex-1">
-                    <p className="text-sm font-medium truncate">{user.name}</p>
-                    <p className="text-xs text-muted-foreground truncate">
-                      {user.isVerifiedDev ? "Dev Profesional" : user.email}
-                    </p>
-                  </div>
+                  <UserBadge user={user} size="md" className={cn(!isCollapsed && "mr-3")} />
+                  {!isCollapsed && (
+                    <div className="text-left min-w-0 flex-1">
+                      <p className="text-sm font-medium truncate">{user.name}</p>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {user.isVerifiedDev ? "Dev Profesional" : user.email}
+                      </p>
+                    </div>
+                  )}
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56" align="end">
+              <DropdownMenuContent className="w-56" align={isCollapsed ? "start" : "end"} side={isCollapsed ? "right" : "bottom"}>
                 <DropdownMenuLabel>Mi Cuenta</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>

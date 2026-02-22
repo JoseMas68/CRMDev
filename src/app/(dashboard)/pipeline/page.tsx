@@ -51,23 +51,36 @@ export default async function PipelinePage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Pipeline de Ventas</h1>
-          <p className="text-muted-foreground">
-            {formatCurrency(totalValue)} en oportunidades abiertas
-          </p>
+      <div className="flex flex-col gap-3 sm:gap-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Pipeline de Ventas</h1>
+            <p className="text-sm sm:text-base text-muted-foreground mt-1">
+              {formatCurrency(totalValue)} en oportunidades abiertas
+            </p>
+          </div>
+
+          <CreateDealDialog
+            stages={stages}
+            clients={clients.map((c) => ({ id: c.id, name: c.name }))}
+          >
+            <Button size="default" className="sm:hidden">
+              <Plus className="h-5 w-5" />
+            </Button>
+          </CreateDealDialog>
         </div>
 
-        <CreateDealDialog
-          stages={stages}
-          clients={clients.map((c) => ({ id: c.id, name: c.name }))}
-        >
-          <Button className="w-full sm:w-auto">
-            <Plus className="mr-2 h-4 w-4" />
-            Nuevo Deal
-          </Button>
-        </CreateDealDialog>
+        <div className="hidden sm:block">
+          <CreateDealDialog
+            stages={stages}
+            clients={clients.map((c) => ({ id: c.id, name: c.name }))}
+          >
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              Nuevo Deal
+            </Button>
+          </CreateDealDialog>
+        </div>
       </div>
 
       {/* Kanban Board */}

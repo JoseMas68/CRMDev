@@ -144,61 +144,69 @@ export default async function DashboardPage() {
 
       {/* Stats Overview - Mobile cards, Desktop grid */}
       <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4">
-        <Card className="shadow-sm">
-          <CardHeader className="pb-2 px-4 pt-4">
-            <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
-              Tareas Activas
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="px-4 pb-4">
-            <div className="text-xl sm:text-2xl font-bold">{activeTasks}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Tareas pendientes
-            </p>
-          </CardContent>
-        </Card>
+        <Link href="/tasks" className="group">
+          <Card className="shadow-sm transition-all hover:shadow-lg hover:border-primary/50 cursor-pointer h-full">
+            <CardHeader className="pb-2 px-4 pt-4">
+              <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground group-hover:text-primary transition-colors">
+                Tareas Activas
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="px-4 pb-4">
+              <div className="text-xl sm:text-2xl font-bold">{activeTasks}</div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Tareas pendientes
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
 
-        <Card className="shadow-sm">
-          <CardHeader className="pb-2 px-4 pt-4">
-            <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
-              Proyectos
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="px-4 pb-4">
-            <div className="text-xl sm:text-2xl font-bold">{projects.length}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              {activeProjects} activos
-            </p>
-          </CardContent>
-        </Card>
+        <Link href="/projects" className="group">
+          <Card className="shadow-sm transition-all hover:shadow-lg hover:border-primary/50 cursor-pointer h-full">
+            <CardHeader className="pb-2 px-4 pt-4">
+              <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground group-hover:text-primary transition-colors">
+                Proyectos
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="px-4 pb-4">
+              <div className="text-xl sm:text-2xl font-bold">{projects.length}</div>
+              <p className="text-xs text-muted-foreground mt-1">
+                {activeProjects} activos
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
 
-        <Card className="shadow-sm">
-          <CardHeader className="pb-2 px-4 pt-4">
-            <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
-              Clientes
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="px-4 pb-4">
-            <div className="text-xl sm:text-2xl font-bold">{clients}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Total clientes
-            </p>
-          </CardContent>
-        </Card>
+        <Link href="/clients" className="group">
+          <Card className="shadow-sm transition-all hover:shadow-lg hover:border-primary/50 cursor-pointer h-full">
+            <CardHeader className="pb-2 px-4 pt-4">
+              <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground group-hover:text-primary transition-colors">
+                Clientes
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="px-4 pb-4">
+              <div className="text-xl sm:text-2xl font-bold">{clients}</div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Total clientes
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
 
-        <Card className="shadow-sm">
-          <CardHeader className="pb-2 px-4 pt-4">
-            <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
-              Tiempo Hoy
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="px-4 pb-4">
-            <div className="text-xl sm:text-2xl font-bold">{timeTodayStr}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Tiempo registrado hoy
-            </p>
-          </CardContent>
-        </Card>
+        <Link href="/time" className="group">
+          <Card className="shadow-sm transition-all hover:shadow-lg hover:border-primary/50 cursor-pointer h-full">
+            <CardHeader className="pb-2 px-4 pt-4">
+              <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground group-hover:text-primary transition-colors">
+                Tiempo Hoy
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="px-4 pb-4">
+              <div className="text-xl sm:text-2xl font-bold">{timeTodayStr}</div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Tiempo registrado hoy
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
       </div>
 
       {/* Main Content Grid */}
