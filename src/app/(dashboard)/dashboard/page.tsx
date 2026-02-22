@@ -111,15 +111,15 @@ export default async function DashboardPage() {
   const formattedDate = format(today, "EEEE, d 'de' MMMM", { locale: es });
 
   return (
-    <div className="space-y-6 md:space-y-8">
+    <div className="space-y-4 md:space-y-6 px-4 sm:px-0">
       {/* Welcome Section */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight">
             Hola, {session.user.name?.split(" ")[0] ?? "Developer"}
           </h1>
-          <p className="text-muted-foreground text-base md:text-lg mt-1">
-            {formattedDate} • Aquí está tu resumen
+          <p className="text-sm sm:text-base md:text-lg text-muted-foreground mt-1">
+            {formattedDate}
           </p>
         </div>
         <div className="hidden sm:flex">

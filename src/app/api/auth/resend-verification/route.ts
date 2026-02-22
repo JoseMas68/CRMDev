@@ -43,8 +43,8 @@ export async function POST(request: NextRequest) {
     }
 
     // En desarrollo, podemos marcar el email como verificado directamente
-    // En producción, Better Auth debería enviar el email automáticamente
-    if (process.env.NODE_ENV === "development") {
+    // En producción, Better Auth enviará el email
+    if (process.env.NODE_ENV === "development" && process.env.SKIP_EMAIL_FOR_DEV === "true") {
       await prisma.user.update({
         where: { id: user.id },
         data: { emailVerified: true },
@@ -56,10 +56,23 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // En producción, intentar loguearse de nuevo enviará un nuevo email
+    // Trigger Better Auth's verification email sending logic
+    const { auth } = await import("@/lib/auth");
+
+    // Convert headers to correctly match Record<string, string> | Headers
+    const headersList = Object.fromEntries(request.headers.entries());
+
+    await auth.api.sendVerificationEmail({
+      body: {
+        email: user.email,
+        callbackURL: process.env.NEXT_PUBLIC_APP_URL || process.env.BETTER_AUTH_URL || "http://localhost:3000"
+      },
+      headers: new Headers(headersList),
+    });
+
     return NextResponse.json({
       success: true,
-      message: "Por favor, intenta iniciar sesión de nuevo. Se enviará un nuevo email de verificación.",
+      message: "Se ha enviado un nuevo email de verificación.",
     });
   } catch (error) {
     console.error("[RESEND_VERIFICATION] Error:", error);

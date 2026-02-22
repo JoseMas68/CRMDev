@@ -40,19 +40,6 @@ export const auth = betterAuth({
     autoSignIn: true, // Auto sign in after registration
     minPasswordLength: 8,
     maxPasswordLength: 128,
-    // Send verification email using Resend
-    sendVerificationEmail: async ({ user, url }: { user: any; url: string }) => {
-      const { sendEmail } = await import("./email");
-      const { default: VerificationEmail } = await import("../emails/verification-email");
-      await sendEmail({
-        to: user.email,
-        subject: "Verifica tu email en CRMDev",
-        react: VerificationEmail({
-          userName: user.name || user.email,
-          verificationUrl: url,
-        }),
-      });
-    },
     // Send password reset email using Resend
     sendResetPassword: async ({ user, url }: { user: any; url: string }) => {
       const { sendEmail } = await import("./email");
@@ -63,6 +50,24 @@ export const auth = betterAuth({
         react: PasswordResetEmail({
           userName: user.name || user.email,
           resetUrl: url,
+        }),
+      });
+    },
+  },
+
+  // Email Verification configuration
+  emailVerification: {
+    sendOnSignUp: true,
+    autoSignInAfterVerification: true,
+    sendVerificationEmail: async ({ user, url }: { user: any; url: string; token: string }) => {
+      const { sendEmail } = await import("./email");
+      const { default: VerificationEmail } = await import("../emails/verification-email");
+      await sendEmail({
+        to: user.email,
+        subject: "Verifica tu email en CRMDev",
+        react: VerificationEmail({
+          userName: user.name || user.email,
+          verificationUrl: url,
         }),
       });
     },
