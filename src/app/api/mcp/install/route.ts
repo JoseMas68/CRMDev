@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 
+import { NextRequest, NextResponse } from "next/server";
+
 // Serve the MCP installer script
 export async function GET(req: NextRequest) {
   const script = `#!/usr/bin/env node
