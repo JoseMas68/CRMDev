@@ -86,7 +86,7 @@ URL: https://crmdev.tech/api/mcp/rest
 Authentication: Generic Credential Type
   - Name: CRM API
   - Header Name: Authorization
-  - Header Value: Bearer crm_6df28433c4ec7ac15ef43d5fca54bbadc725452f81623cc5
+  - Header Value: Bearer crm_TU_API_KEY
 
 Body (JSON):
 {
@@ -211,7 +211,7 @@ URL: https://crmdev.tech/api/mcp/rest
 
 Headers:
   Content-Type: application/json
-  Authorization: Bearer crm_6df28433c4ec7ac15ef43d5fca54bbadc725452f81623cc5
+  Authorization: Bearer crm_TU_API_KEY
 
 Body (JSON Expression):
 {
@@ -324,7 +324,7 @@ En lugar de poner la API Key en cada nodo, créala como credencial:
 2. **Header Auth**
 3. **Name**: `CRM API`
 4. **Name**: `Authorization`
-5. **Value**: `Bearer crm_6df28433c4ec7ac15ef43d5fca54bbadc725452f81623cc5`
+5. **Value**: `Bearer crm_TU_API_KEY`
 
 Luego en los nodos HTTP Request, selecciona esta credencial.
 
@@ -453,6 +453,6 @@ Si tienes problemas:
    ```bash
    curl -X POST https://crmdev.tech/api/mcp/rest \
      -H "Content-Type: application/json" \
-     -H "Authorization: Bearer crm_6df28433c4ec7ac15ef43d5fca54bbadc725452f81623cc5" \
+     -H "Authorization: Bearer crm_TU_API_KEY" \
      -d '{"tool": "list_projects", "arguments": {}}'
    ```

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 // Simple test script for MCP endpoint
-const API_KEY = "crm_6df28433c4ec7ac15ef43d5fca54bbadc725452f81623cc5";
+const API_KEY = "crm_TU_API_KEY";
 const BASE_URL = "https://crmdev.tech";
 
 async function testMCP() {

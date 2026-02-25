@@ -24,7 +24,7 @@ curl -sSL https://crmdev.tech/api/mcp/install | node - TU_API_KEY
 
 **Ejemplo real:**
 ```bash
-curl -sSL https://crmdev.tech/api/mcp/install | node - crm_6df28433c4ec7ac15ef43d5fca54bbadc725452f81623cc5
+curl -sSL https://crmdev.tech/api/mcp/install | node - crm_TU_API_KEY
 ```
 
 Este comando:
