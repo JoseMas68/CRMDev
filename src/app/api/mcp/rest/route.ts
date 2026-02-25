@@ -5,13 +5,13 @@ import { z } from "zod";
 // Use Node.js runtime for Prisma support
 export const runtime = 'nodejs';
 
-// Helper para obtener organizationId desde API key
-async function getOrgIdFromToken(token: string): Promise<string | null> {
+// Helper para obtener organizationId y userId desde API key
+async function getOrgIdFromToken(token: string): Promise<{ organizationId: string; userId: string } | null> {
   const apiKey = await prisma.apiKey.findUnique({
     where: { key: token },
-    select: { organizationId: true },
+    select: { organizationId: true, userId: true },
   });
-  return apiKey?.organizationId || null;
+  return apiKey ? { organizationId: apiKey.organizationId, userId: apiKey.userId } : null;
 }
 
 // Schema para validar requests
@@ -34,11 +34,13 @@ export async function POST(req: NextRequest) {
     }
 
     const token = authHeader.split(" ")[1];
-    const organizationId = await getOrgIdFromToken(token);
+    const authData = await getOrgIdFromToken(token);
 
-    if (!organizationId) {
+    if (!authData) {
       return NextResponse.json({ error: "Invalid API Key" }, { status: 403 });
     }
+
+    const { organizationId, userId } = authData;
 
     // Update last used
     await prisma.apiKey.updateMany({
@@ -170,7 +172,7 @@ export async function POST(req: NextRequest) {
             priority: args.priority || "MEDIUM",
             dueDate: args.dueDate ? new Date(args.dueDate) : null,
             organizationId,
-            creatorId: "system",
+            creatorId: userId,
           },
           select: { id: true, title: true, status: true, priority: true },
         });
