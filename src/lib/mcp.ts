@@ -1,19 +1,25 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
 
 // Store active transports globally for POST messages handler
 const globalForSse = globalThis as unknown as {
-    mcpTransports: Map<string, SSEServerTransport>;
+    mcpTransports: Map<string, { transport: any; organizationId: string }>;
 };
-export const activeTransports = globalForSse.mcpTransports || new Map<string, SSEServerTransport>();
+export const activeTransports = globalForSse.mcpTransports || new Map<string, { transport: any; organizationId: string }>();
 if (process.env.NODE_ENV !== "production") globalForSse.mcpTransports = activeTransports;
 
 // Global singleton instance para evitar fugas de memoria en NextJS HMR (Hot Module Replacement)
 const globalForMcp = globalThis as unknown as {
     mcpServer: McpServer | undefined;
 };
+
+// Helper para obtener organizationId con validación
+function getOrgId(extra: any): string {
+    const orgId = extra?._meta?.organizationId as string;
+    if (!orgId) throw new Error("Acceso denegado: falta organizationId");
+    return orgId;
+}
 
 // Crear la instancia del servidor
 const createMcpServer = () => {
@@ -23,29 +29,28 @@ const createMcpServer = () => {
     });
 
     // ============================================
-    // Registrar las Herramientas (Tools) de la IA
+    // PROJECTS
     // ============================================
 
-    // Tool 1: Listar Proyectos de la Organización
     server.tool(
         "list_projects",
         "Listar todos los proyectos de la organización activa del usuario",
         {
             limit: z.number().optional().describe("Límite de proyectos a devolver, por defecto 10"),
+            status: z.enum(["NOT_STARTED", "IN_PROGRESS", "ON_HOLD", "COMPLETED", "CANCELLED"]).optional().describe("Filtrar por estado"),
         },
-        async ({ limit }, extra) => {
-            // Extraemos el organizationId que viene del request autenticado
-            const orgId = (extra as any)?._meta?.organizationId as string;
-            if (!orgId) throw new Error("Acceso denegado: falta organizationId");
+        async ({ limit, status }, extra) => {
+            const orgId = getOrgId(extra);
 
             const projects = await prisma.project.findMany({
-                where: { organizationId: orgId },
+                where: { organizationId: orgId, status: status as any },
                 select: {
                     id: true,
                     name: true,
                     status: true,
                     progress: true,
                     deadline: true,
+                    type: true,
                 },
                 take: limit || 10,
                 orderBy: { updatedAt: "desc" },
@@ -57,7 +62,464 @@ const createMcpServer = () => {
         }
     );
 
-    // Tool 2: Reporte Rápido de Tiempos de un Proyecto
+    server.tool(
+        "create_project",
+        "Crear un nuevo proyecto en la organización",
+        {
+            name: z.string().describe("Nombre del proyecto"),
+            description: z.string().optional().describe("Descripción del proyecto"),
+            type: z.enum(["GITHUB", "WORDPRESS", "VERCEL", "OTHER"]).optional().describe("Tipo de proyecto"),
+            status: z.enum(["NOT_STARTED", "IN_PROGRESS", "ON_HOLD", "COMPLETED", "CANCELLED"]).optional().describe("Estado inicial"),
+            clientId: z.string().optional().describe("ID del cliente asociado (opcional)"),
+        },
+        async ({ name, description, type, status, clientId }, extra) => {
+            const orgId = getOrgId(extra);
+
+            // Verify client belongs to org if provided
+            if (clientId) {
+                const client = await prisma.client.findFirst({
+                    where: { id: clientId, organizationId: orgId },
+                    select: { id: true },
+                });
+                if (!client) {
+                    return {
+                        content: [{ type: "text", text: "Error: Cliente no encontrado en tu organización." }],
+                    };
+                }
+            }
+
+            const project = await prisma.project.create({
+                data: {
+                    name,
+                    description,
+                    type: type || "OTHER",
+                    status: status || "NOT_STARTED",
+                    clientId,
+                    organizationId: orgId,
+                },
+                select: {
+                    id: true,
+                    name: true,
+                    status: true,
+                    type: true,
+                },
+            });
+
+            return {
+                content: [{ type: "text", text: JSON.stringify({ success: true, project }, null, 2) }],
+            };
+        }
+    );
+
+    server.tool(
+        "update_project",
+        "Actualizar un proyecto existente",
+        {
+            projectId: z.string().describe("ID del proyecto a actualizar"),
+            name: z.string().optional().describe("Nuevo nombre del proyecto"),
+            description: z.string().optional().describe("Nueva descripción"),
+            status: z.enum(["NOT_STARTED", "IN_PROGRESS", "ON_HOLD", "COMPLETED", "CANCELLED"]).optional().describe("Nuevo estado"),
+            progress: z.number().min(0).max(100).optional().describe("Progreso del proyecto (0-100)"),
+        },
+        async ({ projectId, name, description, status, progress }, extra) => {
+            const orgId = getOrgId(extra);
+
+            // Verify project belongs to org
+            const existing = await prisma.project.findFirst({
+                where: { id: projectId, organizationId: orgId },
+                select: { id: true },
+            });
+
+            if (!existing) {
+                return {
+                    content: [{ type: "text", text: "Error: Proyecto no encontrado en tu organización." }],
+                };
+            }
+
+            const project = await prisma.project.update({
+                where: { id: projectId },
+                data: {
+                    ...(name && { name }),
+                    ...(description !== undefined && { description }),
+                    ...(status && { status }),
+                    ...(progress !== undefined && { progress }),
+                },
+                select: {
+                    id: true,
+                    name: true,
+                    status: true,
+                    progress: true,
+                },
+            });
+
+            return {
+                content: [{ type: "text", text: JSON.stringify({ success: true, project }, null, 2) }],
+            };
+        }
+    );
+
+    server.tool(
+        "delete_project",
+        "Eliminar un proyecto (CUIDADO: esta acción no se puede deshacer)",
+        {
+            projectId: z.string().describe("ID del proyecto a eliminar"),
+        },
+        async ({ projectId }, extra) => {
+            const orgId = getOrgId(extra);
+
+            // Verify project belongs to org
+            const existing = await prisma.project.findFirst({
+                where: { id: projectId, organizationId: orgId },
+                select: { id: true, name: true },
+            });
+
+            if (!existing) {
+                return {
+                    content: [{ type: "text", text: "Error: Proyecto no encontrado en tu organización." }],
+                };
+            }
+
+            await prisma.project.delete({
+                where: { id: projectId },
+            });
+
+            return {
+                content: [{ type: "text", text: JSON.stringify({ success: true, message: `Proyecto "${existing.name}" eliminado correctamente.` }, null, 2) }],
+            };
+        }
+    );
+
+    // ============================================
+    // TASKS
+    // ============================================
+
+    server.tool(
+        "list_tasks",
+        "Listar tareas de la organización",
+        {
+            limit: z.number().optional().describe("Límite de tareas a devolver, por defecto 20"),
+            projectId: z.string().optional().describe("Filtrar por proyecto"),
+            status: z.enum(["TODO", "IN_PROGRESS", "IN_REVIEW", "DONE", "CANCELLED"]).optional().describe("Filtrar por estado"),
+        },
+        async ({ limit, projectId, status }, extra) => {
+            const orgId = getOrgId(extra);
+
+            const tasks = await prisma.task.findMany({
+                where: {
+                    organizationId: orgId,
+                    ...(projectId && { projectId }),
+                    ...(status && { status: status as any }),
+                },
+                select: {
+                    id: true,
+                    title: true,
+                    description: true,
+                    status: true,
+                    priority: true,
+                    dueDate: true,
+                    projectId: true,
+                    project: { select: { name: true } },
+                    assignee: { select: { name: true } },
+                },
+                take: limit || 20,
+                orderBy: { createdAt: "desc" },
+            });
+
+            return {
+                content: [{ type: "text", text: JSON.stringify(tasks, null, 2) }],
+            };
+        }
+    );
+
+    server.tool(
+        "create_task",
+        "Crear una nueva tarea",
+        {
+            title: z.string().describe("Título de la tarea"),
+            description: z.string().optional().describe("Descripción de la tarea"),
+            projectId: z.string().optional().describe("ID del proyecto (opcional)"),
+            status: z.enum(["TODO", "IN_PROGRESS", "IN_REVIEW", "DONE", "CANCELLED"]).optional().describe("Estado inicial"),
+            priority: z.enum(["LOW", "MEDIUM", "HIGH", "URGENT"]).optional().describe("Prioridad"),
+            dueDate: z.string().optional().describe("Fecha límite (ISO 8601)"),
+        },
+        async ({ title, description, projectId, status, priority, dueDate }, extra) => {
+            const orgId = getOrgId(extra);
+
+            // Verify project belongs to org if provided
+            if (projectId) {
+                const project = await prisma.project.findFirst({
+                    where: { id: projectId, organizationId: orgId },
+                    select: { id: true },
+                });
+                if (!project) {
+                    return {
+                        content: [{ type: "text", text: "Error: Proyecto no encontrado en tu organización." }],
+                    };
+                }
+            }
+
+            const task = await prisma.task.create({
+                data: {
+                    title,
+                    description,
+                    projectId,
+                    status: status || "TODO",
+                    priority: priority || "MEDIUM",
+                    dueDate: dueDate ? new Date(dueDate) : null,
+                    organizationId: orgId,
+                    creatorId: "system", // MCP creates tasks as system user
+                },
+                select: {
+                    id: true,
+                    title: true,
+                    status: true,
+                    priority: true,
+                },
+            });
+
+            return {
+                content: [{ type: "text", text: JSON.stringify({ success: true, task }, null, 2) }],
+            };
+        }
+    );
+
+    server.tool(
+        "update_task",
+        "Actualizar una tarea existente",
+        {
+            taskId: z.string().describe("ID de la tarea a actualizar"),
+            title: z.string().optional().describe("Nuevo título"),
+            description: z.string().optional().describe("Nueva descripción"),
+            status: z.enum(["TODO", "IN_PROGRESS", "IN_REVIEW", "DONE", "CANCELLED"]).optional().describe("Nuevo estado"),
+            priority: z.enum(["LOW", "MEDIUM", "HIGH", "URGENT"]).optional().describe("Nueva prioridad"),
+        },
+        async ({ taskId, title, description, status, priority }, extra) => {
+            const orgId = getOrgId(extra);
+
+            // Verify task belongs to org
+            const existing = await prisma.task.findFirst({
+                where: { id: taskId, organizationId: orgId },
+                select: { id: true },
+            });
+
+            if (!existing) {
+                return {
+                    content: [{ type: "text", text: "Error: Tarea no encontrada en tu organización." }],
+                };
+            }
+
+            const task = await prisma.task.update({
+                where: { id: taskId },
+                data: {
+                    ...(title && { title }),
+                    ...(description !== undefined && { description }),
+                    ...(status && { status }),
+                    ...(priority && { priority }),
+                },
+                select: {
+                    id: true,
+                    title: true,
+                    status: true,
+                    priority: true,
+                },
+            });
+
+            return {
+                content: [{ type: "text", text: JSON.stringify({ success: true, task }, null, 2) }],
+            };
+        }
+    );
+
+    server.tool(
+        "delete_task",
+        "Eliminar una tarea (CUIDADO: no se puede deshacer)",
+        {
+            taskId: z.string().describe("ID de la tarea a eliminar"),
+        },
+        async ({ taskId }, extra) => {
+            const orgId = getOrgId(extra);
+
+            // Verify task belongs to org
+            const existing = await prisma.task.findFirst({
+                where: { id: taskId, organizationId: orgId },
+                select: { id: true, title: true },
+            });
+
+            if (!existing) {
+                return {
+                    content: [{ type: "text", text: "Error: Tarea no encontrada en tu organización." }],
+                };
+            }
+
+            await prisma.task.delete({
+                where: { id: taskId },
+            });
+
+            return {
+                content: [{ type: "text", text: JSON.stringify({ success: true, message: `Tarea "${existing.title}" eliminada.` }, null, 2) }],
+            };
+        }
+    );
+
+    // ============================================
+    // CLIENTS
+    // ============================================
+
+    server.tool(
+        "list_clients",
+        "Listar clientes de la organización",
+        {
+            limit: z.number().optional().describe("Límite de clientes a devolver, por defecto 20"),
+            status: z.enum(["LEAD", "PROSPECT", "CUSTOMER", "INACTIVE", "CHURNED"]).optional().describe("Filtrar por estado"),
+        },
+        async ({ limit, status }, extra) => {
+            const orgId = getOrgId(extra);
+
+            const clients = await prisma.client.findMany({
+                where: { organizationId: orgId, status: status as any },
+                select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    company: true,
+                    status: true,
+                    phone: true,
+                },
+                take: limit || 20,
+                orderBy: { createdAt: "desc" },
+            });
+
+            return {
+                content: [{ type: "text", text: JSON.stringify(clients, null, 2) }],
+            };
+        }
+    );
+
+    server.tool(
+        "create_client",
+        "Crear un nuevo cliente o lead",
+        {
+            name: z.string().describe("Nombre del cliente"),
+            email: z.string().email().optional().describe("Email del cliente"),
+            company: z.string().optional().describe("Empresa del cliente"),
+            phone: z.string().optional().describe("Teléfono del cliente"),
+            status: z.enum(["LEAD", "PROSPECT", "CUSTOMER", "INACTIVE", "CHURNED"]).optional().describe("Estado inicial"),
+            source: z.string().optional().describe("Fuente del lead (web, referral, etc)"),
+            notes: z.string().optional().describe("Notas adicionales"),
+        },
+        async ({ name, email, company, phone, status, source, notes }, extra) => {
+            const orgId = getOrgId(extra);
+
+            const client = await prisma.client.create({
+                data: {
+                    name,
+                    email,
+                    company,
+                    phone,
+                    status: status || "LEAD",
+                    source,
+                    notes,
+                    organizationId: orgId,
+                },
+                select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    company: true,
+                    status: true,
+                },
+            });
+
+            return {
+                content: [{ type: "text", text: JSON.stringify({ success: true, client }, null, 2) }],
+            };
+        }
+    );
+
+    server.tool(
+        "update_client",
+        "Actualizar un cliente existente",
+        {
+            clientId: z.string().describe("ID del cliente a actualizar"),
+            name: z.string().optional().describe("Nuevo nombre"),
+            email: z.string().email().optional().describe("Nuevo email"),
+            company: z.string().optional().describe("Nueva empresa"),
+            status: z.enum(["LEAD", "PROSPECT", "CUSTOMER", "INACTIVE", "CHURNED"]).optional().describe("Nuevo estado"),
+            notes: z.string().optional().describe("Nuevas notas"),
+        },
+        async ({ clientId, name, email, company, status, notes }, extra) => {
+            const orgId = getOrgId(extra);
+
+            // Verify client belongs to org
+            const existing = await prisma.client.findFirst({
+                where: { id: clientId, organizationId: orgId },
+                select: { id: true },
+            });
+
+            if (!existing) {
+                return {
+                    content: [{ type: "text", text: "Error: Cliente no encontrado en tu organización." }],
+                };
+            }
+
+            const client = await prisma.client.update({
+                where: { id: clientId },
+                data: {
+                    ...(name && { name }),
+                    ...(email && { email }),
+                    ...(company !== undefined && { company }),
+                    ...(status && { status }),
+                    ...(notes !== undefined && { notes }),
+                },
+                select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    status: true,
+                },
+            });
+
+            return {
+                content: [{ type: "text", text: JSON.stringify({ success: true, client }, null, 2) }],
+            };
+        }
+    );
+
+    server.tool(
+        "delete_client",
+        "Eliminar un cliente (CUIDADO: no se puede deshacer)",
+        {
+            clientId: z.string().describe("ID del cliente a eliminar"),
+        },
+        async ({ clientId }, extra) => {
+            const orgId = getOrgId(extra);
+
+            // Verify client belongs to org
+            const existing = await prisma.client.findFirst({
+                where: { id: clientId, organizationId: orgId },
+                select: { id: true, name: true },
+            });
+
+            if (!existing) {
+                return {
+                    content: [{ type: "text", text: "Error: Cliente no encontrado en tu organización." }],
+                };
+            }
+
+            await prisma.client.delete({
+                where: { id: clientId },
+            });
+
+            return {
+                content: [{ type: "text", text: JSON.stringify({ success: true, message: `Cliente "${existing.name}" eliminado.` }, null, 2) }],
+            };
+        }
+    );
+
+    // ============================================
+    // TIME TRACKING
+    // ============================================
+
     server.tool(
         "get_project_time_report",
         "Obtener el reporte de tiempos, total de horas y desglose de tareas de un proyecto",
@@ -65,8 +527,7 @@ const createMcpServer = () => {
             projectId: z.string().describe("El ID del proyecto"),
         },
         async ({ projectId }, extra) => {
-            const orgId = (extra as any)?._meta?.organizationId as string;
-            if (!orgId) throw new Error("Acceso denegado: falta organizationId");
+            const orgId = getOrgId(extra);
 
             // Verify project belongs to org
             const project = await prisma.project.findFirst({
@@ -105,8 +566,6 @@ const createMcpServer = () => {
             };
         }
     );
-
-    // En el futuro, más Tools como create_task, update_deal, etc.
 
     return server;
 };

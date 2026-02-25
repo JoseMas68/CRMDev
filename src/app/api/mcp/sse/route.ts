@@ -25,10 +25,7 @@ export async function GET(req: NextRequest) {
 
     const sessionId = crypto.randomUUID();
 
-    // Note: SSEServerTransport typically expects Node's IncomingMessage/ServerResponse 
-    // but there's a Web stream pattern or we can manage manual streams.
-    // We'll use a TransformStream to bridge the gap.
-
+    // Controller reference for sending SSE events
     let controllerRef: ReadableStreamDefaultController<any>;
 
     const stream = new ReadableStream({
@@ -45,10 +42,7 @@ export async function GET(req: NextRequest) {
         }
     });
 
-    // Our custom adapter since SSEServerTransport in Node wants a res object
-    // Next.js App Router forces Web Streams. We implement a dummy transport or write to the stream natively.
-    // Actually, we can just instantiate a new SSEServerTransport via its raw protocol if needed,
-    // but a simple custom Transport is trivial:
+    // Custom transport adapter for Next.js Web Streams
     const customTransport = {
         send: async (message: any) => {
             if (controllerRef) {
@@ -66,7 +60,12 @@ export async function GET(req: NextRequest) {
 
     // Bind to our MCPServer
     mcpServer.connect(customTransport as any);
-    activeTransports.set(sessionId, customTransport as any);
+
+    // Store transport with organizationId for security in message handler
+    activeTransports.set(sessionId, {
+        transport: customTransport as any,
+        organizationId: apiKey.organizationId,
+    });
 
     // Return the web stream
     return new Response(stream, {
