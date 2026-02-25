@@ -54,7 +54,7 @@
         "authentication": "none",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"token\": \"{{ $json.token }}\",\n  \"telegramUserId\": \"{{ $json.telegramUserId }}\",\n  \"telegramUsername\": \"{{ $json.telegramUsername }}\",\n  \"telegramChatId\": \"{{ $json.telegramChatId }}\"\n}",
+        "jsonBody": "={\n  \"token\": \"{{ $json.token }}\",\n  \"telegramUserId\": {{ $json.telegramUserId }},\n  \"telegramUsername\": \"{{ $json.telegramUsername }}\",\n  \"telegramChatId\": {{ $json.telegramChatId }}\n}",
         "options": {}
       },
       "id": "link-telegram",
