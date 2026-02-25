@@ -2,6 +2,9 @@ import { NextRequest } from "next/server";
 import { mcpServer, activeTransports } from "@/lib/mcp";
 import { prisma } from "@/lib/prisma";
 
+// Use Node.js runtime for Prisma support
+export const runtime = 'nodejs';
+
 export async function GET(req: NextRequest) {
     const authHeader = req.headers.get("authorization");
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
