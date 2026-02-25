@@ -4,9 +4,9 @@
 
 ---
 
-## 🚀 Configuración Rápida (Para Usuarios)
+## 🚀 Instalación en 3 Pasos
 
-### Paso 1: Crear tu API Key en CRMDev
+### Paso 1: Obtener tu API Key
 
 1. Entra a **https://crmdev.tech**
 2. Ve a **Settings → API Keys**
@@ -14,60 +14,35 @@
 4. Ponle un nombre (ej: "Mi Claude Desktop")
 5. **Copia la key inmediatamente** - formato: `crm_xxxxxxxxxxxxxxxx`
 
-### Paso 2: Configurar Claude Desktop
+### Paso 2: Instalar el Servidor MCP (Automático)
 
-#### Windows:
-1. Abre el archivo de configuración:
-   ```
-   notepad %APPDATA%\Claude\claude_desktop_config.json
-   ```
+Abre tu terminal y ejecuta (reemplaza `TU_API_KEY`):
 
-2. Agrega esto (reemplaza `TU_API_KEY` y `RUTA_AL_PROYECTO`):
-   ```json
-   {
-     "mcpServers": {
-       "crmdev": {
-         "command": "node",
-         "args": ["RUTA_AL_PROYECTO/mcp-server.js"],
-         "env": {
-           "CRM_API_KEY": "TU_API_KEY_AQUI"
-         }
-       }
-     }
-   }
-   ```
+```bash
+curl -sSL https://crmdev.tech/api/mcp/install | node - TU_API_KEY
+```
 
-   **Ejemplo** (si el proyecto está en `C:\Projects\CRM`):
-   ```json
-   {
-     "mcpServers": {
-       "crmdev": {
-         "command": "node",
-         "args": ["C:/Projects/CRM/mcp-server.js"],
-         "env": {
-           "CRM_API_KEY": "crm_abc123..."
-         }
-       }
-     }
-   }
-   ```
+**Ejemplo real:**
+```bash
+curl -sSL https://crmdev.tech/api/mcp/install | node - crm_6df28433c4ec7ac15ef43d5fca54bbadc725452f81623cc5
+```
 
-   Si ya tienes otros servidores MCP, solo agrega `"crmdev": { ... }` dentro de `"mcpServers"`.
-
-3. Guarda el archivo
-
-4. **Reinicia Claude Desktop** completamente (ciérralo y ábrelo de nuevo)
+Este comando:
+- ✅ Descarga el servidor MCP
+- ✅ Lo instala en tu sistema
+- ✅ Configura Claude Desktop automáticamente
 
 ### Paso 3: ¡Usar Claude con tu CRM!
 
-En un nuevo chat de Claude, prueba:
+1. **Reinicia Claude Desktop** completamente (ciérralo y ábrelo de nuevo)
+2. En un nuevo chat, prueba:
 
 ```
 ¿Qué proyectos tengo en mi CRM?
 ```
 
 ```
-Crea una tarea llamada "Llamar a cliente" para el proyecto X
+Crea una tarea llamada "Llamar a cliente" con prioridad HIGH
 ```
 
 ```
@@ -80,13 +55,13 @@ Lista todos mis clientes con status LEAD
 
 ### Proyectos
 - "¿Qué proyectos tengo?"
-- "Crear proyecto 'Tienda Online' con descripción 'E-commerce para cliente X'"
-- "Actualizar el progreso del proyecto X al 50%"
+- "Crear proyecto 'Tienda Online' con descripción 'E-commerce'"
+- "Marcar el proyecto X como completado"
 
 ### Tareas
 - "¿Qué tareas pendientes tengo?"
 - "Crear tarea urgente: 'Fix bug en login'"
-- "Listar todas las tareas con prioridad HIGH del proyecto Y"
+- "Listar todas las tareas HIGH priority del proyecto Y"
 
 ### Clientes
 - "¿Quiénes son todos mis clientes?"
@@ -99,7 +74,7 @@ Lista todos mis clientes con status LEAD
 
 ✅ **Cada API Key es única por organización**
 ✅ **Claude solo ve los datos de TU organización**
-✅ **Puedes revocar tu API Key en cualquier momento desde Settings**
+✅ **Puedes revocar tu API Key en cualquier momento**
 
 ⚠️ **Nunca compartas tu API Key** - Da acceso completo a tu CRM
 
@@ -111,54 +86,53 @@ Lista todos mis clientes con status LEAD
 |-------------|-------------|---------|
 | `list_projects` | Ver todos tus proyectos | "Mis proyectos" |
 | `create_project` | Crear un nuevo proyecto | "Crear proyecto 'Web App'" |
-| `update_project` | Actualizar un proyecto | "Marcar proyecto X como completado" |
-| `delete_project` | Eliminar un proyecto | "Borrar proyecto de prueba" |
 | `list_tasks` | Ver tus tareas | "Mis tareas pendientes" |
 | `create_task` | Crear una tarea | "Crear tarea 'Revisar PR'" |
-| `update_task` | Actualizar una tarea | "Completar tarea X" |
-| `delete_task` | Eliminar una tarea | "Borrar tarea de prueba" |
 | `list_clients` | Ver tus clientes | "Mis clientes activos" |
 | `create_client` | Crear un cliente | "Agregar cliente 'María López'" |
-| `update_client` | Actualizar un cliente | "Actualizar email del cliente X" |
-| `delete_client` | Eliminar un cliente | "Borrar cliente de prueba" |
 
 ---
 
 ## ⚠️ Troubleshooting
 
 ### Claude no muestra las herramientas
-1. Verifica que el archivo de configuración esté correcto (JSON válido)
-2. Asegúrate de haber reiniciado Claude Desktop
-3. Verifica que tu API Key sea válida (crea una nueva si es necesario)
+1. Asegúrate de haber reiniciado Claude Desktop completamente
+2. Verifica que el comando de instalación se ejecutó sin errores
+3. Verifica que tu API Key sea válida
 
-### Error de conexión
-1. **Prueba tu API Key primero**:
+### Error de instalación
+**Si `curl` no funciona:**
+
+#### Opción alternativa: Descargar manual
+
+1. Descarga el instalador:
    ```bash
-   curl -H "Authorization: Bearer TU_API_KEY" https://crmdev.tech/api/mcp/rest
+   # Descargar el archivo
+   curl -O https://crmdev.tech/api/mcp/install
+   # O con PowerShell:
+   # Invoke-WebRequest -Uri "https://crmdev.tech/api/mcp/install" -OutFile "install.js"
    ```
 
-2. Si responde correctamente, la API Key funciona
+2. Ejecuta:
+   ```bash
+   node install TU_API_KEY
+   ```
 
-### Error "Server not found"
-1. Verifica que la ruta en `args` sea correcta:
-   - Debe apuntar a donde tienes el proyecto: `TU_RUTA/mcp-server.js`
+### Error "Module not found"
+El instalador necesita las dependencias del SDK de MCP. Asegúrate de tener Node.js instalado:
 
-2. **Ejemplos de rutas**:
-   - Windows: `"C:/Projects/CRM/mcp-server.js"`
-   - Mac/Linux: `"/home/usuario/projects/CRM/mcp-server.js"`
-
-3. Usa **barras hacia adelante** (/) incluso en Windows, o escapa las barras invertidas (\\)
+```bash
+# Verificar Node.js
+node --version  # Debe ser v18 o superior
+```
 
 ---
 
 ## 🎁 Bonus: ChatGPT y Otras IAs
 
-Este mismo sistema funciona con cualquier IA que soporte MCP o REST API:
+Este mismo sistema funciona con cualquier IA que soporte REST API:
 
-**Para conectar ChatGPT u otra IA:**
-1. Crea tu API Key en CRMDev
-2. Usa el endpoint REST: `https://crmdev.tech/api/mcp/rest`
-3. Envía requests con tu API Key en el header `Authorization: Bearer TU_KEY`
+**Endpoint:** `https://crmdev.tech/api/mcp/rest`
 
 **Ejemplo de request:**
 ```json
@@ -176,7 +150,7 @@ Content-Type: application/json
 
 ## 💡 Tips
 
-- **Crea diferentes API Keys** para diferentes dispositivos (Claude Desktop en casa, en el trabajo, etc.)
-- **Nombra tus API Keys** con algo descriptivo: "Claude Laptop", "Claude Work", "ChatGPT Integration"
+- **Crea diferentes API Keys** para diferentes dispositivos
+- **Nombra tus API Keys** con algo descriptivo
 - **Revoca y regenera** API Keys periódicamente por seguridad
-- **Verifica la actividad** de tus API Keys en Settings → API Keys (muestra "Último uso")
+- **Verifica la actividad** de tus API Keys en Settings → API Keys
