@@ -4,12 +4,22 @@ import { z } from "zod";
 
 export const runtime = "nodejs";
 
-// Schema para validar request
+// Schema para validar request (más permisivo para n8n)
 const linkRequestSchema = z.object({
   token: z.string().regex(/^TG-[A-Z0-9]+$/, "Invalid token format"),
-  telegramUserId: z.union([z.string(), z.number()]).transform(val => BigInt(val)),
+  telegramUserId: z.union([z.string(), z.number(), z.bigint()]).transform(val => {
+    // Convertir cualquier formato a BigInt
+    if (typeof val === 'bigint') return val;
+    if (typeof val === 'string') return BigInt(val);
+    return BigInt(val);
+  }),
   telegramUsername: z.string().optional(),
-  telegramChatId: z.union([z.string(), z.number()]).optional().transform(val => val ? BigInt(val) : null),
+  telegramChatId: z.union([z.string(), z.number(), z.bigint()]).optional().transform(val => {
+    if (!val) return null;
+    if (typeof val === 'bigint') return val;
+    if (typeof val === 'string') return BigInt(val);
+    return BigInt(val);
+  }),
 });
 
 // Vincular usuario de Telegram con organización
