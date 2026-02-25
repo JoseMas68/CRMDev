@@ -1,0 +1,333 @@
+{
+  "name": "CRMDev Telegram Multi-Tenant Bot",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "telegram-trigger",
+      "name": "Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1,
+      "position": [250, 400]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.message.text }}",
+              "rightValue": "/start TG-",
+              "operator": {
+                "type": "string",
+                "operation": "startsWith"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "is-start-command",
+      "name": "Is /start TG-?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [450, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extraer token del mensaje /start TG-XXX\nconst text = $json.message.text;\nconst token = text.replace('/start', '').trim();\n\nreturn {\n  json: {\n    token: token,\n    telegramUserId: $json.message.from.id,\n    telegramUsername: $json.message.from.username || '',\n    telegramChatId: $json.message.chat.id\n  }\n};"
+      },
+      "id": "extract-token",
+      "name": "Extract Token",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [700, 250]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://crmdev.tech/api/telegram/link",
+        "authentication": "none",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"token\": \"{{ $json.token }}\",\n  \"telegramUserId\": \"{{ $json.telegramUserId }}\",\n  \"telegramUsername\": \"{{ $json.telegramUsername }}\",\n  \"telegramChatId\": \"{{ $json.telegramChatId }}\"\n}",
+        "options": {}
+      },
+      "id": "link-telegram",
+      "name": "Link Telegram",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [950, 250]
+    },
+    {
+      "parameters": {
+        "jsCode": "const result = $json;\nconst chatId = $('Extract Token').item.json.telegramChatId;\n\nif (result.success) {\n  return { json: { message: `✅ *Conectado correctamente*\\n\\nOrganización: ${result.organization}`, chat_id: chatId } };\n} else {\n  return { json: { message: `❌ Error: ${result.error}`, chat_id: chatId } };\n}"
+      },
+      "id": "format-link-response",
+      "name": "Format Link Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1200, 250]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "=https://crmdev.tech/api/telegram/resolve/{{ $json.message.from.id }}",
+        "authentication": "none",
+        "options": {}
+      },
+      "id": "resolve-api-key",
+      "name": "Resolve API Key",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [700, 550]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.error }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "check-linked",
+      "name": "Check Linked?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [950, 550]
+    },
+    {
+      "parameters": {
+        "jsCode": "return { json: { message: '❌ *No estás vinculado*\\n\\nPara conectar tu cuenta:\\n1. Ve a tu CRM\\n2. Settings → Telegram\\n3. Genera un código\\n4. Usa /start TG-CODE aquí', chat_id: $('Telegram Trigger').item.json.message.chat.id } };"
+      },
+      "id": "not-linked-message",
+      "name": "Not Linked Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1200, 450]
+    },
+    {
+      "parameters": {
+        "dataType": "string",
+        "value1": "={{ $('Telegram Trigger').item.json.message.text }}",
+        "rules": {
+          "values": [
+            { "value1": "/tareas", "operation": "equals" },
+            { "value1": "/proyectos", "operation": "equals" },
+            { "value1": "/clientes", "operation": "equals" },
+            { "value1": "/help", "operation": "equals" }
+          ]
+        }
+      },
+      "id": "switch-commands",
+      "name": "Switch Commands",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [1200, 650]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://crmdev.tech/api/mcp/rest",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Content-Type", "value": "application/json" },
+            { "name": "Authorization", "value": "=Bearer {{ $('Resolve API Key').item.json.api_key }}" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"tool\": \"list_tasks\", \"arguments\": {} }",
+        "options": {}
+      },
+      "id": "list-tareas-api",
+      "name": "List Tareas API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1450, 550]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://crmdev.tech/api/mcp/rest",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Content-Type", "value": "application/json" },
+            { "name": "Authorization", "value": "=Bearer {{ $('Resolve API Key').item.json.api_key }}" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"tool\": \"list_projects\", \"arguments\": {} }",
+        "options": {}
+      },
+      "id": "list-proyectos-api",
+      "name": "List Proyectos API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1450, 650]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://crmdev.tech/api/mcp/rest",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Content-Type", "value": "application/json" },
+            { "name": "Authorization", "value": "=Bearer {{ $('Resolve API Key').item.json.api_key }}" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"tool\": \"list_clients\", \"arguments\": {} }",
+        "options": {}
+      },
+      "id": "list-clientes-api",
+      "name": "List Clientes API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1450, 750]
+    },
+    {
+      "parameters": {
+        "jsCode": "const result = $json;\nif (result.success && result.data && result.data.length > 0) {\n  let msg = '📋 **Tus Tareas:**\\n\\n';\n  result.data.forEach((t, i) => {\n    const emojis = { 'TODO': '⏳', 'IN_PROGRESS': '🔄', 'IN_REVIEW': '👀', 'DONE': '✅', 'CANCELLED': '❌' };\n    const priorities = { 'LOW': '🟢', 'MEDIUM': '🟡', 'HIGH': '🟠', 'URGENT': '🔴' };\n    msg += `${i+1}. ${emojis[t.status] || '📌'} ${t.title}\\n`;\n    if (t.description) msg += `   📝 ${t.description}\\n`;\n    msg += `   ${priorities[t.priority] || ''} ${t.priority}\\n\\n`;\n  });\n  return { json: { message: msg } };\n} else {\n  return { json: { message: '📋 No tienes tareas pendientes.' } };\n}"
+      },
+      "id": "format-tareas",
+      "name": "Format Tareas",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1700, 550]
+    },
+    {
+      "parameters": {
+        "jsCode": "const result = $json;\nif (result.success && result.data && result.data.length > 0) {\n  let msg = '🚀 **Tus Proyectos:**\\n\\n';\n  result.data.forEach((p, i) => {\n    const emojis = { 'NOT_STARTED': '⬜', 'IN_PROGRESS': '🔄', 'ON_HOLD': '⏸️', 'COMPLETED': '✅', 'CANCELLED': '❌' };\n    msg += `${i+1}. ${emojis[p.status] || '📌'} ${p.name}\\n`;\n    msg += `   📊 Progreso: ${p.progress}%\\n`;\n    msg += `   🏷️ ${p.type}\\n\\n`;\n  });\n  return { json: { message: msg } };\n} else {\n  return { json: { message: '🚀 No tienes proyectos.' } };\n}"
+      },
+      "id": "format-proyectos",
+      "name": "Format Proyectos",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1700, 650]
+    },
+    {
+      "parameters": {
+        "jsCode": "const result = $json;\nif (result.success && result.data && result.data.length > 0) {\n  let msg = '👥 **Tus Clientes:**\\n\\n';\n  result.data.forEach((c, i) => {\n    const emojis = { 'LEAD': '🔵', 'PROSPECT': '🟡', 'CUSTOMER': '🟢', 'INACTIVE': '⚪', 'CHURNED': '🔴' };\n    msg += `${i+1}. ${emojis[c.status] || '👤'} ${c.name}\\n`;\n    if (c.email) msg += `   📧 ${c.email}\\n`;\n    if (c.company) msg += `   🏢 ${c.company}\\n`;\n    msg += `   📊 ${c.status}\\n\\n`;\n  });\n  return { json: { message: msg } };\n} else {\n  return { json: { message: '👥 No tienes clientes.' } };\n}"
+      },
+      "id": "format-clientes",
+      "name": "Format Clientes",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1700, 750]
+    },
+    {
+      "parameters": {
+        "jsCode": "return { json: { message: `🤖 **Comandos Disponibles**\\n\\n📋 **Listar:**\\n/tareas - Ver tareas\\n/proyectos - Ver proyectos\\n/clientes - Ver clientes\\n\\n✨ **Crear:**\\n/crear_tarea Título | Prioridad HIGH\\n/crear_proyecto Nombre\\n\\n❓ **Ayuda:**\\n/help - Ver este mensaje` } };"
+      },
+      "id": "help-message",
+      "name": "Help Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1450, 850]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chat_id || $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.message }}",
+        "additionalFields": { "parseMode": "Markdown" }
+      },
+      "id": "send-response",
+      "name": "Send Response",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [1950, 650]
+    }
+  ],
+  "connections": {
+    "Telegram Trigger": {
+      "main": [[{"node": "Is /start TG-?", "type": "main", "index": 0}]]
+    },
+    "Is /start TG-?": {
+      "main": [
+        [{"node": "Extract Token", "type": "main", "index": 0}],
+        [{"node": "Resolve API Key", "type": "main", "index": 0}]
+      ]
+    },
+    "Extract Token": {
+      "main": [[{"node": "Link Telegram", "type": "main", "index": 0}]]
+    },
+    "Link Telegram": {
+      "main": [[{"node": "Format Link Response", "type": "main", "index": 0}]]
+    },
+    "Format Link Response": {
+      "main": [[{"node": "Send Response", "type": "main", "index": 0}]]
+    },
+    "Resolve API Key": {
+      "main": [[{"node": "Check Linked?", "type": "main", "index": 0}]]
+    },
+    "Check Linked?": {
+      "main": [
+        [{"node": "Not Linked Message", "type": "main", "index": 0}],
+        [{"node": "Switch Commands", "type": "main", "index": 0}]
+      ]
+    },
+    "Not Linked Message": {
+      "main": [[{"node": "Send Response", "type": "main", "index": 0}]]
+    },
+    "Switch Commands": {
+      "main": [
+        [{"node": "List Tareas API", "type": "main", "index": 0}],
+        [{"node": "List Proyectos API", "type": "main", "index": 0}],
+        [{"node": "List Clientes API", "type": "main", "index": 0}],
+        [{"node": "Help Message", "type": "main", "index": 0}]
+      ]
+    },
+    "List Tareas API": {
+      "main": [[{"node": "Format Tareas", "type": "main", "index": 0}]]
+    },
+    "List Proyectos API": {
+      "main": [[{"node": "Format Proyectos", "type": "main", "index": 0}]]
+    },
+    "List Clientes API": {
+      "main": [[{"node": "Format Clientes", "type": "main", "index": 0}]]
+    },
+    "Format Tareas": {
+      "main": [[{"node": "Send Response", "type": "main", "index": 0}]]
+    },
+    "Format Proyectos": {
+      "main": [[{"node": "Send Response", "type": "main", "index": 0}]]
+    },
+    "Format Clientes": {
+      "main": [[{"node": "Send Response", "type": "main", "index": 0}]]
+    },
+    "Help Message": {
+      "main": [[{"node": "Send Response", "type": "main", "index": 0}]]
+    }
+  },
+  "pinData": {},
+  "settings": { "executionOrder": "v1" },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2025-02-25T00:00:00.000Z",
+  "versionId": "1"
+}

@@ -134,7 +134,11 @@ model Organization {
   subscription  Subscription?
 
   // API Keys (MCP Integrations)
-  apiKeys       ApiKey[]
+  apiKeys               ApiKey[]
+
+  // Telegram Integrations (Multi-tenant bot)
+  telegramLinkTokens     TelegramLinkToken[]
+  telegramConnections    TelegramConnection[]
 
   @@map("organizations")
 }
@@ -842,6 +846,47 @@ model Subscription {
 
   @@index([stripeCustomerId])
   @@map("subscriptions")
+}
+
+// ===========================================
+// TELEGRAM INTEGRATION (Multi-tenant)
+// Un solo bot atiende a todas las organizaciones
+// ===========================================
+
+model TelegramLinkToken {
+  id             String       @id @default(cuid())
+  token          String       @unique // Token temporal tipo "TG-XXXXX"
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  expiresAt      DateTime     // 10 minutos desde creación
+  used           Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+
+  @@index([token])
+  @@index([organizationId])
+  @@map("telegram_link_tokens")
+}
+
+model TelegramConnection {
+  id              String       @id @default(cuid())
+  organizationId  String
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  // Telegram user info
+  telegramUserId  BigInt       // Telegram user ID (bigint)
+  telegramUsername String?     // @username (opcional, puede cambiar)
+  telegramChatId  BigInt?      // Chat ID para enviar mensajes
+
+  // Metadata
+  isActive        Boolean      @default(true)
+  linkedAt        DateTime     @default(now())
+  unlinkedAt      DateTime?
+
+  @@unique([telegramUserId])
+  @@index([organizationId])
+  @@index([telegramUserId])
+  @@map("telegram_connections")
 }
 
 enum SubscriptionStatus {
