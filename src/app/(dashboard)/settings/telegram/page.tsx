@@ -35,13 +35,14 @@ export default async function TelegramPage() {
   const canManageTelegram = member?.role === "owner" || member?.role === "admin";
 
   const connectionsResult = await getTelegramConnection();
+  const rawData = connectionsResult.success && connectionsResult.data ? connectionsResult.data : [];
   const connections: Array<{
     id: string;
     telegramUsername: string | null;
     telegramUserId: bigint;
     linkedAt: Date;
     isActive: boolean;
-  }> = (connectionsResult.success ? connectionsResult.data : []).map((c: any) => ({
+  }> = rawData.map((c: any) => ({
     id: c.id,
     telegramUsername: c.telegramUsername,
     telegramUserId: c.telegramUserId,
