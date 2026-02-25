@@ -18,7 +18,16 @@ export async function POST(req: NextRequest) {
   try {
     // 1. Validar request
     const body = await req.json();
+    console.log("[TELEGRAM_LINK] Received body:", JSON.stringify(body, null, 2));
+
     const { token, telegramUserId, telegramUsername, telegramChatId } = linkRequestSchema.parse(body);
+
+    console.log("[TELEGRAM_LINK] Parsed data:", {
+      token,
+      telegramUserId: telegramUserId.toString(),
+      telegramUsername,
+      telegramChatId: telegramChatId?.toString()
+    });
 
     // 2. Buscar token
     const linkToken = await prisma.telegramLinkToken.findUnique({
@@ -103,14 +112,23 @@ export async function POST(req: NextRequest) {
     console.error("[TELEGRAM_LINK]", error);
 
     if (error instanceof z.ZodError) {
+      console.error("[TELEGRAM_LINK] Validation error:", error.errors);
       return NextResponse.json(
         { error: "Invalid request", details: error.errors },
         { status: 400 }
       );
     }
 
+    // Log error details
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error("[TELEGRAM_LINK] Error details:", errorMessage);
+
     return NextResponse.json(
-      { error: "Internal server error" },
+      {
+        error: "Internal server error",
+        message: errorMessage,
+        type: error instanceof Error ? error.constructor.name : typeof error
+      },
       { status: 500 }
     );
   }
