@@ -1,27 +1,28 @@
 # Conectar Claude Desktop con CRMDev
 
-## 🔧 Configuración de Claude Desktop
+> 📌 **Importante**: Cada usuario de CRMDev crea su propia API Key y configura su conexión. Claude solo accederá a los datos de la organización del usuario.
 
-### Paso 1: Instalar Dependencias
+---
 
-```bash
-cd c:/Users/Jose/Desktop/Proyectos/CRM
-pnpm install
-```
+## 🚀 Configuración Rápida (Para Usuarios)
+
+### Paso 1: Crear tu API Key en CRMDev
+
+1. Entra a **https://crmdev.tech**
+2. Ve a **Settings → API Keys**
+3. Click en **"Crear nueva API Key"**
+4. Ponle un nombre (ej: "Mi Claude Desktop")
+5. **Copia la key inmediatamente** - formato: `crm_xxxxxxxxxxxxxxxx`
 
 ### Paso 2: Configurar Claude Desktop
 
-1. **Abre Claude Desktop**
-
-2. **Ve a Settings → MCP** (o edita el config directamente)
-
-3. **Windows**: El config está en:
+#### Windows:
+1. Abre el archivo de configuración:
    ```
-   %APPDATA%\Claude\claude_desktop_config.json
+   notepad %APPDATA%\Claude\claude_desktop_config.json
    ```
-   O ejecuta: `notepad %APPDATA%\Claude\claude_desktop_config.json`
 
-4. **Agrega esta configuración**:
+2. Agrega esto (reemplaza `TU_API_KEY` con la que copiaste):
    ```json
    {
      "mcpServers": {
@@ -29,70 +30,134 @@ pnpm install
          "command": "node",
          "args": ["C:/Users/Jose/Desktop/Proyectos/CRM/mcp-server.js"],
          "env": {
-           "CRM_API_KEY": "crm_6df28433c4ec7ac15ef43d5fca54bbadc725452f81623cc5"
+           "CRM_API_KEY": "TU_API_KEY_AQUI"
          }
        }
      }
    }
    ```
 
-5. **Reinicia Claude Desktop**
+   Si ya tienes otros servidores MCP, solo agrega `"crmdev": { ... }` dentro de `"mcpServers"`.
 
-### Paso 3: Verificar que Funciona
+3. Guarda el archivo
 
-En Claude Desktop, abre un nuevo chat y prueba:
+4. **Reinicia Claude Desktop** completamente (ciérralo y ábrelo de nuevo)
 
-```
-¿Qué proyectos tengo en CRMDev?
-```
+### Paso 3: ¡Usar Claude con tu CRM!
 
-```
-Crea una nueva tarea llamada "Revisar código" con prioridad HIGH
-```
+En un nuevo chat de Claude, prueba:
 
 ```
-Lista todos los clientes con status LEAD
+¿Qué proyectos tengo en mi CRM?
 ```
+
+```
+Crea una tarea llamada "Llamar a cliente" para el proyecto X
+```
+
+```
+Lista todos mis clientes con status LEAD
+```
+
+---
+
+## 🎯 Ejemplos de Comandos
+
+### Proyectos
+- "¿Qué proyectos tengo?"
+- "Crear proyecto 'Tienda Online' con descripción 'E-commerce para cliente X'"
+- "Actualizar el progreso del proyecto X al 50%"
+
+### Tareas
+- "¿Qué tareas pendientes tengo?"
+- "Crear tarea urgente: 'Fix bug en login'"
+- "Listar todas las tareas con prioridad HIGH del proyecto Y"
+
+### Clientes
+- "¿Quiénes son todos mis clientes?"
+- "Crear cliente 'Juan Pérez' con email juan@empresa.com"
+- "Actualizar el cliente X a status CUSTOMER"
+
+---
+
+## 🔒 Seguridad y Privacidad
+
+✅ **Cada API Key es única por organización**
+✅ **Claude solo ve los datos de TU organización**
+✅ **Puedes revocar tu API Key en cualquier momento desde Settings**
+
+⚠️ **Nunca compartas tu API Key** - Da acceso completo a tu CRM
 
 ---
 
 ## 📋 Herramientas Disponibles
 
-| Tool | Descripción | Ejemplo |
-|------|-------------|---------|
-| `list_projects` | Listar proyectos | "¿Qué proyectos hay?" |
-| `create_project` | Crear proyecto | "Crea proyecto 'Web App'" |
-| `list_tasks` | Listar tareas | "¿Qué tareas pendientes hay?" |
-| `create_task` | Crear tarea | "Crea tarea 'Fix bug'" |
-| `list_clients` | Listar clientes | "¿Quiénes son mis clientes?" |
-| `create_client` | Crear cliente | "Agrega cliente Juan Pérez" |
+| Herramienta | Descripción | Ejemplo |
+|-------------|-------------|---------|
+| `list_projects` | Ver todos tus proyectos | "Mis proyectos" |
+| `create_project` | Crear un nuevo proyecto | "Crear proyecto 'Web App'" |
+| `update_project` | Actualizar un proyecto | "Marcar proyecto X como completado" |
+| `delete_project` | Eliminar un proyecto | "Borrar proyecto de prueba" |
+| `list_tasks` | Ver tus tareas | "Mis tareas pendientes" |
+| `create_task` | Crear una tarea | "Crear tarea 'Revisar PR'" |
+| `update_task` | Actualizar una tarea | "Completar tarea X" |
+| `delete_task` | Eliminar una tarea | "Borrar tarea de prueba" |
+| `list_clients` | Ver tus clientes | "Mis clientes activos" |
+| `create_client` | Crear un cliente | "Agregar cliente 'María López'" |
+| `update_client` | Actualizar un cliente | "Actualizar email del cliente X" |
+| `delete_client` | Eliminar un cliente | "Borrar cliente de prueba" |
 
 ---
 
 ## ⚠️ Troubleshooting
 
-### Claude no reconoce las herramientas
-1. Verifica que el config JSON esté correcto
-2. Reinicia Claude Desktop completamente
-3. Verifica que `node mcp-server.js` funcione en terminal
+### Claude no muestra las herramientas
+1. Verifica que el archivo de configuración esté correcto (JSON válido)
+2. Asegúrate de haber reiniciado Claude Desktop
+3. Verifica que tu API Key sea válida (crea una nueva si es necesario)
 
 ### Error de conexión
-1. Verifica que el deploy esté terminado en EasyPanel
-2. Prueba el endpoint: `node scripts/test-mcp-rest.js`
-3. Verifica la API Key esté vigente
+1. **Prueba tu API Key primero**:
+   ```bash
+   curl -H "Authorization: Bearer TU_API_KEY" https://crmdev.tech/api/mcp/rest
+   ```
+
+2. Si responde correctamente, la API Key funciona
+
+### Error "Server not found"
+1. Verifica que la ruta en `args` sea correcta:
+   - `C:/Users/Jose/Desktop/Proyectos/CRM/mcp-server.js`
+
+2. Si cambiaste la ubicación del proyecto, actualiza la ruta
 
 ---
 
-## 🎯 Ejemplos de Uso
+## 🎁 Bonus: ChatGPT y Otras IAs
 
+Este mismo sistema funciona con cualquier IA que soporte MCP o REST API:
+
+**Para conectar ChatGPT u otra IA:**
+1. Crea tu API Key en CRMDev
+2. Usa el endpoint REST: `https://crmdev.tech/api/mcp/rest`
+3. Envía requests con tu API Key en el header `Authorization: Bearer TU_KEY`
+
+**Ejemplo de request:**
+```json
+POST https://crmdev.tech/api/mcp/rest
+Authorization: Bearer crm_TU_KEY
+Content-Type: application/json
+
+{
+  "tool": "list_projects",
+  "arguments": {}
+}
 ```
-// Claude puede hacer esto naturalmente:
 
-"Crear un proyecto nuevo llamado 'E-commerce' con descripción 'Tienda online'"
+---
 
-"Listar todas las tareas con prioridad HIGH"
+## 💡 Tips
 
-"Agregar un cliente llamado María García con email maria@empresa.com"
-
-"¿Cuántas horas se han trabajado en el proyecto X?"
-```
+- **Crea diferentes API Keys** para diferentes dispositivos (Claude Desktop en casa, en el trabajo, etc.)
+- **Nombra tus API Keys** con algo descriptivo: "Claude Laptop", "Claude Work", "ChatGPT Integration"
+- **Revoca y regenera** API Keys periódicamente por seguridad
+- **Verifica la actividad** de tus API Keys en Settings → API Keys (muestra "Último uso")

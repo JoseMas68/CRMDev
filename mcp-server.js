@@ -1,10 +1,14 @@
 #!/usr/bin/env node
 
 /**
- * MCP Server Proxy for Claude Desktop
+ * MCP Server Proxy for Claude Desktop (Multi-Tenant)
  *
- * This server runs locally and connects to your CRMDev via REST API
- * Claude Desktop connects to this server via stdio
+ * This server runs locally and connects to CRMDev via REST API.
+ * Each user configures their OWN API KEY from their CRM account.
+ * Claude Desktop connects to this server via stdio.
+ *
+ * SECURITY: The API key determines which organization's data is accessed.
+ * Each user should use their own API key from Settings → API Keys in CRMDev.
  */
 
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
@@ -12,8 +16,17 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { z } from "zod";
 
 // Configuración
+// Set this environment variable when configuring Claude Desktop:
+// CRM_API_KEY=crm_your_key_here
 const API_URL = "https://crmdev.tech/api/mcp/rest";
-const API_KEY = process.env.CRM_API_KEY || "crm_6df28433c4ec7ac15ef43d5fca54bbadc725452f81623cc5";
+const API_KEY = process.env.CRM_API_KEY;
+
+if (!API_KEY) {
+  console.error("❌ ERROR: CRM_API_KEY environment variable is not set!");
+  console.error("Please set CRM_API_KEY in your claude_desktop_config.json:");
+  console.error('  "env": { "CRM_API_KEY": "crm_your_key_here" }');
+  process.exit(1);
+}
 
 // Helper para llamar a la API REST
 async function callTool(toolName, args = {}) {

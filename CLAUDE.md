@@ -118,20 +118,25 @@ import { authClient } from "@/lib/auth-client";
 
 ## MCP (Model Context Protocol) Integration
 
-### Architecture
-- **SSE Endpoint**: `/api/mcp/sse` - Server-Sent Events for streaming
-- **Message Endpoint**: `/api/mcp/message` - POST handler for JSON-RPC messages
-- **API Key Authentication**: Bearer token from `api_keys` table
+### Multi-User Architecture
+**Each user creates their own API Key** in CRMDev → Settings → API Keys, then configures their AI assistant (Claude, ChatGPT, etc.) with that key. The API key determines which organization's data is accessible.
 
-### Server ([src/lib/mcp.ts](src/lib/mcp.ts))
-Registered tools:
-- `list_projects` - List projects in active organization
-- `get_project_time_report` - Get time tracking report for project
+### Endpoints
+- **REST Endpoint**: `/api/mcp/rest` - Simple JSON API (recommended for most integrations)
+- **SSE Endpoint**: `/api/mcp/sse` - Server-Sent Events (for MCP protocol clients)
+- **Authentication**: Bearer token from `api_keys` table (per-organization)
 
-### Bridge Script ([mcp-bridge.js](mcp-bridge.js))
-- Connects Claude Desktop to remote CRM via SSE
-- Uses environment variables: `CRM_URL`, `CRM_API_KEY`
-- Note: Native SSE support in Claude Desktop is pending
+### Registered Tools ([src/lib/mcp.ts](src/lib/mcp.ts))
+- **Projects**: list, create, update, delete
+- **Tasks**: list, create, update, delete
+- **Clients**: list, create, update, delete
+- **Time**: get_project_time_report
+
+### User Setup
+Users configure their own AI assistant:
+- See [CLAUDE_DESKTOP_SETUP.md](CLAUDE_DESKTOP_SETUP.md) for Claude Desktop instructions
+- Each user sets their own `CRM_API_KEY` in their config
+- For REST API: POST to `/api/mcp/rest` with `Authorization: Bearer crm_KEY`
 
 ## Database Schema Notes
 
