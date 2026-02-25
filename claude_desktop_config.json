@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "crmdev": {
+      "command": "node",
+      "args": ["C:/Users/Jose/Desktop/Proyectos/CRM/mcp-server.js"],
+      "env": {
+        "CRM_API_KEY": "crm_6df28433c4ec7ac15ef43d5fca54bbadc725452f81623cc5"
+      }
+    }
+  }
+}
