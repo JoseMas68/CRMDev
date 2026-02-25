@@ -128,6 +128,22 @@ node --version  # Debe ser v18 o superior
 
 ---
 
+## 📱 Soporte Móvil (Futuro)
+
+⚠️ **Actualmente**, MCP solo funciona en **Claude Desktop para PC** (Windows/Mac).
+
+**Planes futuros** cuando Anthropic añada soporte MCP móvil:
+- Claude para iOS/Android tendrá soporte MCP
+- La misma configuración funcionará en móvil
+- Este instalador será compatible
+
+Mientras tanto:
+- ✅ Usa Claude Desktop en tu PC/Mac
+- ✅ Accede a tu CRM desde el navegador móvil en https://crmdev.tech
+- 🔄 Sync automático entre dispositivos
+
+---
+
 ## 🎁 Bonus: ChatGPT y Otras IAs
 
 Este mismo sistema funciona con cualquier IA que soporte REST API:
