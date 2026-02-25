@@ -22,15 +22,30 @@
    notepad %APPDATA%\Claude\claude_desktop_config.json
    ```
 
-2. Agrega esto (reemplaza `TU_API_KEY` con la que copiaste):
+2. Agrega esto (reemplaza `TU_API_KEY` y `RUTA_AL_PROYECTO`):
    ```json
    {
      "mcpServers": {
        "crmdev": {
          "command": "node",
-         "args": ["C:/Users/Jose/Desktop/Proyectos/CRM/mcp-server.js"],
+         "args": ["RUTA_AL_PROYECTO/mcp-server.js"],
          "env": {
            "CRM_API_KEY": "TU_API_KEY_AQUI"
+         }
+       }
+     }
+   }
+   ```
+
+   **Ejemplo** (si el proyecto está en `C:\Projects\CRM`):
+   ```json
+   {
+     "mcpServers": {
+       "crmdev": {
+         "command": "node",
+         "args": ["C:/Projects/CRM/mcp-server.js"],
+         "env": {
+           "CRM_API_KEY": "crm_abc123..."
          }
        }
      }
@@ -126,9 +141,13 @@ Lista todos mis clientes con status LEAD
 
 ### Error "Server not found"
 1. Verifica que la ruta en `args` sea correcta:
-   - `C:/Users/Jose/Desktop/Proyectos/CRM/mcp-server.js`
+   - Debe apuntar a donde tienes el proyecto: `TU_RUTA/mcp-server.js`
 
-2. Si cambiaste la ubicación del proyecto, actualiza la ruta
+2. **Ejemplos de rutas**:
+   - Windows: `"C:/Projects/CRM/mcp-server.js"`
+   - Mac/Linux: `"/home/usuario/projects/CRM/mcp-server.js"`
+
+3. Usa **barras hacia adelante** (/) incluso en Windows, o escapa las barras invertidas (\\)
 
 ---
 
