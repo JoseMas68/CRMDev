@@ -155,8 +155,8 @@ export function TaskDetailsDialog({ task, open, onOpenChange, projects = [], mem
     setEditPriority(task.priority);
     setEditStatus(task.status);
     setEditDueDate(task.dueDate ? task.dueDate.toISOString().split('T')[0] : "");
-    setEditProjectId(task.project?.id || "");
-    setEditAssigneeId(task.assignee?.id || "");
+    setEditProjectId(task.project?.id || "none");
+    setEditAssigneeId(task.assignee?.id || "none");
     setIsEditMode(true);
   }
 
@@ -181,13 +181,13 @@ export function TaskDetailsDialog({ task, open, onOpenChange, projects = [], mem
         updateData.dueDate = null;
       }
 
-      if (editProjectId) {
+      if (editProjectId && editProjectId !== "none") {
         updateData.projectId = editProjectId;
       } else {
         updateData.projectId = null;
       }
 
-      if (editAssigneeId) {
+      if (editAssigneeId && editAssigneeId !== "none") {
         updateData.assigneeId = editAssigneeId;
       } else {
         updateData.assigneeId = null;
@@ -307,31 +307,33 @@ export function TaskDetailsDialog({ task, open, onOpenChange, projects = [], mem
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="w-[95vw] sm:max-w-[600px] max-h-[95vh] overflow-y-auto p-4 sm:p-6">
           <DialogHeader>
-            <div className="flex items-center justify-between pr-8">
-              <DialogTitle className="text-xl">
-                {isEditMode ? (
-                  <Input
-                    value={editTitle}
-                    onChange={(e) => setEditTitle(e.target.value)}
-                    className="text-lg font-medium"
-                    placeholder="Título de la tarea"
-                  />
-                ) : (
-                  task.title
-                )}
-              </DialogTitle>
-              {!isEditMode && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="lg:hidden absolute right-4 top-4"
-                  onClick={handleStartEdit}
-                >
-                  <Edit2 className="h-4 w-4" />
-                </Button>
+            <DialogTitle className="text-xl pr-20">
+              {isEditMode ? (
+                <Input
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  className="text-lg font-medium"
+                  placeholder="Título de la tarea"
+                />
+              ) : (
+                task.title
               )}
-            </div>
+            </DialogTitle>
           </DialogHeader>
+
+          {/* Edit button - mobile only */}
+          {!isEditMode && (
+            <div className="lg:hidden absolute right-10 top-4">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleStartEdit}
+                className="h-8 w-8"
+              >
+                <Edit2 className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
 
           <div className="space-y-6">
             {/* Status and Priority */}
@@ -409,7 +411,7 @@ export function TaskDetailsDialog({ task, open, onOpenChange, projects = [], mem
                       <SelectValue placeholder="Sin proyecto" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Sin proyecto</SelectItem>
+                      <SelectItem value="none">Sin proyecto</SelectItem>
                       {projects.map((project) => (
                         <SelectItem key={project.id} value={project.id}>
                           {project.name}
@@ -427,7 +429,7 @@ export function TaskDetailsDialog({ task, open, onOpenChange, projects = [], mem
                       <SelectValue placeholder="Sin asignar" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Sin asignar</SelectItem>
+                      <SelectItem value="none">Sin asignar</SelectItem>
                       {members.map((member) => (
                         <SelectItem key={member.id} value={member.id}>
                           {member.name}
