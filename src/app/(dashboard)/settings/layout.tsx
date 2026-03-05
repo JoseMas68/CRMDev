@@ -27,6 +27,10 @@ const sidebarNavItems = [
         href: "/settings/api-keys",
     },
     {
+        title: "AI Assistant",
+        href: "/settings/ai",
+    },
+    {
         title: "Telegram",
         href: "/settings/telegram",
     }

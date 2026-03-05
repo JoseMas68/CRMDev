@@ -6,14 +6,29 @@ export const runtime = "nodejs";
 
 // Schema para validar request (más permisivo para n8n)
 const linkRequestSchema = z.object({
-  token: z.string().regex(/^TG-[A-Z0-9]+$/, "Invalid token format"),
+  token: z.string().transform(val => {
+    // Limpiar el token si n8n envía el prefijo =
+    let cleaned = val.trim();
+    if (cleaned.startsWith('=')) {
+      cleaned = cleaned.substring(1);
+    }
+    return cleaned;
+  }).refine(val => /^TG-[A-Z0-9]+$/.test(val), "Invalid token format"),
   telegramUserId: z.union([z.string(), z.number(), z.bigint()]).transform(val => {
     // Convertir cualquier formato a BigInt
     if (typeof val === 'bigint') return val;
     if (typeof val === 'string') return BigInt(val);
     return BigInt(val);
   }),
-  telegramUsername: z.string().optional(),
+  telegramUsername: z.string().optional().transform(val => {
+    // Limpiar username si n8n envía el prefijo =
+    if (!val) return val;
+    let cleaned = val.trim();
+    if (cleaned.startsWith('=')) {
+      cleaned = cleaned.substring(1);
+    }
+    return cleaned;
+  }),
   telegramChatId: z.union([z.string(), z.number(), z.bigint()]).optional().transform(val => {
     if (!val) return null;
     if (typeof val === 'bigint') return val;

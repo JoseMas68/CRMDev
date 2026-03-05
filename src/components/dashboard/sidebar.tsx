@@ -20,6 +20,8 @@ import {
   Ticket,
   SidebarOpen,
   SidebarClose,
+  Bot,
+  Sparkles,
 } from "lucide-react";
 import { cn, getInitials } from "@/lib/utils";
 import { useSidebarStore } from "@/store/sidebar-store";
@@ -96,6 +98,11 @@ const navigation = [
     name: "Soporte",
     href: "/support",
     icon: Ticket,
+  },
+  {
+    name: "AI Chat",
+    href: "/chat",
+    icon: Bot,
   },
 ];
 

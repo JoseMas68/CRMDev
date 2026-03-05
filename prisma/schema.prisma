@@ -136,6 +136,9 @@ model Organization {
   // API Keys (MCP Integrations)
   apiKeys               ApiKey[]
 
+  // AI Settings
+  openaiApiKey          String?
+
   // Telegram Integrations (Multi-tenant bot)
   telegramLinkTokens     TelegramLinkToken[]
   telegramConnections    TelegramConnection[]
