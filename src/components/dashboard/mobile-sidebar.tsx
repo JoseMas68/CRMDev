@@ -22,7 +22,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { signOut } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { UserBadge } from "@/components/ui/user-badge";
 import { useRouter } from "next/navigation";
@@ -145,16 +144,10 @@ export function MobileSidebar({ user, children }: MobileSidebarProps) {
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b">
-            <div className="flex items-center gap-3">
-              <Avatar className="h-10 w-10">
-                <AvatarImage src={user.avatarUrl || user.image || undefined} />
-                <AvatarFallback className="text-sm font-medium bg-primary text-primary-foreground">
-                  {getInitials(user.name)}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex flex-col">
-                <span className="font-medium text-sm">{user.name}</span>
-                <span className="text-xs text-muted-foreground truncate max-w-[150px]">
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              <div className="flex flex-col min-w-0">
+                <span className="font-medium text-sm truncate">{user.name}</span>
+                <span className="text-xs text-muted-foreground truncate">
                   {user.email}
                 </span>
               </div>
@@ -278,13 +271,4 @@ export function MobileSidebar({ user, children }: MobileSidebarProps) {
       </SheetContent>
     </Sheet>
   );
-}
-
-function getInitials(name: string) {
-  return name
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
 }
