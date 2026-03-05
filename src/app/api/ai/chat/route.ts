@@ -288,6 +288,8 @@ Ejemplos de respuestas:
       const toolResults: any[] = [];
 
       for (const toolCall of responseMessage.tool_calls) {
+        if (toolCall.type !== 'function') continue;
+
         const functionName = toolCall.function.name;
         const functionArgs = JSON.parse(toolCall.function.arguments);
 
@@ -323,10 +325,13 @@ Ejemplos de respuestas:
 
       return NextResponse.json({
         message: finalResponse.choices[0].message.content,
-        toolCalls: toolResults.map((tr) => ({
-          name: responseMessage.tool_calls?.find((tc) => tc.id === tr.tool_call_id)?.function.name,
-          result: JSON.parse(tr.content),
-        })),
+        toolCalls: toolResults.map((tr) => {
+          const toolCall = responseMessage.tool_calls?.find((tc) => tc.id === tr.tool_call_id);
+          return {
+            name: toolCall?.type === 'function' ? toolCall.function.name : undefined,
+            result: JSON.parse(tr.content),
+          };
+        }),
       });
     }
 

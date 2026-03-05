@@ -35,8 +35,8 @@ export default async function AiSettingsPage() {
   const canManageAI = member?.role === "owner" || member?.role === "admin";
 
   const apiKeyResult = await getOpenAIApiKey();
-  const hasApiKey = apiKeyResult.success ? apiKeyResult.data?.hasApiKey : false;
-  const preview = apiKeyResult.success ? apiKeyResult.data?.preview : null;
+  const hasApiKey = apiKeyResult.success ? (apiKeyResult.data?.hasApiKey ?? false) : false;
+  const preview = apiKeyResult.success ? (apiKeyResult.data?.preview ?? null) : null;
 
   return (
     <div className="space-y-6">
