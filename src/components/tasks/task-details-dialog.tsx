@@ -149,6 +149,7 @@ export function TaskDetailsDialog({ task, open, onOpenChange, projects = [], mem
 
   // Initialize edit form when entering edit mode
   function handleStartEdit() {
+    if (!task) return;
     setEditTitle(task.title);
     setEditDescription(task.description || "");
     setEditPriority(task.priority);
