@@ -181,8 +181,10 @@ export function OrganizationsClient() {
                 <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
                     <DialogTrigger asChild>
                         <Button size="sm">
-                            <Plus className="mr-2 h-4 w-4" />
-                            Nueva Organización
+                            <span className="flex items-center gap-2">
+                                <Plus className="h-4 w-4" />
+                                <span>Nueva Organización</span>
+                            </span>
                         </Button>
                     </DialogTrigger>
                     <DialogContent>

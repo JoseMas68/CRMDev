@@ -151,8 +151,10 @@ export default async function ClientPage({ params }: ClientPageProps) {
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button variant="destructive">
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Eliminar
+                  <span className="flex items-center gap-2">
+                    <Trash2 className="h-4 w-4" />
+                    <span>Eliminar</span>
+                  </span>
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
