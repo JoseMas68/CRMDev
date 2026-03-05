@@ -159,7 +159,7 @@ export async function getTasks(
 /**
  * Get tasks grouped by status for Kanban view
  */
-export async function getTasksForKanban(projectId?: string): Promise<
+export async function getTasksForKanban(projectId?: string, assigneeId?: string): Promise<
   ActionResponse<{
     columns: Array<{
       id: string;
@@ -196,6 +196,10 @@ export async function getTasksForKanban(projectId?: string): Promise<
 
     if (projectId) {
       where.projectId = projectId;
+    }
+
+    if (assigneeId) {
+      where.assigneeId = assigneeId;
     }
 
     const tasks = await db.task.findMany({

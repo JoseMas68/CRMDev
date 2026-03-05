@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { TasksKanban } from "@/components/tasks/tasks-kanban";
 import { TaskStats } from "@/components/tasks/task-stats";
 import { CreateTaskDialog } from "@/components/tasks/create-task-dialog";
+import { MemberFilter } from "@/components/tasks/member-filter";
 
 export const metadata: Metadata = {
   title: "Tareas",
@@ -20,6 +21,7 @@ export const metadata: Metadata = {
 interface TasksPageProps {
   searchParams: Promise<{
     projectId?: string;
+    assigneeId?: string;
   }>;
 }
 
@@ -34,17 +36,19 @@ export default async function TasksPage({ searchParams }: TasksPageProps) {
 
   const params = await searchParams;
   const projectId = params.projectId;
+  const assigneeId = params.assigneeId;
 
   // Fetch data in parallel
   const [kanbanResult, statsResult, projectsResult, membersResult] =
     await Promise.all([
-      getTasksForKanban(projectId),
+      getTasksForKanban(projectId, assigneeId),
       getTaskStats(),
       getProjects({ limit: 100 }),
       // Get organization members for assignee selection
       prisma.member.findMany({
         where: { organizationId: session.session.activeOrganizationId },
         select: {
+          id: true,
           user: {
             select: { id: true, name: true, image: true },
           },
@@ -55,15 +59,18 @@ export default async function TasksPage({ searchParams }: TasksPageProps) {
   const columns = kanbanResult.success ? kanbanResult.data.columns : [];
   const stats = statsResult.success ? statsResult.data : null;
   const projects = projectsResult.success ? projectsResult.data.projects : [];
-  const members = membersResult.map((m) => m.user);
+  const members = membersResult.map((m) => ({ id: m.id, name: m.user.name, image: m.user.image }));
 
   return (
     <div className="space-y-4 sm:space-y-6">
       {/* Actions bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <p className="text-sm text-muted-foreground hidden sm:block">
-          {stats ? `${stats.myTasks} asignadas a ti` : ""}
-        </p>
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+          <p className="text-sm text-muted-foreground hidden sm:block">
+            {stats ? `${stats.myTasks} asignadas a ti` : ""}
+          </p>
+          <MemberFilter members={members} currentMemberId={assigneeId} />
+        </div>
 
         <div className="flex items-center gap-2 ml-auto">
           <CreateTaskDialog
@@ -84,8 +91,12 @@ export default async function TasksPage({ searchParams }: TasksPageProps) {
         </div>
       </div>
 
-      {/* Stats */}
-      {stats && <TaskStats stats={stats} />}
+      {/* Stats - desktop only */}
+      {stats && (
+        <div className="hidden sm:block">
+          <TaskStats stats={stats} />
+        </div>
+      )}
 
       {/* Kanban Board */}
       <TasksKanban
