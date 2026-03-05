@@ -300,6 +300,8 @@ export function TasksKanban({
         task={selectedTask}
         open={detailsOpen}
         onOpenChange={setDetailsOpen}
+        projects={projects}
+        members={members}
       />
     </>
   );

@@ -15,6 +15,8 @@ import {
   Trash2,
   X,
   ArrowUpDown,
+  Edit2,
+  Save,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -68,10 +70,23 @@ interface Task {
   commitHash?: string | null;
 }
 
+interface Project {
+  id: string;
+  name: string;
+}
+
+interface Member {
+  id: string;
+  name: string;
+  image: string | null;
+}
+
 interface TaskDetailsDialogProps {
   task: Task | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  projects?: Project[];
+  members?: Member[];
 }
 
 const priorityColors: Record<string, string> = {
@@ -104,11 +119,22 @@ const statusColors: Record<string, string> = {
   CANCELLED: "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300",
 };
 
-export function TaskDetailsDialog({ task, open, onOpenChange }: TaskDetailsDialogProps) {
+export function TaskDetailsDialog({ task, open, onOpenChange, projects = [], members = [] }: TaskDetailsDialogProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+
+  // Edit form state
+  const [editTitle, setEditTitle] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+  const [editPriority, setEditPriority] = useState("");
+  const [editStatus, setEditStatus] = useState("");
+  const [editDueDate, setEditDueDate] = useState("");
+  const [editProjectId, setEditProjectId] = useState("");
+  const [editAssigneeId, setEditAssigneeId] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
 
   // Time Tracking State
   const [showTimeDialog, setShowTimeDialog] = useState(false);
@@ -120,6 +146,66 @@ export function TaskDetailsDialog({ task, open, onOpenChange }: TaskDetailsDialo
   if (!task) return null;
 
   const isOverdue = task.dueDate && new Date(task.dueDate) < new Date() && task.status !== "DONE";
+
+  // Initialize edit form when entering edit mode
+  function handleStartEdit() {
+    setEditTitle(task.title);
+    setEditDescription(task.description || "");
+    setEditPriority(task.priority);
+    setEditStatus(task.status);
+    setEditDueDate(task.dueDate ? task.dueDate.toISOString().split('T')[0] : "");
+    setEditProjectId(task.project?.id || "");
+    setEditAssigneeId(task.assignee?.id || "");
+    setIsEditMode(true);
+  }
+
+  function handleCancelEdit() {
+    setIsEditMode(false);
+  }
+
+  async function handleSaveEdit() {
+    if (!task) return;
+    setIsSaving(true);
+    try {
+      const updateData: any = {
+        title: editTitle,
+        description: editDescription || null,
+        priority: editPriority,
+        status: editStatus,
+      };
+
+      if (editDueDate) {
+        updateData.dueDate = new Date(editDueDate);
+      } else {
+        updateData.dueDate = null;
+      }
+
+      if (editProjectId) {
+        updateData.projectId = editProjectId;
+      } else {
+        updateData.projectId = null;
+      }
+
+      if (editAssigneeId) {
+        updateData.assigneeId = editAssigneeId;
+      } else {
+        updateData.assigneeId = null;
+      }
+
+      const result = await updateTask(task.id, updateData);
+      if (result.success) {
+        toast.success("Tarea actualizada");
+        setIsEditMode(false);
+        router.refresh();
+      } else {
+        toast.error(result.error);
+      }
+    } catch (error) {
+      toast.error("Error al actualizar tarea");
+    } finally {
+      setIsSaving(false);
+    }
+  }
 
   async function handleMarkAsDone() {
     if (!task) return;
@@ -220,84 +306,217 @@ export function TaskDetailsDialog({ task, open, onOpenChange }: TaskDetailsDialo
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="w-[95vw] sm:max-w-[600px] max-h-[95vh] overflow-y-auto p-4 sm:p-6">
           <DialogHeader>
-            <DialogTitle className="text-xl pr-8">{task.title}</DialogTitle>
+            <div className="flex items-center justify-between pr-8">
+              <DialogTitle className="text-xl">
+                {isEditMode ? (
+                  <Input
+                    value={editTitle}
+                    onChange={(e) => setEditTitle(e.target.value)}
+                    className="text-lg font-medium"
+                    placeholder="Título de la tarea"
+                  />
+                ) : (
+                  task.title
+                )}
+              </DialogTitle>
+              {!isEditMode && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="lg:hidden absolute right-4 top-4"
+                  onClick={handleStartEdit}
+                >
+                  <Edit2 className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
           </DialogHeader>
 
           <div className="space-y-6">
             {/* Status and Priority */}
             <div className="flex flex-wrap gap-2">
-              <Badge className={cn("text-sm", statusColors[task.status])}>
-                {statusLabels[task.status]}
-              </Badge>
-              <Badge className={cn("text-sm", priorityColors[task.priority])}>
-                Prioridad: {priorityLabels[task.priority]}
-              </Badge>
+              {isEditMode ? (
+                <>
+                  <Select value={editStatus} onValueChange={setEditStatus}>
+                    <SelectTrigger className="w-[140px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="TODO">Por Hacer</SelectItem>
+                      <SelectItem value="IN_PROGRESS">En Progreso</SelectItem>
+                      <SelectItem value="IN_REVIEW">En Revisión</SelectItem>
+                      <SelectItem value="DONE">Completada</SelectItem>
+                      <SelectItem value="CANCELLED">Cancelada</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Select value={editPriority} onValueChange={setEditPriority}>
+                    <SelectTrigger className="w-[140px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="LOW">Baja</SelectItem>
+                      <SelectItem value="MEDIUM">Media</SelectItem>
+                      <SelectItem value="HIGH">Alta</SelectItem>
+                      <SelectItem value="URGENT">Urgente</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </>
+              ) : (
+                <>
+                  <Badge className={cn("text-sm", statusColors[task.status])}>
+                    {statusLabels[task.status]}
+                  </Badge>
+                  <Badge className={cn("text-sm", priorityColors[task.priority])}>
+                    Prioridad: {priorityLabels[task.priority]}
+                  </Badge>
+                </>
+              )}
             </div>
 
             {/* Description */}
-            {task.description && (
+            {isEditMode ? (
               <div>
-                <h4 className="text-sm font-medium mb-2">Descripcion</h4>
-                <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                  {task.description}
-                </p>
+                <Label htmlFor="description">Descripción</Label>
+                <Textarea
+                  id="description"
+                  value={editDescription}
+                  onChange={(e) => setEditDescription(e.target.value)}
+                  placeholder="Describe la tarea..."
+                  className="mt-2"
+                  rows={3}
+                />
+              </div>
+            ) : (
+              task.description && (
+                <div>
+                  <h4 className="text-sm font-medium mb-2">Descripción</h4>
+                  <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                    {task.description}
+                  </p>
+                </div>
+              )
+            )}
+
+            {/* Editable Fields */}
+            {isEditMode && (
+              <div className="space-y-4">
+                {/* Project */}
+                <div>
+                  <Label htmlFor="project">Proyecto</Label>
+                  <Select value={editProjectId} onValueChange={setEditProjectId}>
+                    <SelectTrigger id="project" className="mt-2">
+                      <SelectValue placeholder="Sin proyecto" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">Sin proyecto</SelectItem>
+                      {projects.map((project) => (
+                        <SelectItem key={project.id} value={project.id}>
+                          {project.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Assignee */}
+                <div>
+                  <Label htmlFor="assignee">Asignado a</Label>
+                  <Select value={editAssigneeId} onValueChange={setEditAssigneeId}>
+                    <SelectTrigger id="assignee" className="mt-2">
+                      <SelectValue placeholder="Sin asignar" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">Sin asignar</SelectItem>
+                      {members.map((member) => (
+                        <SelectItem key={member.id} value={member.id}>
+                          {member.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Due Date */}
+                <div>
+                  <Label htmlFor="dueDate">Fecha límite</Label>
+                  <Input
+                    id="dueDate"
+                    type="date"
+                    value={editDueDate}
+                    onChange={(e) => setEditDueDate(e.target.value)}
+                    className="mt-2"
+                  />
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-2 pt-2">
+                  <Button onClick={handleSaveEdit} disabled={isSaving} className="flex-1">
+                    <Save className="h-4 w-4 mr-2" />
+                    {isSaving ? "Guardando..." : "Guardar"}
+                  </Button>
+                  <Button variant="outline" onClick={handleCancelEdit} disabled={isSaving}>
+                    Cancelar
+                  </Button>
+                </div>
               </div>
             )}
 
-            {/* Details Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* Project */}
-              {task.project && (
-                <div className="flex items-center gap-2">
-                  <FolderKanban className="h-4 w-4 text-muted-foreground" />
-                  <div>
-                    <p className="text-xs text-muted-foreground">Proyecto</p>
-                    <p className="text-sm font-medium">{task.project.name}</p>
+            {/* Details Grid - View Mode Only */}
+            {!isEditMode && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Project */}
+                {task.project && (
+                  <div className="flex items-center gap-2">
+                    <FolderKanban className="h-4 w-4 text-muted-foreground" />
+                    <div>
+                      <p className="text-xs text-muted-foreground">Proyecto</p>
+                      <p className="text-sm font-medium">{task.project.name}</p>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {/* Assignee */}
-              {task.assignee && (
-                <div className="flex items-center gap-2">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src={task.assignee.image || undefined} />
-                    <AvatarFallback>
-                      {task.assignee.name.split(" ").map(n => n[0]).join("").toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Asignado a</p>
-                    <p className="text-sm font-medium">{task.assignee.name}</p>
+                {/* Assignee */}
+                {task.assignee && (
+                  <div className="flex items-center gap-2">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={task.assignee.image || undefined} />
+                      <AvatarFallback>
+                        {task.assignee.name.split(" ").map(n => n[0]).join("").toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Asignado a</p>
+                      <p className="text-sm font-medium">{task.assignee.name}</p>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {/* Due Date */}
-              {task.dueDate && (
-                <div className="flex items-center gap-2">
-                  <Calendar className={cn("h-4 w-4", isOverdue ? "text-destructive" : "text-muted-foreground")} />
-                  <div>
-                    <p className="text-xs text-muted-foreground">Fecha limite</p>
-                    <p className={cn("text-sm font-medium", isOverdue && "text-destructive")}>
-                      {formatDate(task.dueDate)}
-                      {isOverdue && " (Vencida)"}
-                    </p>
+                {/* Due Date */}
+                {task.dueDate && (
+                  <div className="flex items-center gap-2">
+                    <Calendar className={cn("h-4 w-4", isOverdue ? "text-destructive" : "text-muted-foreground")} />
+                    <div>
+                      <p className="text-xs text-muted-foreground">Fecha límite</p>
+                      <p className={cn("text-sm font-medium", isOverdue && "text-destructive")}>
+                        {formatDate(task.dueDate)}
+                        {isOverdue && " (Vencida)"}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {/* Subtasks */}
-              {task._count.subtasks > 0 && (
-                <div className="flex items-center gap-2">
-                  <Tag className="h-4 w-4 text-muted-foreground" />
-                  <div>
-                    <p className="text-xs text-muted-foreground">Subtareas</p>
-                    <p className="text-sm font-medium">{task._count.subtasks}</p>
+                {/* Subtasks */}
+                {task._count.subtasks > 0 && (
+                  <div className="flex items-center gap-2">
+                    <Tag className="h-4 w-4 text-muted-foreground" />
+                    <div>
+                      <p className="text-xs text-muted-foreground">Subtareas</p>
+                      <p className="text-sm font-medium">{task._count.subtasks}</p>
+                    </div>
                   </div>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
+            )}
 
             {/* GitHub Integration */}
             {(task.issueUrl || task.prUrl || task.commitHash) && (
@@ -354,92 +573,96 @@ export function TaskDetailsDialog({ task, open, onOpenChange }: TaskDetailsDialo
               </div>
             )}
 
-            {/* Status Changer - Mobile */}
-            <div className="lg:hidden pt-4 border-t">
-              <div className="space-y-2">
-                <Label htmlFor="status-select" className="flex items-center gap-2">
-                  <ArrowUpDown className="h-4 w-4" />
-                  Cambiar Estado
-                </Label>
-                <Select
-                  value={task.status}
-                  onValueChange={handleStatusChange}
-                  disabled={isUpdatingStatus}
-                >
-                  <SelectTrigger id="status-select" className="w-full">
-                    <SelectValue placeholder="Seleccionar estado" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="TODO">
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-gray-500" />
-                        Por Hacer
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="IN_PROGRESS">
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-blue-500" />
-                        En Progreso
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="IN_REVIEW">
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-yellow-500" />
-                        En Revisión
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="DONE">
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-green-500" />
-                        Completada
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="CANCELLED">
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-red-500" />
-                        Cancelada
-                      </div>
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-                {isUpdatingStatus && (
-                  <p className="text-xs text-muted-foreground">Actualizando estado...</p>
-                )}
+            {/* Status Changer - Mobile (View Mode Only) */}
+            {!isEditMode && (
+              <div className="lg:hidden pt-4 border-t">
+                <div className="space-y-2">
+                  <Label htmlFor="status-select" className="flex items-center gap-2">
+                    <ArrowUpDown className="h-4 w-4" />
+                    Cambiar Estado
+                  </Label>
+                  <Select
+                    value={task.status}
+                    onValueChange={handleStatusChange}
+                    disabled={isUpdatingStatus}
+                  >
+                    <SelectTrigger id="status-select" className="w-full">
+                      <SelectValue placeholder="Seleccionar estado" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="TODO">
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full bg-gray-500" />
+                          Por Hacer
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="IN_PROGRESS">
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full bg-blue-500" />
+                          En Progreso
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="IN_REVIEW">
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full bg-yellow-500" />
+                          En Revisión
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="DONE">
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full bg-green-500" />
+                          Completada
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="CANCELLED">
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full bg-red-500" />
+                          Cancelada
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {isUpdatingStatus && (
+                    <p className="text-xs text-muted-foreground">Actualizando estado...</p>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
 
-            {/* Actions */}
-            <div className="flex flex-col sm:flex-row gap-2 pt-4 border-t">
-              <Button
-                variant="outline"
-                onClick={() => setShowTimeDialog(true)}
-                disabled={isLoading}
-                className="w-full sm:w-auto text-blue-600 border-blue-200 hover:bg-blue-50 dark:text-blue-400 dark:border-blue-900 dark:hover:bg-blue-900/50"
-              >
-                <Clock className="h-4 w-4 sm:mr-0 mr-2" />
-                <span className="sm:hidden">Añadir Tiempo</span>
-              </Button>
-
-              {task.status !== "DONE" && (
+            {/* Actions - View Mode Only */}
+            {!isEditMode && (
+              <div className="flex flex-col sm:flex-row gap-2 pt-4 border-t">
                 <Button
-                  onClick={handleMarkAsDone}
+                  variant="outline"
+                  onClick={() => setShowTimeDialog(true)}
                   disabled={isLoading}
-                  className="flex-1"
+                  className="w-full sm:w-auto text-blue-600 border-blue-200 hover:bg-blue-50 dark:text-blue-400 dark:border-blue-900 dark:hover:bg-blue-900/50"
                 >
-                  <CheckCircle2 className="mr-2 h-4 w-4" />
-                  Completar Tarea
+                  <Clock className="h-4 w-4 sm:mr-0 mr-2" />
+                  <span className="sm:hidden">Añadir Tiempo</span>
                 </Button>
-              )}
-              <Button
-                variant="destructive"
-                onClick={() => setShowDeleteDialog(true)}
-                disabled={isLoading}
-                className="w-full sm:w-auto"
-              >
-                <Trash2 className="h-4 w-4 sm:mr-0 mr-2" />
-                <span className="sm:hidden">Eliminar</span>
-              </Button>
-            </div>
+
+                {task.status !== "DONE" && (
+                  <Button
+                    onClick={handleMarkAsDone}
+                    disabled={isLoading}
+                    className="flex-1"
+                  >
+                    <CheckCircle2 className="mr-2 h-4 w-4" />
+                    Completar Tarea
+                  </Button>
+                )}
+                <Button
+                  variant="destructive"
+                  onClick={() => setShowDeleteDialog(true)}
+                  disabled={isLoading}
+                  className="w-full sm:w-auto"
+                >
+                  <Trash2 className="h-4 w-4 sm:mr-0 mr-2" />
+                  <span className="sm:hidden">Eliminar</span>
+                </Button>
+              </div>
+            )}
           </div>
         </DialogContent>
       </Dialog>
@@ -450,7 +673,7 @@ export function TaskDetailsDialog({ task, open, onOpenChange }: TaskDetailsDialo
           <AlertDialogHeader>
             <AlertDialogTitle>Eliminar tarea</AlertDialogTitle>
             <AlertDialogDescription>
-              Estas seguro de que quieres eliminar &quot;{task.title}&quot;?
+              Estas seguro de que quieres eliminar "{task.title}"?
               Esta accion no se puede deshacer.
             </AlertDialogDescription>
           </AlertDialogHeader>
