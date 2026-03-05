@@ -54,7 +54,7 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
       {/* Actions bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="hidden sm:block">
-          <ProjectStats stats={stats} />
+          {stats && <ProjectStats stats={stats} />}
         </div>
 
         <CreateProjectDialog
