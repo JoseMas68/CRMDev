@@ -313,27 +313,22 @@ export function DashboardSidebar({ user, activeOrgId }: SidebarProps) {
             </ul>
           </nav>
 
-          {/* User section */}
-          <div className="-mx-2 mt-auto border-t border-border pt-4">
+          {/* User section - Oculto en desktop (ya está en el header) */}
+          <div className="lg:hidden -mx-2 mt-auto border-t border-border pt-4">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
-                  className={cn("w-full justify-start h-auto py-2 hover:bg-muted/50", isCollapsed && "justify-center px-0")}
+                  className="w-full justify-start h-auto py-2 hover:bg-muted/50"
                 >
-                  <UserBadge user={user} size="md" className={cn(!isCollapsed && "mr-3")} />
-                  {!isCollapsed && (
-                    <div className="text-left min-w-0 flex-1">
-                      <p className="text-sm font-medium truncate">{user.name}</p>
-                      <p className="text-xs text-muted-foreground truncate">
-                        {user.isVerifiedDev ? "Dev Profesional" : user.email}
-                      </p>
-                    </div>
-                  )}
+                  <UserBadge user={user} size="md" className="mr-3" showName />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56" align={isCollapsed ? "start" : "end"} side={isCollapsed ? "right" : "bottom"}>
-                <DropdownMenuLabel>Mi Cuenta</DropdownMenuLabel>
+              <DropdownMenuContent className="w-56" align="end" side="bottom">
+                <DropdownMenuLabel>
+                  <p className="text-sm font-medium">{user.name}</p>
+                  <p className="text-xs text-muted-foreground">{user.email}</p>
+                </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
                   <Link href="/settings/profile">
@@ -352,6 +347,21 @@ export function DashboardSidebar({ user, activeOrgId }: SidebarProps) {
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
+
+          {/* Desktop only - Cerrar sesión simple */}
+          {isCollapsed && (
+            <div className="hidden lg:flex -mx-2 mt-auto border-t border-border pt-4">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleSignOut}
+                className="w-full"
+                title="Cerrar Sesión"
+              >
+                <LogOut className="h-5 w-5" />
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     </>

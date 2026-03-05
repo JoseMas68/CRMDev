@@ -51,39 +51,27 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
 
   return (
     <div className="space-y-4 sm:space-y-6">
-      {/* Header - Mobile optimized */}
-      <div className="flex flex-col gap-3 sm:gap-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Proyectos</h1>
-            <p className="text-sm sm:text-base text-muted-foreground mt-1">
-              Gestiona tus proyectos y su progreso
-            </p>
-          </div>
-
-          <CreateProjectDialog
-            clients={clients.map((c) => ({ id: c.id, name: c.name }))}
-          >
-            <Button size="default" className="sm:hidden">
-              <Plus className="h-5 w-5" />
-            </Button>
-          </CreateProjectDialog>
-        </div>
-
+      {/* Actions bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="hidden sm:block">
-          <CreateProjectDialog
-            clients={clients.map((c) => ({ id: c.id, name: c.name }))}
-          >
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              Nuevo Proyecto
-            </Button>
-          </CreateProjectDialog>
+          <ProjectStats stats={stats} />
         </div>
+
+        <CreateProjectDialog
+          clients={clients.map((c) => ({ id: c.id, name: c.name }))}
+        >
+          <Button size="default" className="sm:hidden">
+            <Plus className="h-5 w-5" />
+          </Button>
+          <Button className="hidden sm:flex">
+            <Plus className="mr-2 h-4 w-4" />
+            Nuevo Proyecto
+          </Button>
+        </CreateProjectDialog>
       </div>
 
-      {/* Stats - Hide on mobile to save space */}
-      <div className="hidden sm:block">
+      {/* Mobile stats */}
+      <div className="sm:hidden">
         {stats && <ProjectStats stats={stats} />}
       </div>
 

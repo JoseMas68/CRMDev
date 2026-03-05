@@ -33,26 +33,26 @@ export function ClientsClientView({
 
   return (
     <div className="space-y-4 sm:space-y-6">
-      {/* Header - Mobile optimized */}
-      <div className="flex flex-col gap-3 sm:gap-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Clientes</h1>
-            <p className="text-sm sm:text-base text-muted-foreground mt-1">
-              Gestiona tus clientes, leads y contactos
-            </p>
-          </div>
+      {/* Actions bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <p className="text-sm text-muted-foreground hidden sm:block">
+          {total} cliente{total !== 1 ? "s" : ""}
+        </p>
 
-          {/* Mobile: Icon only button */}
-          <div className="sm:hidden">
-            {children}
-          </div>
+        {/* Mobile: Icon only button */}
+        <div className="sm:hidden">
+          {children}
         </div>
 
         {/* Desktop: Full button */}
         <div className="hidden sm:block">
           {children}
         </div>
+      </div>
+
+      {/* Mobile counter */}
+      <div className="sm:hidden text-center">
+        <p className="text-sm text-muted-foreground">{total} cliente{total !== 1 ? "s" : ""}</p>
       </div>
 
       {/* Table - desktop only */}
