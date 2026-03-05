@@ -162,15 +162,15 @@ export function DashboardHeader({ user }: HeaderProps) {
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
-                <Link href="/settings">
-                  <User className="mr-2 h-4 w-4" />
-                  Mi Perfil
+                <Link href="/settings" className="flex items-center gap-2">
+                  <User className="h-4 w-4" />
+                  <span>Mi Perfil</span>
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link href="/settings">
-                  <Settings className="mr-2 h-4 w-4" />
-                  Configuración
+                <Link href="/settings" className="flex items-center gap-2">
+                  <Settings className="h-4 w-4" />
+                  <span>Configuración</span>
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />

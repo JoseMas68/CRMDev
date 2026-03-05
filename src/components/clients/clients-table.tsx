@@ -286,15 +286,15 @@ export function ClientsTable({
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem asChild>
-                          <Link href={`/clients/${client.id}`} className="cursor-pointer">
-                            <Eye className="mr-2 h-4 w-4" />
-                            Ver
+                          <Link href={`/clients/${client.id}`} className="cursor-pointer flex items-center gap-2">
+                            <Eye className="h-4 w-4" />
+                            <span>Ver</span>
                           </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild>
-                          <Link href={`/clients/${client.id}/edit`} className="cursor-pointer">
-                            <Pencil className="mr-2 h-4 w-4" />
-                            Editar
+                          <Link href={`/clients/${client.id}/edit`} className="cursor-pointer flex items-center gap-2">
+                            <Pencil className="h-4 w-4" />
+                            <span>Editar</span>
                           </Link>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />

@@ -461,15 +461,15 @@ function ProjectCard({
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem asChild>
-                      <Link href={`/projects/${project.id}`}>
-                        <Eye className="mr-2 h-4 w-4" />
-                        Ver detalles
+                      <Link href={`/projects/${project.id}`} className="flex items-center gap-2">
+                        <Eye className="h-4 w-4" />
+                        <span>Ver detalles</span>
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link href={`/projects/${project.id}/edit`}>
-                        <Pencil className="mr-2 h-4 w-4" />
-                        Editar
+                      <Link href={`/projects/${project.id}/edit`} className="flex items-center gap-2">
+                        <Pencil className="h-4 w-4" />
+                        <span>Editar</span>
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />

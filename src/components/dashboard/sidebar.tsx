@@ -252,9 +252,9 @@ export function DashboardSidebar({ user, activeOrgId }: SidebarProps) {
               ))}
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
-                <Link href="/select-org" className="cursor-pointer">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Nueva organización
+                <Link href="/select-org" className="cursor-pointer flex items-center gap-2">
+                  <Plus className="h-4 w-4" />
+                  <span>Nueva organización</span>
                 </Link>
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -331,9 +331,9 @@ export function DashboardSidebar({ user, activeOrgId }: SidebarProps) {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <Link href="/settings/profile">
-                    <Settings className="mr-2 h-4 w-4" />
-                    Configuración
+                  <Link href="/settings/profile" className="flex items-center gap-2">
+                    <Settings className="h-4 w-4" />
+                    <span>Configuración</span>
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
