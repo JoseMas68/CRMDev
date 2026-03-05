@@ -16,6 +16,7 @@ import {
   UserPlus,
   Ticket,
   X,
+  Bot,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -81,6 +82,11 @@ const navigation = [
     name: "Soporte",
     href: "/support",
     icon: Ticket,
+  },
+  {
+    name: "AI Chat",
+    href: "/chat",
+    icon: Bot,
   },
 ];
 
