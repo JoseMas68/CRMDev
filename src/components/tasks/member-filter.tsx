@@ -41,14 +41,14 @@ export function MemberFilter({ members, currentMemberId }: MemberFilterProps) {
   }
 
   return (
-    <div className="flex items-center gap-2">
-      <Users className="h-4 w-4 text-muted-foreground" />
+    <div className="flex items-center gap-2 flex-1 sm:flex-none">
+      <Users className="h-4 w-4 text-muted-foreground flex-shrink-0" />
       <Select
         value={currentMemberId || "all"}
         onValueChange={handleMemberChange}
         disabled={isPending}
       >
-        <SelectTrigger className="w-[180px]">
+        <SelectTrigger className="w-full sm:w-[200px]">
           <SelectValue placeholder="Todos los miembros" />
         </SelectTrigger>
         <SelectContent>
