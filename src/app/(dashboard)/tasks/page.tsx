@@ -71,13 +71,15 @@ export default async function TasksPage({ searchParams }: TasksPageProps) {
             members={members}
             defaultProjectId={projectId}
           >
-            <Button size="default" className="sm:hidden">
-              <Plus className="h-5 w-5" />
-            </Button>
-            <Button className="hidden sm:flex">
-              <Plus className="mr-2 h-4 w-4" />
-              Nueva Tarea
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button size="default" className="sm:hidden">
+                <Plus className="h-5 w-5" />
+              </Button>
+              <Button className="hidden sm:flex">
+                <Plus className="mr-2 h-4 w-4" />
+                Nueva Tarea
+              </Button>
+            </div>
           </CreateTaskDialog>
         </div>
       </div>
