@@ -115,12 +115,14 @@ export function MemberActions({
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="icon" className="h-8 w-8" disabled={isLoading}>
-            {isLoading ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <MoreHorizontal className="h-4 w-4" />
-            )}
-            <span className="sr-only">Acciones</span>
+            <span className="flex items-center justify-center">
+              {isLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <MoreHorizontal className="h-4 w-4" />
+              )}
+              <span className="sr-only">Acciones</span>
+            </span>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
