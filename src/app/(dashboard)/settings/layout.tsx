@@ -30,10 +30,6 @@ const sidebarNavItems = [
         title: "AI Assistant",
         href: "/settings/ai",
     },
-    {
-        title: "Telegram",
-        href: "/settings/telegram",
-    }
 ];
 
 interface SettingsLayoutProps {
