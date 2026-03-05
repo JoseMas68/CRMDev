@@ -222,9 +222,9 @@ export function GitHubSync({ initialConnected = false, initialUsername = null }:
             </div>
           ) : (
             <Button className="w-full" asChild>
-              <a href="/api/auth/signin/github">
-                <Github className="h-4 w-4 mr-2" />
-                Conectar con GitHub
+              <a href="/api/auth/signin/github" className="flex items-center gap-2">
+                <Github className="h-4 w-4" />
+                <span>Conectar con GitHub</span>
               </a>
             </Button>
           )}

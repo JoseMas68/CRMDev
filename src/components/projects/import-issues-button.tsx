@@ -67,9 +67,9 @@ export function ImportIssuesButton({ projectId, repoUrl }: ImportIssuesButtonPro
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
-        <Button variant="outline" size="sm">
-          <GitBranch className="mr-2 h-4 w-4" />
-          Importar Issues
+        <Button variant="outline" size="sm" className="flex items-center gap-2">
+          <GitBranch className="h-4 w-4" />
+          <span>Importar Issues</span>
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
