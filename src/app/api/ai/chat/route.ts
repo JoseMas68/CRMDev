@@ -32,7 +32,7 @@ const tools = [
     type: "function" as const,
     function: {
       name: "create_task",
-      description: "Crear una nueva tarea",
+      description: "Crear una nueva tarea. Opcionalmente puedes asociarla a un proyecto y asignarla a un miembro.",
       parameters: {
         type: "object",
         properties: {
@@ -43,6 +43,14 @@ const tools = [
           description: {
             type: "string",
             description: "Descripción detallada (opcional)",
+          },
+          projectId: {
+            type: "string",
+            description: "ID del proyecto al que asociar la tarea (opcional). Debe obtenerse de list_projects primero",
+          },
+          assigneeId: {
+            type: "string",
+            description: "ID del miembro al que asignar la tarea (opcional). Debe obtenerse de list_members primero",
           },
           priority: {
             type: "string",
@@ -114,6 +122,17 @@ const tools = [
       },
     },
   },
+  {
+    type: "function" as const,
+    function: {
+      name: "list_members",
+      description: "Listar todos los miembros de la organización (para ver quién está disponible)",
+      parameters: {
+        type: "object",
+        properties: {},
+      },
+    },
+  },
 ];
 
 // Ejecutar función de herramienta
@@ -134,6 +153,19 @@ async function executeTool(
           description: true,
           status: true,
           priority: true,
+          dueDate: true,
+          project: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+          assignee: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
         },
         take: 20,
         orderBy: { createdAt: "desc" },
@@ -141,16 +173,48 @@ async function executeTool(
 
     case "create_task": {
       const session = await auth.api.getSession({ headers: await headers() });
+
+      // Verify project exists and belongs to org if provided
+      if (args.projectId) {
+        const project = await db.project.findFirst({
+          where: { id: args.projectId },
+          select: { id: true },
+        });
+        if (!project) {
+          throw new Error("Proyecto no encontrado");
+        }
+      }
+
+      // Verify member exists and belongs to org if provided
+      if (args.assigneeId) {
+        const member = await db.member.findFirst({
+          where: { id: args.assigneeId, organizationId: session?.session?.activeOrganizationId },
+          select: { id: true },
+        });
+        if (!member) {
+          throw new Error("Miembro no encontrado en tu organización");
+        }
+      }
+
       return await db.task.create({
         data: {
           title: args.title,
           description: args.description,
-          status: args.status || "TODO",
+          projectId: args.projectId || null,
+          assigneeId: args.assigneeId || null,
+          status: "TODO",
           priority: args.priority || "MEDIUM",
           organizationId: session?.session?.activeOrganizationId || "",
           creatorId: session?.user?.id || "",
         },
-        select: { id: true, title: true, status: true, priority: true },
+        select: {
+          id: true,
+          title: true,
+          status: true,
+          priority: true,
+          project: { select: { name: true } },
+          assignee: { select: { name: true } },
+        },
       });
     }
 
@@ -165,6 +229,11 @@ async function executeTool(
           status: true,
           progress: true,
           type: true,
+          client: {
+            select: {
+              name: true,
+            },
+          },
         },
         take: 20,
         orderBy: { createdAt: "desc" },
@@ -198,6 +267,23 @@ async function executeTool(
         },
         take: 20,
         orderBy: { createdAt: "desc" },
+      });
+
+    case "list_members":
+      return await db.member.findMany({
+        select: {
+          id: true,
+          role: true,
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+        },
+        take: 50,
+        orderBy: { createdAt: "asc" },
       });
 
     default:
@@ -250,22 +336,79 @@ export async function POST(req: NextRequest) {
     const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
       {
         role: "system",
-        content: `Eres un asistente útil para un CRM (Customer Relationship Management).
+        content: `Eres un asistente inteligente para CRMDev, un sistema de gestión de proyectos y tareas.
 
-Tu objetivo es ayudar al usuario a gestionar sus tareas, proyectos y clientes usando lenguaje natural.
+🎯 TU OBJETIVO:
+Ayudar al usuario a gestionar tareas, proyectos, clientes y miembros del equipo usando lenguaje natural.
 
-INSTRUCCIONES IMPORTANTES:
-- Siempre responde en el mismo idioma que el usuario (español, inglés, etc.)
-- Sé conciso y directo
-- Cuando crees algo, confirma con un ✅
-- Cuando listes elementos, usa formato numeral
-- Si el usuario pregunta algo que no requiere herramientas, responde directamente
-- NO inventes datos que no existen
+📊 ESTRUCTURA DEL CRM:
+- CLIENTES: Leads, prospectos y clientes que la empresa gestiona
+- PROYECTOS: Trabajos organizados por cliente (web, apps, marketing, etc.)
+- TAREAS: Actividades específicas que pueden tener proyecto y asignatario
+- MIEMBROS: Personas del equipo que pueden ser asignadas a tareas
 
-Ejemplos de respuestas:
-- "Tienes 5 tareas pendientes:"
-- "✅ Tarea creada: Llamar a Juan"
-- "No hay proyectos con ese estado"`,
+🔗 RELACIONES IMPORTANTES:
+- Los PROYECTOS agrupan TAREAS relacionadas
+- Las TAREAS tienen un ASIGNADO (assignee) que es un MIEMBRO del equipo
+- Las tareas pueden tener proyecto, asignatario, ambos, o ninguno
+- Para asignar una tarea, necesitas el ID del miembro de list_members
+
+⚠️ REGLAS DE ORO:
+
+1. ANTES de crear o asignar tareas:
+   - Usa list_projects para ver proyectos disponibles
+   - Usa list_members para ver miembros disponibles
+   - Usa list_tasks para ver asignaciones actuales
+
+2. Si el usuario pregunta "¿Quién está asignado a X?" o "¿Qué tareas tiene Juan?":
+   - PRIMERO: list_members para obtener IDs y nombres
+   - SEGUNDO: list_tasks para ver tareas con sus asignados
+   - ANALIZA: qué tareas tiene cada miembro
+
+3. Si el usuario dice "Asignar tarea a Juan" o "Juan se encarga de...":
+   - Busca a Juan en list_members → obtener su ID
+   - Usa ese ID como assigneeId en create_task
+
+4. Para detectar carga de trabajo:
+   - list_tasks muestra todas las tareas con sus asignados
+   - Cuenta cuántas tareas tiene cada miembro
+   - Reporta quién está sobrecargado o disponible
+
+5. SIEMPRE responde en el mismo idioma del usuario (español, inglés, etc.)
+
+📝 EJEMPLOS DE INTERACCIÓN:
+
+Usuario: "¿Qué tareas tiene Juan?"
+Asistente:
+1. list_members → encontrar ID de Juan
+2. list_tasks → ver todas las tareas con asignados
+3. Filtrar tareas donde assignee.name es "Juan"
+4. "Juan tiene 3 tareas: Fix bug login, Revisar PR #42, Actualizar docs"
+
+Usuario: "¿Quiénes están disponibles? ¿Quién tiene menos tareas?"
+Asistente:
+1. list_tasks → ver todas las tareas con asignados
+2. Contar tareas por asignado
+3. "María tiene 2 tareas, Juan tiene 5, Pedro no tiene tareas asignadas"
+4. "Pedro está más disponible"
+
+Usuario: "Asignar la tarea de arreglar el carrito a María"
+Asistente:
+1. list_members → buscar a María, obtener su ID
+2. create_task con assigneeId de María
+3. "✅ Tarea creada: Arreglar carrito (asignada a María)"
+
+Usuario: "Crear tarea urgente para el proyecto E-commerce: revisar stock"
+Asistente:
+1. list_projects → buscar "E-commerce", obtener ID
+2. list_members → ver quién está disponible
+3. create_task con projectId y assigneeId
+4. "✅ Tarea creada: Revisar stock (E-commerce, asignada a Pedro)"
+
+💡 CONSEJOS:
+- Siempre muestra el NOMBRE del asignado, no solo el ID
+- Sé específico: "Juan tiene 5 tareas" es mejor que "Hay tareas asignadas"
+- Si alguien está sobrecargado, sugiere redistribuir`,
       },
       ...history,
       { role: "user", content: message },
