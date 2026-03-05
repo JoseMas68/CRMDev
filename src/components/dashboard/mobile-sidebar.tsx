@@ -17,6 +17,7 @@ import {
   Ticket,
   X,
   Bot,
+  Menu,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -123,21 +124,8 @@ export function MobileSidebar({ user, children }: MobileSidebarProps) {
         {children ? (
           children
         ) : (
-          <Button variant="ghost" size="icon" className="lg:hidden">
-            <svg
-              className="h-6 w-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 6h16M4 12h16M4 18h16"
-              />
-            </svg>
-            <span className="sr-only">Abrir menú</span>
+          <Button variant="ghost" size="icon" className="lg:hidden" aria-label="Abrir menú">
+            <Menu className="h-6 w-6" />
           </Button>
         )}
       </SheetTrigger>
