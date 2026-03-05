@@ -11,7 +11,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Member } from "@/components/members/member-types";
+
+interface Member {
+  id: string;
+  name: string;
+  image: string | null;
+}
 
 interface MemberFilterProps {
   members: Member[];
