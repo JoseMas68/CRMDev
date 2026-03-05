@@ -120,7 +120,9 @@ export function MobileSidebar({ user, children }: MobileSidebarProps) {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        {children || (
+        {children ? (
+          children
+        ) : (
           <Button variant="ghost" size="icon" className="lg:hidden">
             <svg
               className="h-6 w-6"
