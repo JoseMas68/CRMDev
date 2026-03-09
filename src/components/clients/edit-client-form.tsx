@@ -78,7 +78,7 @@ export function EditClientForm({ client }: EditClientFormProps) {
       tags: client.tags || [],
       notes: client.notes || "",
       clientCode: (customData.clientCode as string) || "",
-      projectType: (customData.projectType as string) || "",
+      projectType: (customData.projectType as UpdateClientInput["projectType"]) || undefined,
       funnelStage: (customData.funnelStage as string) || "",
       techStack: (customData.techStack as string) || "",
       nextFollowUp: (customData.nextFollowUp as string) || "",
