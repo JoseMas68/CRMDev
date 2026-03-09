@@ -342,20 +342,21 @@ export function CreateClientDialog({ children }: CreateClientDialogProps) {
                   <div className="space-y-2">
                     <Label htmlFor="projectType">Tipo de proyecto</Label>
                     <Select
-                      value={projectTypeValue}
-                      onValueChange={(value) =>
+                      value={projectTypeValue ?? "_none"}
+                      onValueChange={(value) => {
+                        const nextValue = value === "_none" ? undefined : value;
                         setValue(
                           "projectType",
-                          (value || undefined) as CreateClientInput["projectType"]
-                        )
-                      }
+                          nextValue as CreateClientInput["projectType"]
+                        );
+                      }}
                       disabled={isLoading}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Selecciona tipo" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Sin especificar</SelectItem>
+                        <SelectItem value="_none">Sin especificar</SelectItem>
                         {CLIENT_PROJECT_TYPES.map((option) => (
                           <SelectItem key={option.value} value={option.value}>
                             {option.label}
