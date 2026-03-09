@@ -63,6 +63,7 @@ export default async function EditClientPage({ params }: EditClientPageProps) {
         source: client.source,
         tags: client.tags,
         notes: client.notes,
+        customData: client.customData,
       }}
     />
   );

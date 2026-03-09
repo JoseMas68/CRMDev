@@ -17,7 +17,9 @@ import {
   FileText,
   Edit,
   Trash2,
+  Link as LinkIcon,
 } from "lucide-react";
+import { getProjectTypeLabel } from "@/lib/constants/client";
 
 import { auth } from "@/lib/auth";
 import { getClient, deleteClient } from "@/actions/clients";
@@ -75,6 +77,16 @@ const statusLabels: Record<string, string> = {
   CHURNED: "Perdido",
 };
 
+type ClientCustomData = {
+  clientCode?: string;
+  projectType?: string;
+  funnelStage?: string;
+  techStack?: string;
+  nextFollowUp?: string;
+  painPoints?: string;
+  projectFolderUrl?: string;
+};
+
 export default async function ClientPage({ params }: ClientPageProps) {
   const session = await auth.api.getSession({
     headers: await headers(),
@@ -92,6 +104,11 @@ export default async function ClientPage({ params }: ClientPageProps) {
   }
 
   const client = result.data;
+  const customData = (client.customData as ClientCustomData | null) ?? {};
+  const projectTypeLabel = getProjectTypeLabel(customData.projectType);
+  const nextFollowUpLabel = customData.nextFollowUp && !Number.isNaN(Date.parse(customData.nextFollowUp))
+    ? formatDate(new Date(customData.nextFollowUp))
+    : customData.nextFollowUp || null;
 
   // Calculate total deals value
   const totalDealsValue = client.deals?.reduce(
@@ -130,6 +147,11 @@ export default async function ClientPage({ params }: ClientPageProps) {
                 >
                   {statusLabels[client.status]}
                 </Badge>
+                {customData.clientCode && (
+                  <Badge variant="outline" className="font-mono text-xs">
+                    {customData.clientCode}
+                  </Badge>
+                )}
               </div>
               {client.company && (
                 <p className="text-muted-foreground flex items-center gap-2">
@@ -193,6 +215,7 @@ export default async function ClientPage({ params }: ClientPageProps) {
         tabs={[
           { value: "contact", label: "Contacto", icon: User },
           { value: "notes", label: "Notas", icon: FileText },
+          { value: "operational", label: "Ficha", icon: FolderKanban },
           { value: "activity", label: "Actividad", icon: Calendar },
         ]}
         defaultValue="contact"
@@ -305,6 +328,28 @@ export default async function ClientPage({ params }: ClientPageProps) {
                   Sin notas agregadas
                 </p>
               )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="operational">
+          <Card className="lg:hidden">
+            <CardHeader>
+              <CardTitle className="text-lg">Ficha operativa</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3 text-sm">
+              <OperationalRow label="Código del cliente" value={customData.clientCode} />
+              <OperationalRow label="Tipo de proyecto" value={projectTypeLabel} />
+              <OperationalRow label="Etapa del embudo" value={customData.funnelStage} />
+              <OperationalRow label="Origen del lead" value={client.source} />
+              <OperationalRow label="Tecnología" value={customData.techStack} />
+              <OperationalRow label="Próximo seguimiento" value={nextFollowUpLabel} />
+              <OperationalRow label="Notas / Pain points" value={customData.painPoints} multiline />
+              <OperationalRow
+                label="Carpeta del proyecto"
+                value={customData.projectFolderUrl}
+                isLink
+              />
             </CardContent>
           </Card>
         </TabsContent>
@@ -451,6 +496,31 @@ export default async function ClientPage({ params }: ClientPageProps) {
           </CardContent>
         </Card>
       </div>
+
+      <Card className="hidden lg:block">
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <FolderKanban className="h-5 w-5" />
+            Ficha operativa
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <OperationalRow label="Código del cliente" value={customData.clientCode} />
+            <OperationalRow label="Tipo de proyecto" value={projectTypeLabel} />
+            <OperationalRow label="Etapa del embudo" value={customData.funnelStage} />
+            <OperationalRow label="Origen del lead" value={client.source} />
+            <OperationalRow label="Tecnología" value={customData.techStack} />
+            <OperationalRow label="Próximo seguimiento" value={nextFollowUpLabel} />
+            <OperationalRow
+              label="Carpeta del proyecto"
+              value={customData.projectFolderUrl}
+              isLink
+            />
+            <OperationalRow label="Notas / Pain points" value={customData.painPoints} multiline />
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Deals section */}
       {client.deals && client.deals.length > 0 && (
@@ -634,6 +704,42 @@ export default async function ClientPage({ params }: ClientPageProps) {
             </div>
           </CardContent>
         </Card>
+      )}
+    </div>
+  );
+}
+
+interface OperationalRowProps {
+  label: string;
+  value?: string | null;
+  multiline?: boolean;
+  isLink?: boolean;
+}
+
+function OperationalRow({ label, value, multiline = false, isLink = false }: OperationalRowProps) {
+  const displayValue = value && value.toString().trim().length ? value.toString() : null;
+
+  return (
+    <div className="flex flex-col gap-1">
+      <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+        {label}
+      </span>
+      {displayValue ? (
+        isLink ? (
+          <Link
+            href={displayValue}
+            className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
+            target="_blank"
+            rel="noreferrer"
+          >
+            <LinkIcon className="h-3.5 w-3.5" />
+            <span className="truncate">{displayValue}</span>
+          </Link>
+        ) : (
+          <p className={cn("text-sm", multiline && "whitespace-pre-wrap")}>{displayValue}</p>
+        )
+      ) : (
+        <p className="text-sm text-muted-foreground">—</p>
       )}
     </div>
   );

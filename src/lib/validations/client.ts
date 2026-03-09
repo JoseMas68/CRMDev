@@ -6,6 +6,7 @@
  */
 
 import { z } from "zod";
+import { CLIENT_PROJECT_TYPES } from "@/lib/constants/client";
 
 // Status enum matching Prisma schema
 export const clientStatusEnum = z.enum([
@@ -15,6 +16,15 @@ export const clientStatusEnum = z.enum([
   "INACTIVE",
   "CHURNED",
 ]);
+
+type ProjectTypeValue = (typeof CLIENT_PROJECT_TYPES)[number]["value"];
+
+const projectTypeEnum = z.enum(
+  CLIENT_PROJECT_TYPES.map((type) => type.value) as [
+    ProjectTypeValue,
+    ...ProjectTypeValue[]
+  ]
+);
 
 // Create client schema
 export const createClientSchema = z.object({
@@ -87,6 +97,47 @@ export const createClientSchema = z.object({
     .or(z.literal("")),
 
   status: clientStatusEnum.default("LEAD"),
+
+  clientCode: z
+    .string()
+    .max(50, "Code must be less than 50 characters")
+    .optional()
+    .or(z.literal("")),
+
+  projectType: projectTypeEnum.optional(),
+
+  funnelStage: z
+    .string()
+    .max(100, "Stage must be less than 100 characters")
+    .optional()
+    .or(z.literal("")),
+
+  techStack: z
+    .string()
+    .max(255, "Tech stack must be less than 255 characters")
+    .optional()
+    .or(z.literal("")),
+
+  nextFollowUp: z
+    .string()
+    .refine((value) => !value || !Number.isNaN(Date.parse(value)), {
+      message: "Fecha inválida",
+    })
+    .optional()
+    .or(z.literal("")),
+
+  painPoints: z
+    .string()
+    .max(2000, "Pain points must be less than 2000 characters")
+    .optional()
+    .or(z.literal("")),
+
+  projectFolderUrl: z
+    .string()
+    .url("Invalid URL")
+    .max(500, "URL must be less than 500 characters")
+    .optional()
+    .or(z.literal("")),
 
   source: z
     .string()

@@ -25,6 +25,72 @@ import {
   type ClientFilter,
 } from "@/lib/validations/client";
 
+type OperationalField =
+  | "clientCode"
+  | "projectType"
+  | "funnelStage"
+  | "techStack"
+  | "nextFollowUp"
+  | "painPoints"
+  | "projectFolderUrl";
+
+const OPERATIONAL_FIELDS: OperationalField[] = [
+  "clientCode",
+  "projectType",
+  "funnelStage",
+  "techStack",
+  "nextFollowUp",
+  "painPoints",
+  "projectFolderUrl",
+];
+
+type OperationalInput = Partial<Record<OperationalField, string | undefined>>;
+
+function sanitizeStringValue(value?: string | null) {
+  if (typeof value !== "string") return undefined;
+  const trimmed = value.trim();
+  return trimmed.length ? trimmed : undefined;
+}
+
+function buildOperationalCustomData(input: Partial<Record<OperationalField, unknown>>) {
+  const result: Record<string, string> = {};
+
+  for (const key of OPERATIONAL_FIELDS) {
+    const rawValue = input[key];
+
+    if (typeof rawValue === "string") {
+      const sanitized = sanitizeStringValue(rawValue);
+      if (sanitized) {
+        result[key] = sanitized;
+      }
+    } else if (typeof rawValue === "number" || rawValue instanceof Date) {
+      result[key] = String(rawValue);
+    }
+  }
+
+  return result;
+}
+
+function mergeOperationalCustomData(
+  existing: Record<string, unknown> | null | undefined,
+  updates: Record<string, string>,
+  rawInput: Partial<Record<OperationalField, unknown>>
+) {
+  const next: Record<string, unknown> = { ...(existing ?? {}) };
+
+  for (const key of OPERATIONAL_FIELDS) {
+    if (!(key in rawInput)) continue;
+    const value = updates[key];
+    if (value !== undefined) {
+      next[key] = value;
+    } else {
+      delete next[key];
+    }
+  }
+
+  return next;
+}
+
 // Response types
 type ActionResponse<T = void> =
   | { success: true; data: T }
@@ -220,6 +286,15 @@ export async function createClient(
       }
     }
 
+    const operationalCustomData = buildOperationalCustomData(validatedData as Partial<Record<OperationalField, unknown>>);
+    const combinedCustomData = {
+      ...(validatedData.customData || {}),
+      ...operationalCustomData,
+    };
+    const customDataPayload = Object.keys(combinedCustomData).length
+      ? combinedCustomData
+      : undefined;
+
     // Create client
     const client = await db.client.create({
       data: {
@@ -238,7 +313,7 @@ export async function createClient(
         source: validatedData.source || null,
         tags: validatedData.tags || [],
         notes: validatedData.notes || null,
-        customData: validatedData.customData || undefined,
+        customData: customDataPayload,
         organizationId: session.session.activeOrganizationId!,
       },
       select: { id: true },
@@ -294,7 +369,7 @@ export async function updateClient(
     // Check client exists and belongs to org (middleware handles this)
     const existingClient = await db.client.findUnique({
       where: { id },
-      select: { id: true, name: true },
+      select: { id: true, name: true, customData: true },
     });
 
     if (!existingClient) {
@@ -316,6 +391,22 @@ export async function updateClient(
       }
     }
 
+    const operationalCustomData = buildOperationalCustomData(
+      validatedData as Partial<Record<OperationalField, unknown>>
+    );
+    let mergedCustomData = mergeOperationalCustomData(
+      existingClient.customData as Record<string, unknown> | null,
+      operationalCustomData,
+      validatedData as Partial<Record<OperationalField, unknown>>
+    );
+
+    if (validatedData.customData) {
+      mergedCustomData = {
+        ...mergedCustomData,
+        ...validatedData.customData,
+      };
+    }
+
     // Update client
     await db.client.update({
       where: { id },
@@ -335,7 +426,7 @@ export async function updateClient(
         ...(validatedData.source !== undefined && { source: validatedData.source || null }),
         ...(validatedData.tags && { tags: validatedData.tags }),
         ...(validatedData.notes !== undefined && { notes: validatedData.notes || null }),
-        ...(validatedData.customData && { customData: validatedData.customData }),
+        customData: mergedCustomData,
       },
     });
 

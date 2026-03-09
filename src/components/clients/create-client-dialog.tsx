@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -9,6 +9,7 @@ import { toast } from "sonner";
 
 import { createClient } from "@/actions/clients";
 import { createClientSchema, type CreateClientInput } from "@/lib/validations/client";
+import { CLIENT_PROJECT_TYPES, CLIENT_FUNNEL_STAGE_SUGGESTIONS } from "@/lib/constants/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -52,10 +53,23 @@ export function CreateClientDialog({ children }: CreateClientDialogProps) {
     defaultValues: {
       status: "LEAD",
       tags: [],
+      clientCode: "",
+      projectType: "",
+      funnelStage: "",
+      techStack: "",
+      nextFollowUp: "",
+      painPoints: "",
+      projectFolderUrl: "",
     },
   });
 
   const status = watch("status");
+  const projectTypeValue = watch("projectType") ?? "";
+
+  useEffect(() => {
+    register("projectType");
+    register("nextFollowUp");
+  }, [register]);
 
   async function onSubmit(data: CreateClientInput) {
     setIsLoading(true);
@@ -309,8 +323,107 @@ export function CreateClientDialog({ children }: CreateClientDialogProps) {
                   </p>
                 )}
               </div>
+
+              <div className="pt-4 border-t space-y-4">
+                <p className="text-sm font-medium text-muted-foreground">
+                  Ficha operativa
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="clientCode">Código del cliente</Label>
+                    <Input
+                      id="clientCode"
+                      placeholder="DC0001"
+                      disabled={isLoading}
+                      {...register("clientCode")}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="projectType">Tipo de proyecto</Label>
+                    <Select
+                      value={projectTypeValue}
+                      onValueChange={(value) =>
+                        setValue("projectType", value || undefined)
+                      }
+                      disabled={isLoading}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecciona tipo" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">Sin especificar</SelectItem>
+                        {CLIENT_PROJECT_TYPES.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2 sm:col-span-2">
+                    <Label htmlFor="funnelStage">Etapa del embudo</Label>
+                    <Input
+                      id="funnelStage"
+                      list="funnel-stage-suggestions"
+                      placeholder="Contacto inicial, Propuesta, etc."
+                      disabled={isLoading}
+                      {...register("funnelStage")}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="techStack">Tecnología</Label>
+                    <Input
+                      id="techStack"
+                      placeholder="React, Next.js, WordPress..."
+                      disabled={isLoading}
+                      {...register("techStack")}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="nextFollowUp">Próximo seguimiento</Label>
+                    <Input
+                      id="nextFollowUp"
+                      type="date"
+                      disabled={isLoading}
+                      {...register("nextFollowUp")}
+                    />
+                  </div>
+
+                  <div className="space-y-2 sm:col-span-2">
+                    <Label htmlFor="painPoints">Notas / Pain points</Label>
+                    <Textarea
+                      id="painPoints"
+                      placeholder="¿Cuál es el dolor principal del cliente?"
+                      rows={3}
+                      disabled={isLoading}
+                      {...register("painPoints")}
+                    />
+                  </div>
+
+                  <div className="space-y-2 sm:col-span-2">
+                    <Label htmlFor="projectFolderUrl">Carpeta del proyecto</Label>
+                    <Input
+                      id="projectFolderUrl"
+                      type="url"
+                      placeholder="https://drive.google.com/..."
+                      disabled={isLoading}
+                      {...register("projectFolderUrl")}
+                    />
+                  </div>
+                </div>
+              </div>
             </TabsContent>
           </Tabs>
+
+          <datalist id="funnel-stage-suggestions">
+            {CLIENT_FUNNEL_STAGE_SUGGESTIONS.map((stage) => (
+              <option key={stage.value} value={stage.label} />
+            ))}
+          </datalist>
 
           <DialogFooter className="mt-6">
             <Button
