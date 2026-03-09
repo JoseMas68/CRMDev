@@ -54,7 +54,7 @@ export function CreateClientDialog({ children }: CreateClientDialogProps) {
       status: "LEAD",
       tags: [],
       clientCode: "",
-      projectType: "",
+      projectType: undefined,
       funnelStage: "",
       techStack: "",
       nextFollowUp: "",
