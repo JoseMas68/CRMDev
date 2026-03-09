@@ -344,7 +344,10 @@ export function CreateClientDialog({ children }: CreateClientDialogProps) {
                     <Select
                       value={projectTypeValue}
                       onValueChange={(value) =>
-                        setValue("projectType", value || undefined)
+                        setValue(
+                          "projectType",
+                          (value || undefined) as CreateClientInput["projectType"]
+                        )
                       }
                       disabled={isLoading}
                     >

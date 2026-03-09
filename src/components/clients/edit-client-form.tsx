@@ -372,7 +372,10 @@ export function EditClientForm({ client }: EditClientFormProps) {
                   <Select
                     value={projectTypeValue}
                     onValueChange={(value) =>
-                      setValue("projectType", value || undefined)
+                      setValue(
+                        "projectType",
+                        (value || undefined) as UpdateClientInput["projectType"]
+                      )
                     }
                     disabled={isLoading}
                   >
