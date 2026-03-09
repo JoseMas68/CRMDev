@@ -59,7 +59,11 @@ export default async function TasksPage({ searchParams }: TasksPageProps) {
   const columns = kanbanResult.success ? kanbanResult.data.columns : [];
   const stats = statsResult.success ? statsResult.data : null;
   const projects = projectsResult.success ? projectsResult.data.projects : [];
-  const members = membersResult.map((m) => ({ id: m.id, name: m.user.name, image: m.user.image }));
+  const members = membersResult.map((m) => ({
+    id: m.user.id,
+    name: m.user.name,
+    image: m.user.image,
+  }));
 
   return (
     <div className="space-y-4 sm:space-y-6">
