@@ -76,9 +76,12 @@ export default async function TokenSupportPortalPage({ params }: TokenSupportPor
 
   const orgSlug = client.organization.slug;
 
-  // Get available projects for this org
+  // Get available projects for this CLIENT only (not all org projects)
   const projects = await prisma.project.findMany({
-    where: { organizationId: (await prisma.organization.findUnique({ where: { slug: orgSlug }, select: { id: true } }))!.id },
+    where: {
+      organizationId: (await prisma.organization.findUnique({ where: { slug: orgSlug }, select: { id: true } }))!.id,
+      clientId: client.id,
+    },
     select: { id: true, name: true },
     orderBy: { name: "asc" },
     take: 20,
