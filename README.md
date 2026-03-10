@@ -1,17 +1,24 @@
 # CRMPro - SaaS Multi-Tenant CRM
 
+![Next.js](https://img.shields.io/badge/Next.js-15.1+-black?style=flat-square&logo=next.js)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.6+-blue?style=flat-square&logo=typescript)
+![Prisma](https://img.shields.io/badge/Prisma-6.2+-2D3748?style=flat-square&logo=prisma)
+![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
+
 ## 📋 Índice
 
 1. [Overview y Objetivos](#overview-y-objetivos)
 2. [Arquitectura del Sistema](#arquitectura-del-sistema)
 3. [Tech Stack](#tech-stack)
-4. [Requisitos Previos](#requisitos-previos)
-5. [Setup Local Paso a Paso](#setup-local-paso-a-paso)
-6. [Configuración de Better Auth](#configuración-de-better-auth)
-7. [Variables de Entorno](#variables-de-entorno)
-8. [Seguridad Multi-Tenant](#seguridad-multi-tenant)
-9. [Deployment a Vercel](#deployment-a-vercel)
-10. [Guía de Desarrollo](#guía-de-desarrollo)
+4. [Integración MCP](#integración-mcp)
+5. [Requisitos Previos](#requisitos-previos)
+6. [Setup Local Paso a Paso](#setup-local-paso-a-paso)
+7. [Configuración de Better Auth](#configuración-de-better-auth)
+8. [Variables de Entorno](#variables-de-entorno)
+9. [Seguridad Multi-Tenant](#seguridad-multi-tenant)
+10. [Deployment con EasyPanel](#deployment-con-easypanel)
+11. [Guía de Desarrollo](#guía-de-desarrollo)
+12. [Documentación Adicional](#documentación-adicional)
 
 ---
 
@@ -28,8 +35,12 @@ CRMPro es un **CRM SaaS comercial multi-tenant** diseñado para PYMEs y agencias
 | **Clientes** | Gestión de leads, contactos y oportunidades con campos personalizables |
 | **Pipeline de Ventas** | Tablero Kanban con etapas drag & drop para seguimiento de deals |
 | **Proyectos** | Proyectos asociados a clientes con tareas, deadlines, progreso % y comentarios |
-| **Tareas** | Sistema de tareas individuales con prioridades y estados |
+| **Tareas** | Sistema de tareas individuales con prioridades, estados y asignaciones |
+| **Time Tracking** | Registro de tiempo por tarea con reportes |
+| **Tickets** | Sistema de soporte con categorización AI |
 | **Multi-Tenancy** | Cada organización es un tenant aislado con sus propios datos |
+| **MCP Integration** | API para integración con asistentes AI (Claude, ChatGPT, etc.) |
+| **WordPress Monitor** | Monitoreo de updates, vulnerabilidades y SSL |
 | **Suscripciones** | Planes de pago por organización via Stripe |
 
 ### Objetivos Técnicos
@@ -240,8 +251,82 @@ erDiagram
 
 | Tecnología | Propósito |
 |------------|-----------|
-| **Vercel** | Hosting y deployment |
+| **Docker** | Contenerización para deployment |
+| **EasyPanel** | Hosting y deployment |
 | **Prisma Accelerate** | Connection pooling para edge |
+
+---
+
+## Integración MCP
+
+### ¿Qué es MCP?
+
+**MCP (Model Context Protocol)** es una API abierta que permite a asistentes AI (como Claude Desktop, ChatGPT, etc.) interactuar directamente con el CRM.
+
+### Arquitectura Multi-Usuario
+
+Cada usuario crea su propia API Key desde el CRM:
+- **Security**: Cada key está vinculada a una organización específica
+- **Aislamiento**: Los asistentes solo acceden a datos de la organización del usuario
+- **Control**: Los usuarios pueden revocar keys en cualquier momento
+
+### Herramientas MCP Disponibles
+
+| Herramienta | Descripción |
+|-------------|-------------|
+| `list_projects` | Listar proyectos de la organización |
+| `create_project` | Crear nuevo proyecto |
+| `update_project` | Actualizar proyecto existente |
+| `delete_project` | Eliminar proyecto |
+| `list_tasks` | Listar tareas de un proyecto |
+| `create_task` | Crear nueva tarea |
+| `update_task` | Actualizar tarea existente |
+| `delete_task` | Eliminar tarea |
+| `list_clients` | Listar clientes |
+| `create_client` | Crear nuevo cliente |
+| `update_client` | Actualizar cliente |
+| `delete_client` | Eliminar cliente |
+| `get_project_time_report` | Reporte de tiempo por proyecto |
+
+### Endpoints MCP
+
+- **REST API**: `POST /api/mcp/rest` - JSON API simple
+- **SSE Endpoint**: `/api/mcp/sse` - Server-Sent Events para clientes MCP
+
+### Configuración Rápida
+
+1. **Crear API Key**:
+   - Ir a Settings → API Keys
+   - Crear nueva key con nombre descriptivo
+   - Copiar la key generada
+
+2. **Configurar Claude Desktop**:
+   ```json
+   {
+     "mcpServers": {
+       "crmdev": {
+         "command": "node",
+         "args": ["path/to/mcp-client.js"],
+         "env": {
+           "CRM_API_KEY": "crm_tu_api_key_aqui"
+         }
+       }
+     }
+   }
+   ```
+
+3. **Usar REST API**:
+   ```bash
+   curl -X POST https://tu-domain.com/api/mcp/rest \
+     -H "Authorization: Bearer crm_tu_api_key" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "tool": "list_projects",
+       "arguments": {}
+     }'
+   ```
+
+📖 **Guía completa**: [Ver documentación de MCP](./docs/guides/claude-desktop-setup.md)
 
 ---
 
@@ -1053,7 +1138,7 @@ export async function getClients() {
 
 ---
 
-## Deployment a Vercel
+## Deployment con EasyPanel
 
 ### Paso 1: Preparar Repositorio
 
@@ -1087,74 +1172,100 @@ EOF
 
 # Commit inicial
 git add .
-git commit -m "Initial commit: CRMPro MVP setup"
+git commit -m "Initial commit: CRMPro setup"
 
 # Crear repo en GitHub y push
-gh repo create crmpro --private --source=. --push
+gh repo create crmdev --private --source=. --push
 ```
 
-### Paso 2: Configurar Neon Database
+### Paso 2: Configurar Base de Datos
 
+**Opción A: Neon (Recomendado)**
 1. Ir a [Neon Console](https://console.neon.tech)
-2. Crear nuevo proyecto: `crmpro-production`
+2. Crear nuevo proyecto: `crmdev-production`
 3. Copiar connection string
 4. Crear branch `development` para desarrollo
 
+**Opción B: Supabase**
+1. Ir a [Supabase](https://supabase.com)
+2. Crear nuevo proyecto
+3. Copiar connection string desde Settings > Database
+
 ```bash
 # Aplicar schema a la base de datos
-npx prisma db push
+pnpm db:push
 
 # Generar cliente
-npx prisma generate
+pnpm db:generate
 ```
 
-### Paso 3: Deploy a Vercel
+### Paso 3: Configurar EasyPanel
 
-1. Ir a [Vercel Dashboard](https://vercel.com/dashboard)
-2. Click "New Project"
-3. Importar repositorio de GitHub
-4. Configurar variables de entorno:
+1. **Conectar EasyPanel con GitHub**
+   - En EasyPanel, ir a Projects > New Project
+   - Conectar cuenta de GitHub
+   - Seleccionar repositorio `crmdev`
 
-```
-DATABASE_URL=postgresql://...
-BETTER_AUTH_SECRET=...
-BETTER_AUTH_URL=https://tu-app.vercel.app
-NEXT_PUBLIC_APP_URL=https://tu-app.vercel.app
-STRIPE_SECRET_KEY=sk_live_...
-STRIPE_WEBHOOK_SECRET=whsec_...
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_...
-```
+2. **Configurar el contenedor Docker**
+   ```dockerfile
+   # next.config.js debe tener:
+   output: 'standalone'
+   ```
 
-5. Deploy
+3. **Configurar variables de entorno en EasyPanel**
+   ```
+   DATABASE_URL=postgresql://...
+   BETTER_AUTH_SECRET=...
+   BETTER_AUTH_URL=https://tu-dominio.com
+   NEXT_PUBLIC_APP_URL=https://tu-dominio.com
+   NEXT_PUBLIC_MCP_PUBLIC_URL=https://tu-dominio.com
+   STRIPE_SECRET_KEY=sk_live_...
+   STRIPE_WEBHOOK_SECRET=whsec_...
+   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_...
+   RESEND_API_KEY=re_...
+   EMAIL_FROM=noreply@tudominio.com
+   UPSTASH_REDIS_REST_URL=...
+   UPSTASH_REDIS_REST_TOKEN=...
+   ```
+
+4. **Build Configuration**
+   - Build Command: `pnpm build`
+   - Start Command: `pnpm start`
+   - Node Version: `20`
+
+5. **Deploy**
 
 ### Paso 4: Configurar Dominio Personalizado
 
-1. En Vercel > Settings > Domains
-2. Agregar dominio: `app.tudominio.com`
-3. Configurar DNS según instrucciones
-4. Actualizar variables de entorno con nuevo dominio
+1. En EasyPanel > Project > Domains
+2. Agregar dominio: `crm.tudominio.com`
+3. Configurar DNS según instrucciones de EasyPanel
+4. Habilitar HTTPS (Let's Encrypt automático)
+5. Actualizar variables de entorno con nuevo dominio
 
 ### Paso 5: Configurar Stripe Webhooks
 
 1. En Stripe Dashboard > Developers > Webhooks
-2. Add endpoint: `https://tu-app.vercel.app/api/webhooks/stripe`
+2. Add endpoint: `https://tu-dominio.com/api/webhooks/stripe`
 3. Seleccionar eventos:
    - `customer.subscription.created`
    - `customer.subscription.updated`
    - `customer.subscription.deleted`
    - `invoice.paid`
    - `invoice.payment_failed`
-4. Copiar signing secret a Vercel env vars
+4. Copiar signing secret a variables de entorno de EasyPanel
 
 ### Paso 6: Verificar Deploy
 
 ```bash
 # Verificar que todo funciona
-curl https://tu-app.vercel.app/api/health
+curl https://tu-dominio.com/api/health
 
-# Verificar logs en Vercel Dashboard
+# Verificar logs en EasyPanel Dashboard
 # Verificar que no hay errores de conexión a DB
 ```
+
+📖 **Guía completa de deployment**: [Ver guía de EasyPanel](./docs/deployment/easypanel.md)
 
 ### Prisma en Edge (Opcional)
 
@@ -1252,23 +1363,67 @@ async function createClient(data: FormData) {
 
 ---
 
+## Documentación Adicional
+
+Para documentación detallada del proyecto, visita la carpeta [`docs/`](./docs/):
+
+### 📚 Arquitectura
+- [**Vista General del Sistema**](./docs/architecture/system-overview.md) - Arquitectura completa, stack tecnológico y estructura del proyecto
+- [**Integración MCP**](./docs/architecture/mcp-integration.md) - Arquitectura de MCP (Model Context Protocol)
+- [**Multi-Tenancy**](./docs/architecture/multi-tenancy.md) - Estrategia de aislamiento de datos entre organizaciones
+
+### 🚀 Guías
+- [**Setup Claude Desktop**](./docs/guides/claude-desktop-setup.md) - Configurar Claude Desktop con MCP
+- [**Gestión de API Keys**](./docs/guides/api-keys.md) - Crear y gestionar API Keys para integraciones
+- [**Configuración de Email**](./docs/guides/email-setup.md) - Configurar Resend para emails
+
+### 🔧 Deployment
+- [**Despliegue en EasyPanel**](./docs/deployment/easypanel.md) - Guía completa de deployment con Docker
+
+### 🔌 API
+- [**Webhooks**](./docs/api/webhooks.md) - Documentación de webhooks disponibles
+
+---
+
+## Características Adicionales
+
+### 🔐 Seguridad Implementada
+- ✅ **Multi-tenant isolation**: Middleware de Prisma filtra automáticamente por `organizationId`
+- ✅ **Rate limiting**: Upstash Redis para protección contra DoS
+- ✅ **CORS whitelist**: Solo orígenes permitidos pueden acceder a la API
+- ✅ **Session management**: Better Auth con JWT cache y cookies seguras
+- ✅ **Input validation**: Zod schemas en todos los Server Actions
+
+### 🤖 Integraciones AI
+- **MCP Protocol**: API abierta para integración con asistentes AI
+- **Claude Desktop**: Soporte nativo para Claude Desktop
+- **ChatGPT**: Compatible con cualquier cliente MCP
+- **Custom Tools**: Herramientas personalizables para cada organización
+
+### 📊 Monitorización
+- **WordPress Monitor**: Updates, vulnerabilidades, SSL
+- **Time Tracking**: Registro de tiempo por tarea
+- **Ticket System**: Soporte con categorización AI
+
+---
+
 ## Próximos Pasos
 
-Una vez completado el MVP, puedes extender con:
+Características planificadas para futuras versiones:
 
 1. **Integraciones**
    - WhatsApp Business API
    - Google Calendar sync
-   - Email tracking (Resend)
+   - Email tracking avanzado
 
 2. **IA Features**
    - Resumen automático de clientes
    - Predicción de cierre de deals
-   - Asistente de ventas
+   - Asistente de ventas con contexto
 
 3. **Analytics**
-   - Dashboard con métricas
-   - Reportes exportables
+   - Dashboard con métricas avanzadas
+   - Reportes exportables (PDF, Excel)
    - Funnel analytics
 
 4. **Mobile**
@@ -1279,12 +1434,18 @@ Una vez completado el MVP, puedes extender con:
 
 ## Soporte y Contribución
 
-- **Issues**: Reportar bugs en GitHub Issues
-- **Docs**: Este README + comentarios en código
-- **Security**: Reportar vulnerabilidades a security@tudominio.com
+- **Issues**: Reportar bugs en [GitHub Issues](https://github.com/tu-usuario/crmdev/issues)
+- **Documentación**: Ver carpeta [`docs/`](./docs/)
+- **Security**: Reportar vulnerabilidades de forma privada
+
+---
+
+## Licencia
+
+Este proyecto está bajo la Licencia MIT. Ver archivo [LICENSE](./LICENSE) para más detalles.
 
 ---
 
 **Versión**: 1.0.0
-**Última actualización**: 2026-02-03
-**Mantenido por**: Tu Equipo
+**Última actualización**: 2026-03-10
+**Stack**: Next.js 15 · TypeScript · Prisma · Better Auth · MCP
