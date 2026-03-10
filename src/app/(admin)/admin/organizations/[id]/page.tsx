@@ -27,15 +27,16 @@ import {
 import Link from "next/link";
 
 interface PageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default async function OrganizationDetailPage({
   params,
 }: PageProps) {
-  const result = await getOrganizationById(params.id);
+  const { id } = await params;
+  const result = await getOrganizationById(id);
 
   if (!result.success) {
     notFound();
