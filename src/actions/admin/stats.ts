@@ -106,7 +106,11 @@ export async function getOrganizationsStats() {
         logo: true,
         createdAt: true,
         updatedAt: true,
-        plan: true,
+        subscription: {
+          select: {
+            plan: true,
+          },
+        },
         _count: {
           select: {
             members: true,
@@ -123,7 +127,10 @@ export async function getOrganizationsStats() {
 
     return {
       success: true,
-      data: organizations,
+      data: organizations.map((org) => ({
+        ...org,
+        plan: org.subscription?.plan || "FREE",
+      })),
     };
   } catch (error) {
     console.error("Error fetching organizations stats:", error);

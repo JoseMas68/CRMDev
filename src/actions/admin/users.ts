@@ -14,10 +14,10 @@ async function verifySuperAdmin() {
   });
 
   if (!session?.user?.isSuperAdmin) {
-    return { success: false, error: "No autorizado: Se requiere superadmin" };
+    return { success: false, error: "No autorizado: Se requiere superadmin" } as const;
   }
 
-  return { success: true, session };
+  return { success: true, session } as const;
 }
 
 /**
@@ -112,7 +112,6 @@ export async function getUserById(id: string) {
                 name: true,
                 slug: true,
                 logo: true,
-                plan: true,
               },
             },
           },

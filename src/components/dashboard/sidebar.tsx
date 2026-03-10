@@ -22,6 +22,7 @@ import {
   SidebarClose,
   Bot,
   Sparkles,
+  Shield,
 } from "lucide-react";
 import { cn, getInitials } from "@/lib/utils";
 import { useSidebarStore } from "@/store/sidebar-store";
@@ -30,6 +31,7 @@ import {
   useListOrganizations,
   organization,
   signOut,
+  useSession,
 } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -119,14 +121,27 @@ const secondaryNavigation = [
   },
 ];
 
+// Admin navigation (only for superadmins)
+const adminNavigation = [
+  {
+    name: "Admin Panel",
+    href: "/admin",
+    icon: Shield,
+  },
+];
+
 export function DashboardSidebar({ user, activeOrgId }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { isCollapsed, toggleCollapse } = useSidebarStore();
+  const { data: session } = useSession();
 
   // Fetch organizations
   const { data: activeOrg } = useActiveOrganization();
   const { data: organizations } = useListOrganizations();
+
+  // Check if user is superadmin
+  const isSuperAdmin = (session?.user as any)?.isSuperAdmin || false;
 
   async function handleSwitchOrg(orgId: string) {
     try {
@@ -310,6 +325,33 @@ export function DashboardSidebar({ user, activeOrgId }: SidebarProps) {
                   })}
                 </ul>
               </li>
+
+              {/* Admin Navigation - Solo para superadmins */}
+              {isSuperAdmin && (
+                <li className="mt-2">
+                  <ul role="list" className="-mx-2 space-y-1">
+                    {adminNavigation.map((item) => {
+                      const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+                      return (
+                        <li key={item.name}>
+                          <Link
+                            href={item.href}
+                            className={cn(
+                              "sidebar-link bg-red-500/10 text-red-500 hover:bg-red-500/20",
+                              isActive && "sidebar-link-active bg-red-500/20",
+                              isCollapsed && "justify-center px-0"
+                            )}
+                            title={isCollapsed ? item.name : undefined}
+                          >
+                            <item.icon className={cn("h-5 w-5 shrink-0", isCollapsed ? "mx-auto" : "")} />
+                            {!isCollapsed && <span>{item.name}</span>}
+                          </Link>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </li>
+              )}
             </ul>
           </nav>
 
@@ -336,6 +378,16 @@ export function DashboardSidebar({ user, activeOrgId }: SidebarProps) {
                     <span>Configuración</span>
                   </Link>
                 </DropdownMenuItem>
+                {isSuperAdmin && (
+                  <>
+                    <DropdownMenuItem asChild>
+                      <Link href="/admin" className="flex items-center gap-2 text-red-500">
+                        <Shield className="h-4 w-4" />
+                        <span>Admin Panel</span>
+                      </Link>
+                    </DropdownMenuItem>
+                  </>
+                )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={handleSignOut}

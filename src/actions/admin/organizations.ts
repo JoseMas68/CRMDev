@@ -14,10 +14,10 @@ async function verifySuperAdmin() {
   });
 
   if (!session?.user?.isSuperAdmin) {
-    return { success: false, error: "No autorizado: Se requiere superadmin" };
+    return { success: false, error: "No autorizado: Se requiere superadmin" } as const;
   }
 
-  return { success: true, session };
+  return { success: true, session } as const;
 }
 
 /**
@@ -67,9 +67,13 @@ export async function getAllOrganizations(filters?: {
         name: true,
         slug: true,
         logo: true,
-        plan: true,
         createdAt: true,
         updatedAt: true,
+        subscription: {
+          select: {
+            plan: true,
+          },
+        },
         _count: {
           select: {
             members: true,
@@ -104,6 +108,7 @@ export async function getAllOrganizations(filters?: {
       success: true,
       data: organizations.map((org) => ({
         ...org,
+        plan: org.subscription?.plan || "FREE",
         owner: org.members[0]?.user || null,
         members: org._count.members,
         clients: org._count.clients,
@@ -130,6 +135,11 @@ export async function getOrganizationById(id: string) {
     const organization = await prisma.organization.findUnique({
       where: { id },
       include: {
+        subscription: {
+          select: {
+            plan: true,
+          },
+        },
         members: {
           include: {
             user: {
@@ -180,13 +190,13 @@ export async function getOrganizationById(id: string) {
         id: true,
         name: true,
         type: true,
-        githubRepo: true,
+        repoUrl: true,
         wpUrl: true,
         vercelUrl: true,
       },
     });
 
-    const hasGitHub = projects.some((p) => p.githubRepo);
+    const hasGitHub = projects.some((p) => p.repoUrl);
     const hasWordPress = projects.some((p) => p.wpUrl);
     const hasVercel = projects.some((p) => p.vercelUrl);
 
@@ -196,7 +206,7 @@ export async function getOrganizationById(id: string) {
       select: {
         id: true,
         name: true,
-        lastUsed: true,
+        lastUsedAt: true,
         createdAt: true,
       },
     });
@@ -205,6 +215,7 @@ export async function getOrganizationById(id: string) {
       success: true,
       data: {
         ...organization,
+        plan: organization.subscription?.plan || "FREE",
         recentActivities,
         integrations: {
           github: hasGitHub,

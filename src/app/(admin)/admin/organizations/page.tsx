@@ -75,7 +75,7 @@ export default function OrganizationsPage() {
       plan: planFilter === "all" ? undefined : planFilter,
     });
 
-    if (result.success) {
+    if (result.success && result.data) {
       setOrganizations(result.data);
     } else {
       toast.error(result.error);

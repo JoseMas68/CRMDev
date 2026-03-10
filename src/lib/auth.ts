@@ -120,6 +120,7 @@ export const auth = betterAuth({
       githubUsername: { type: "string", required: false },
       avatarUrl: { type: "string", required: false },
       isVerifiedDev: { type: "boolean", required: false, defaultValue: false },
+      isSuperAdmin: { type: "boolean", required: false, defaultValue: false },
     },
   },
 
@@ -221,6 +222,7 @@ export interface ExtendedSession {
     githubUsername?: string | null;
     avatarUrl?: string | null;
     isVerifiedDev?: boolean;
+    isSuperAdmin?: boolean;
   };
   session: Session["session"] & {
     activeOrganizationId: string | null;

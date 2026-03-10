@@ -6,15 +6,17 @@ async function AdminDashboard() {
   const result = await getGlobalStats();
 
   if (!result.success) {
+    const error = "error" in result ? result.error : "Unknown error";
     return (
       <div className="p-8">
         <h1 className="text-3xl font-bold mb-4">Admin Dashboard</h1>
-        <p className="text-red-500">Error: {result.error}</p>
+        <p className="text-red-500">Error: {error}</p>
       </div>
     );
   }
 
-  const stats = result.data;
+  // Type assertion - sabemos que data existe porque success es true
+  const stats = (result as { success: true; data: any }).data;
 
   const statCards = [
     {

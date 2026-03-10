@@ -27,21 +27,22 @@ import {
 import Link from "next/link";
 
 interface PageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default async function OrganizationDetailPage({
   params,
 }: PageProps) {
-  const result = await getOrganizationById(params.id);
+  const { id } = await params;
+  const result = await getOrganizationById(id);
 
-  if (!result.success) {
+  if (!result.success || !result.data) {
     notFound();
   }
 
-  const { data: org } = result;
+  const org = result.data;
 
   return (
     <div className="space-y-8">
@@ -212,7 +213,7 @@ export default async function OrganizationDetailPage({
                 <div key={activity.id} className="flex items-start gap-3 text-sm">
                   <Clock className="h-4 w-4 text-muted-foreground mt-0.5" />
                   <div className="flex-1">
-                    <p className="font-medium">{activity.action}</p>
+                    <p className="font-medium">{activity.title}</p>
                     <p className="text-muted-foreground">
                       {new Date(activity.createdAt).toLocaleString("es-ES")}
                     </p>

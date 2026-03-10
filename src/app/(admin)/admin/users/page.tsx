@@ -73,10 +73,10 @@ export default function UsersPage() {
           : superAdminFilter === "true",
     });
 
-    if (result.success) {
+    if (result.success && "data" in result && result.data) {
       setUsers(result.data);
     } else {
-      toast.error(result.error);
+      toast.error("error" in result ? result.error : "Error desconocido");
     }
     setLoading(false);
   }
@@ -85,11 +85,11 @@ export default function UsersPage() {
     setTogglingUserId(userId);
     const result = await toggleSuperAdmin(userId);
 
-    if (result.success) {
+    if (result.success && "data" in result && result.data) {
       toast.success(result.data.message);
       loadUsers();
     } else {
-      toast.error(result.error);
+      toast.error("error" in result ? result.error : "Error desconocido");
     }
     setTogglingUserId(null);
   }

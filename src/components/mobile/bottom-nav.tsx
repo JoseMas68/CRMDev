@@ -16,70 +16,81 @@ import {
   Settings,
   ChevronLeft,
   ChevronRight,
+  Shield,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useSession } from "@/lib/auth-client";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-
-// TODAS las páginas del sidebar desktop
-const navItems = [
-  {
-    name: "Panel",
-    href: "/dashboard",
-    icon: LayoutDashboard,
-  },
-  {
-    name: "Clientes",
-    href: "/clients",
-    icon: Users,
-  },
-  {
-    name: "Pipeline",
-    href: "/pipeline",
-    icon: Kanban,
-  },
-  {
-    name: "Proyectos",
-    href: "/projects",
-    icon: FolderKanban,
-  },
-  {
-    name: "Tareas",
-    href: "/tasks",
-    icon: CheckSquare,
-  },
-  {
-    name: "Tiempo",
-    href: "/time",
-    icon: Clock,
-  },
-  {
-    name: "Equipo",
-    href: "/members",
-    icon: UserPlus,
-  },
-  {
-    name: "Soporte",
-    href: "/support",
-    icon: Ticket,
-  },
-  {
-    name: "Integraciones",
-    href: "/integrations",
-    icon: Link2,
-  },
-  {
-    name: "Configuración",
-    href: "/settings/profile",
-    icon: Settings,
-  },
-];
 
 export function BottomNav() {
   const pathname = usePathname();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
+  const { data: session } = useSession();
+
+  // Check if user is superadmin
+  const isSuperAdmin = (session?.user as any)?.isSuperAdmin || false;
+
+  // TODAS las páginas del sidebar desktop
+  const navItems = [
+    {
+      name: "Panel",
+      href: "/dashboard",
+      icon: LayoutDashboard,
+    },
+    {
+      name: "Clientes",
+      href: "/clients",
+      icon: Users,
+    },
+    {
+      name: "Pipeline",
+      href: "/pipeline",
+      icon: Kanban,
+    },
+    {
+      name: "Proyectos",
+      href: "/projects",
+      icon: FolderKanban,
+    },
+    {
+      name: "Tareas",
+      href: "/tasks",
+      icon: CheckSquare,
+    },
+    {
+      name: "Tiempo",
+      href: "/time",
+      icon: Clock,
+    },
+    {
+      name: "Equipo",
+      href: "/members",
+      icon: UserPlus,
+    },
+    {
+      name: "Soporte",
+      href: "/support",
+      icon: Ticket,
+    },
+    {
+      name: "Integraciones",
+      href: "/integrations",
+      icon: Link2,
+    },
+    {
+      name: "Configuración",
+      href: "/settings/profile",
+      icon: Settings,
+    },
+    ...(isSuperAdmin ? [{
+      name: "Admin",
+      href: "/admin",
+      icon: Shield,
+    }] : []),
+  ];
 
   // Don't show on auth pages
   if (pathname?.startsWith("/login") || pathname?.startsWith("/signup")) {
