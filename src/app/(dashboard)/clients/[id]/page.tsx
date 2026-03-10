@@ -40,6 +40,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { MobileTabNavigation } from "@/components/mobile/tab-navigation";
+import { SupportTokenCard } from "@/components/clients/support-token-card";
 
 interface ClientPageProps {
   params: Promise<{ id: string }>;
@@ -604,6 +605,13 @@ export default async function ClientPage({ params }: ClientPageProps) {
           </CardContent>
         </Card>
       )}
+
+      {/* Support Portal Token */}
+      <SupportTokenCard
+        clientId={client.id}
+        supportToken={client.supportToken ?? null}
+        supportTokenActive={client.supportTokenActive ?? true}
+      />
 
       {/* Stats cards moved to the bottom */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

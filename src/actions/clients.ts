@@ -14,6 +14,7 @@
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { Prisma } from "@prisma/client";
+import { nanoid } from "nanoid";
 import { auth } from "@/lib/auth";
 import { getPrismaWithSession, prisma } from "@/lib/prisma";
 import {
@@ -186,6 +187,8 @@ export async function getClient(id: string): Promise<
     tags: string[];
     notes: string | null;
     customData: unknown;
+    supportToken: string | null;
+    supportTokenActive: boolean;
     createdAt: Date;
     updatedAt: Date;
     deals: Array<{
@@ -553,5 +556,89 @@ export async function getClientStats(): Promise<ActionResponse<{
   } catch (error) {
     console.error("[CLIENTS] Error fetching stats:", error);
     return { success: false, error: "Error al obtener estadisticas" };
+  }
+}
+
+/**
+ * Generate or regenerate support token for a client
+ */
+export async function generateClientSupportToken(
+  clientId: string
+): Promise<ActionResponse<{ token: string }>> {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.session.activeOrganizationId) {
+      return { success: false, error: "No autorizado" };
+    }
+
+    const db = await getPrismaWithSession(session);
+
+    // Verify client belongs to the org
+    const existing = await db.client.findUnique({
+      where: { id: clientId },
+      select: { id: true },
+    });
+
+    if (!existing) {
+      return { success: false, error: "Cliente no encontrado" };
+    }
+
+    const token = nanoid(32);
+
+    await db.client.update({
+      where: { id: clientId },
+      data: {
+        supportToken: token,
+        supportTokenActive: true,
+      },
+    });
+
+    revalidatePath(`/clients/${clientId}`);
+    return { success: true, data: { token } };
+  } catch (error) {
+    console.error("[CLIENTS] Error generating support token:", error);
+    return { success: false, error: "Error al generar el token de soporte" };
+  }
+}
+
+/**
+ * Revoke the support token for a client
+ */
+export async function revokeClientSupportToken(
+  clientId: string
+): Promise<ActionResponse<void>> {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.session.activeOrganizationId) {
+      return { success: false, error: "No autorizado" };
+    }
+
+    const db = await getPrismaWithSession(session);
+
+    const existing = await db.client.findUnique({
+      where: { id: clientId },
+      select: { id: true },
+    });
+
+    if (!existing) {
+      return { success: false, error: "Cliente no encontrado" };
+    }
+
+    await db.client.update({
+      where: { id: clientId },
+      data: { supportTokenActive: false },
+    });
+
+    revalidatePath(`/clients/${clientId}`);
+    return { success: true, data: undefined };
+  } catch (error) {
+    console.error("[CLIENTS] Error revoking support token:", error);
+    return { success: false, error: "Error al revocar el token de soporte" };
   }
 }
