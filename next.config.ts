@@ -4,6 +4,14 @@ const nextConfig: NextConfig = {
   // Output standalone para Docker/EasyPanel
   output: "standalone",
 
+  // Skip type checking during build (handled separately in CI)
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+
   // Experimental features para Next.js 15+
   experimental: {
     // Server Actions habilitados por default en Next.js 15
