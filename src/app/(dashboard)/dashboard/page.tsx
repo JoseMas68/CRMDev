@@ -210,9 +210,9 @@ export default async function DashboardPage() {
       </div>
 
       {/* Main Content Grid */}
-      <div className="grid gap-4 md:gap-6 lg:grid-cols-3 px-4 sm:px-0">
+      <div className="grid gap-4 md:gap-6 lg:grid-cols-3 px-4 sm:px-0 overflow-x-hidden">
         {/* Tasks Quick View - Takes 2 columns on large screens */}
-        <Card className="lg:col-span-2 shadow-sm">
+        <Card className="lg:col-span-2 shadow-sm overflow-x-hidden">
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
@@ -260,20 +260,18 @@ export default async function DashboardPage() {
                       href={`/tasks?taskId=${task.id}`}
                       className="block"
                     >
-                      <div className="flex items-center justify-between p-3 sm:p-4 rounded-lg border hover:bg-muted/50 transition-colors">
-                        <div className="flex items-center gap-3 flex-1 min-w-0">
-                          <div className={cn(
-                            "w-2 h-2 rounded-full flex-shrink-0",
-                            statusColors[task.status]
-                          )} />
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium truncate">{task.title}</p>
-                            <p className="text-xs text-muted-foreground truncate">
-                              {task.project?.name || "Sin proyecto"}
-                            </p>
-                          </div>
+                      <div className="flex items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg border hover:bg-muted/50 transition-colors overflow-hidden">
+                        <div className={cn(
+                          "w-2 h-2 rounded-full flex-shrink-0",
+                          statusColors[task.status]
+                        )} />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate">{task.title}</p>
+                          <p className="text-xs text-muted-foreground truncate">
+                            {task.project?.name || "Sin proyecto"}
+                          </p>
                         </div>
-                        <span className="text-xs text-muted-foreground flex-shrink-0">
+                        <span className="text-xs text-muted-foreground shrink-0 ml-1">
                           {statusLabels[task.status]}
                         </span>
                       </div>
@@ -288,17 +286,17 @@ export default async function DashboardPage() {
         {/* Right Column */}
         <div className="space-y-4 md:space-y-6">
           {/* Time Tracker Widget */}
-          <Card className="border-2 border-primary/20 shadow-sm">
+          <Card className="border-2 border-primary/20 shadow-sm overflow-hidden">
             <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="text-base">Time Tracker</CardTitle>
+              <div className="flex items-center justify-between gap-2">
+                <div className="min-w-0 flex-1">
+                  <CardTitle className="text-base truncate">Time Tracker</CardTitle>
                   <CardDescription className="text-xs">
                     Registra tu tiempo
                   </CardDescription>
                 </div>
                 <Link href="/time">
-                  <Button variant="ghost" size="sm">
+                  <Button variant="ghost" size="sm" className="shrink-0">
                     Ver todo
                   </Button>
                 </Link>
@@ -319,18 +317,18 @@ export default async function DashboardPage() {
           </Card>
 
           {/* Support Widget */}
-          <Card className="shadow-sm">
+          <Card className="shadow-sm overflow-hidden">
             <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="text-base">Soporte</CardTitle>
+              <div className="flex items-center justify-between gap-2">
+                <div className="min-w-0 flex-1">
+                  <CardTitle className="text-base truncate">Soporte</CardTitle>
                   <CardDescription className="text-xs">
                     {recentTickets.length > 0 ? "Tickets recientes" : "No hay tickets"}
                   </CardDescription>
                 </div>
                 {recentTickets.length > 0 && (
                   <Link href="/support">
-                    <Button variant="ghost" size="sm">
+                    <Button variant="ghost" size="sm" className="shrink-0">
                       Ver todo
                     </Button>
                   </Link>
@@ -364,14 +362,14 @@ export default async function DashboardPage() {
                       <Link
                         key={ticket.id}
                         href={`/support/${ticket.id}`}
-                        className="block p-2 rounded-lg border hover:bg-muted/50 transition-colors"
+                        className="block p-2 rounded-lg border hover:bg-muted/50 transition-colors overflow-hidden"
                       >
                         <p className="text-xs font-medium truncate mb-1">{ticket.title}</p>
-                        <div className="flex items-center justify-between">
-                          <span className={cn("text-[10px] px-2 py-0.5 rounded", statusColors[ticket.status])}>
+                        <div className="flex items-center justify-between gap-2">
+                          <span className={cn("text-[10px] px-2 py-0.5 rounded shrink-0", statusColors[ticket.status])}>
                             {statusLabels[ticket.status]}
                           </span>
-                          <span className="text-[10px] text-muted-foreground">{timeAgo}</span>
+                          <span className="text-[10px] text-muted-foreground truncate">{timeAgo}</span>
                         </div>
                       </Link>
                     );
