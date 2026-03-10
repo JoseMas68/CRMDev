@@ -238,11 +238,12 @@ const createMcpServer = () => {
             title: z.string().describe("Título de la tarea"),
             description: z.string().optional().describe("Descripción de la tarea"),
             projectId: z.string().optional().describe("ID del proyecto (opcional)"),
+            assigneeId: z.string().optional().describe("ID del usuario asignado (opcional, usar list_members para obtener IDs)"),
             status: z.enum(["TODO", "IN_PROGRESS", "IN_REVIEW", "DONE", "CANCELLED"]).optional().describe("Estado inicial"),
             priority: z.enum(["LOW", "MEDIUM", "HIGH", "URGENT"]).optional().describe("Prioridad"),
             dueDate: z.string().optional().describe("Fecha límite (ISO 8601)"),
         },
-        async ({ title, description, projectId, status, priority, dueDate }, extra) => {
+        async ({ title, description, projectId, assigneeId, status, priority, dueDate }, extra) => {
             const orgId = getOrgId(extra);
 
             // Verify project belongs to org if provided
@@ -258,11 +259,25 @@ const createMcpServer = () => {
                 }
             }
 
+            // Verify assignee belongs to org if provided
+            if (assigneeId) {
+                const member = await prisma.member.findFirst({
+                    where: { userId: assigneeId, organizationId: orgId },
+                    select: { id: true },
+                });
+                if (!member) {
+                    return {
+                        content: [{ type: "text", text: "Error: El usuario asignado no es miembro de tu organización." }],
+                    };
+                }
+            }
+
             const task = await prisma.task.create({
                 data: {
                     title,
                     description,
                     projectId,
+                    assigneeId,
                     status: status || "TODO",
                     priority: priority || "MEDIUM",
                     dueDate: dueDate ? new Date(dueDate) : null,
@@ -274,6 +289,7 @@ const createMcpServer = () => {
                     title: true,
                     status: true,
                     priority: true,
+                    assignee: { select: { name: true } },
                 },
             });
 
@@ -563,6 +579,42 @@ const createMcpServer = () => {
 
             return {
                 content: [{ type: "text", text: JSON.stringify(summary, null, 2) }],
+            };
+        }
+    );
+
+    // ============================================
+    // MEMBERS
+    // ============================================
+
+    server.tool(
+        "list_members",
+        "Listar miembros de la organización para asignar tareas",
+        {
+            limit: z.number().optional().describe("Límite de miembros a devolver, por defecto 50"),
+        },
+        async ({ limit }, extra) => {
+            const orgId = getOrgId(extra);
+
+            const members = await prisma.member.findMany({
+                where: { organizationId: orgId },
+                select: {
+                    user: {
+                        select: {
+                            id: true,
+                            name: true,
+                            email: true,
+                            image: true,
+                        }
+                    },
+                    role: true,
+                },
+                take: limit || 50,
+                orderBy: { createdAt: "asc" },
+            });
+
+            return {
+                content: [{ type: "text", text: JSON.stringify(members, null, 2) }],
             };
         }
     );
