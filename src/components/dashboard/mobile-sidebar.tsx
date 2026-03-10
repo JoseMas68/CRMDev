@@ -10,12 +10,10 @@ import {
   CheckSquare,
   Settings,
   LogOut,
-  Terminal,
   Clock,
   Link2,
   UserPlus,
   Ticket,
-  X,
   Bot,
   Menu,
 } from "lucide-react";
