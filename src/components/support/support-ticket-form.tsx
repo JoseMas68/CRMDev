@@ -28,9 +28,11 @@ import {
 interface SupportTicketFormProps {
   orgSlug: string;
   projects: Array<{ id: string; name: string }>;
+  clientName: string;
+  clientEmail: string;
 }
 
-export function SupportTicketForm({ orgSlug, projects }: SupportTicketFormProps) {
+export function SupportTicketForm({ orgSlug, projects, clientName, clientEmail }: SupportTicketFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -44,6 +46,8 @@ export function SupportTicketForm({ orgSlug, projects }: SupportTicketFormProps)
     defaultValues: {
       category: "SUPPORT",
       priority: "MEDIUM",
+      guestName: clientName,
+      guestEmail: clientEmail,
     },
   });
 
@@ -51,7 +55,11 @@ export function SupportTicketForm({ orgSlug, projects }: SupportTicketFormProps)
     setIsSubmitting(true);
 
     try {
-      const result = await createTicket(orgSlug, data);
+      const result = await createTicket(orgSlug, {
+        ...data,
+        guestName: clientName,
+        guestEmail: clientEmail,
+      });
 
       if (result.success) {
         setIsSuccess(true);
@@ -95,40 +103,6 @@ export function SupportTicketForm({ orgSlug, projects }: SupportTicketFormProps)
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      {/* Guest Info */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="guestName">
-            Tu Nombre <span className="text-destructive">*</span>
-          </Label>
-          <Input
-            id="guestName"
-            placeholder="Juan Pérez"
-            disabled={isSubmitting}
-            {...register("guestName")}
-          />
-          {errors.guestName && (
-            <p className="text-sm text-destructive">{errors.guestName.message}</p>
-          )}
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="guestEmail">
-            Tu Email <span className="text-destructive">*</span>
-          </Label>
-          <Input
-            id="guestEmail"
-            type="email"
-            placeholder="juan@ejemplo.com"
-            disabled={isSubmitting}
-            {...register("guestEmail")}
-          />
-          {errors.guestEmail && (
-            <p className="text-sm text-destructive">{errors.guestEmail.message}</p>
-          )}
-        </div>
-      </div>
-
       {/* Title */}
       <div className="space-y-2">
         <Label htmlFor="title">

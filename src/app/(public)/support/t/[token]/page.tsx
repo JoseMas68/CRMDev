@@ -27,9 +27,8 @@ export async function generateMetadata({ params }: TokenSupportPortalPageProps) 
     };
   }
 
-  const displayName = client.company || client.name;
   return {
-    title: `Portal de Soporte - ${displayName}`,
+    title: "Portal de Soporte CRMDev",
     description: "Reporta incidencias, solicita features o contacta con el equipo de soporte",
   };
 }
@@ -42,6 +41,7 @@ export default async function TokenSupportPortalPage({ params }: TokenSupportPor
     select: {
       id: true,
       name: true,
+      email: true,
       company: true,
       supportTokenActive: true,
       organization: {
@@ -75,7 +75,6 @@ export default async function TokenSupportPortalPage({ params }: TokenSupportPor
   }
 
   const orgSlug = client.organization.slug;
-  const displayName = client.company || client.name;
 
   // Get available projects for this org
   const projects = await prisma.project.findMany({
@@ -95,8 +94,7 @@ export default async function TokenSupportPortalPage({ params }: TokenSupportPor
               <MessageSquare className="h-8 w-8 text-primary" />
             </div>
           </div>
-          <h1 className="text-3xl font-bold mb-2">Portal de Soporte</h1>
-          <p className="text-lg text-primary font-medium mb-1">{displayName}</p>
+          <h1 className="text-3xl font-bold mb-2">Portal de Soporte CRMDev</h1>
           <p className="text-muted-foreground">
             ¿Necesitas ayuda? Crea un ticket y nuestro equipo te responderá lo antes posible.
           </p>
@@ -125,7 +123,12 @@ export default async function TokenSupportPortalPage({ params }: TokenSupportPor
             </h2>
           </div>
           <div className="p-6">
-            <SupportTicketForm orgSlug={orgSlug} projects={projects} />
+            <SupportTicketForm
+              orgSlug={orgSlug}
+              projects={projects}
+              clientName={client.company || client.name}
+              clientEmail={client.email}
+            />
           </div>
         </div>
 
