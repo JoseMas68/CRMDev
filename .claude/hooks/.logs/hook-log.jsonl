@@ -122,3 +122,5 @@
 {"ts":"2026-03-10T18:22:12.772Z","hook":"scout-block","tool":"Bash","dur":28,"status":"ok","exit":0,"error":""}
 {"ts":"2026-03-10T18:33:47.398Z","hook":"scout-block","tool":"Glob","dur":12,"status":"ok","exit":0,"error":""}
 {"ts":"2026-03-10T18:38:25.053Z","hook":"scout-block","tool":"Bash","dur":63,"status":"ok","exit":0,"error":""}
+{"ts":"2026-03-10T18:38:49.463Z","hook":"scout-block","tool":"Bash","dur":8,"status":"ok","exit":0,"error":""}
+{"ts":"2026-03-10T18:47:13.603Z","hook":"scout-block","tool":"Bash","dur":9,"status":"ok","exit":0,"error":""}

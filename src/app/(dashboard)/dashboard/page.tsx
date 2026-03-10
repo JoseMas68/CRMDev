@@ -111,9 +111,9 @@ export default async function DashboardPage() {
   const formattedDate = format(today, "EEEE, d 'de' MMMM", { locale: es });
 
   return (
-    <div className="space-y-4 md:space-y-6 px-4 sm:px-0">
+    <div className="space-y-4 md:space-y-6 overflow-x-hidden">
       {/* Welcome Section */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between px-4 sm:px-0">
         <div>
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight">
             Hola, {session.user.name?.split(" ")[0] ?? "Developer"}
@@ -143,7 +143,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Stats Overview - Mobile cards, Desktop grid */}
-      <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4 px-4 sm:px-0">
         <Link href="/tasks" className="group">
           <Card className="shadow-sm transition-all hover:shadow-lg hover:border-primary/50 cursor-pointer h-full">
             <CardHeader className="pb-2 px-4 pt-4">
@@ -210,7 +210,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Main Content Grid */}
-      <div className="grid gap-4 md:gap-6 lg:grid-cols-3">
+      <div className="grid gap-4 md:gap-6 lg:grid-cols-3 px-4 sm:px-0">
         {/* Tasks Quick View - Takes 2 columns on large screens */}
         <Card className="lg:col-span-2 shadow-sm">
           <CardHeader>
@@ -384,7 +384,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Quick Links Grid */}
-      <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4 px-4 sm:px-0">
         <Link href="/projects" className="group">
           <Card className="transition-all hover:shadow-lg hover:border-primary/50">
             <CardContent className="p-4 sm:p-6">

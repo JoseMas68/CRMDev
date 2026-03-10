@@ -358,7 +358,10 @@ function MobileTaskColumn({
         {/* Header - Always visible, also droppable */}
         <div
           onClick={onToggle}
-          className="bg-gradient-to-r p-5 flex items-center justify-between cursor-pointer active:scale-[0.99] transition-transform"
+          className={cn(
+            "bg-gradient-to-r p-5 flex items-center justify-between cursor-pointer active:scale-[0.99] transition-transform",
+            columnColors[column.id] || "from-gray-500 to-gray-600"
+          )}
         >
           <div className="flex items-center gap-3">
             <div className={cn("w-14 h-14 rounded-xl flex items-center justify-center text-white text-2xl font-bold shadow-lg", columnGradients[column.id] || "bg-gray-500")}>
