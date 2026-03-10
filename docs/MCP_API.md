@@ -32,7 +32,7 @@ Authorization: Bearer crm_YOUR_API_KEY_HERE
 }
 ```
 
-## Endpoints Disponibles (23 tools)
+## Endpoints Disponibles (18 tools)
 
 ---
 
