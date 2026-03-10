@@ -567,6 +567,202 @@ const createMcpServer = () => {
         }
     );
 
+    // ============================================
+    // TICKETS
+    // ============================================
+
+    server.tool(
+        "list_tickets",
+        "Listar tickets de soporte de la organización",
+        {
+            limit: z.number().optional().describe("Límite de tickets a devolver, por defecto 20"),
+            status: z.enum(["OPEN", "IN_PROGRESS", "WAITING_CLIENT", "RESOLVED", "CLOSED"]).optional().describe("Filtrar por estado"),
+            priority: z.enum(["LOW", "MEDIUM", "HIGH", "URGENT"]).optional().describe("Filtrar por prioridad"),
+            category: z.enum(["BUG", "FEATURE_REQUEST", "QUESTION", "SUPPORT", "BILLING"]).optional().describe("Filtrar por categoría"),
+            clientId: z.string().optional().describe("Filtrar por cliente"),
+        },
+        async ({ limit, status, priority, category, clientId }, extra) => {
+            const orgId = getOrgId(extra);
+
+            const tickets = await prisma.ticket.findMany({
+                where: {
+                    organizationId: orgId,
+                    ...(status && { status: status as any }),
+                    ...(priority && { priority: priority as any }),
+                    ...(category && { category: category as any }),
+                    ...(clientId && { clientId }),
+                },
+                select: {
+                    id: true,
+                    title: true,
+                    description: true,
+                    status: true,
+                    priority: true,
+                    category: true,
+                    guestName: true,
+                    guestEmail: true,
+                    project: { select: { name: true } },
+                    client: { select: { name: true, company: true } },
+                    createdAt: true,
+                    updatedAt: true,
+                },
+                take: limit || 20,
+                orderBy: { createdAt: "desc" },
+            });
+
+            return {
+                content: [{ type: "text", text: JSON.stringify(tickets, null, 2) }],
+            };
+        }
+    );
+
+    server.tool(
+        "create_ticket",
+        "Crear un nuevo ticket de soporte",
+        {
+            title: z.string().describe("Título del ticket"),
+            description: z.string().describe("Descripción detallada del problema"),
+            guestName: z.string().describe("Nombre del cliente/invitado"),
+            guestEmail: z.string().email().describe("Email del cliente/invitado"),
+            category: z.enum(["BUG", "FEATURE_REQUEST", "QUESTION", "SUPPORT", "BILLING"]).optional().describe("Categoría del ticket"),
+            priority: z.enum(["LOW", "MEDIUM", "HIGH", "URGENT"]).optional().describe("Prioridad del ticket"),
+            clientId: z.string().optional().describe("ID del cliente (opcional)"),
+            projectId: z.string().optional().describe("ID del proyecto relacionado (opcional)"),
+        },
+        async ({ title, description, guestName, guestEmail, category, priority, clientId, projectId }, extra) => {
+            const orgId = getOrgId(extra);
+
+            // Verify client belongs to org if provided
+            if (clientId) {
+                const client = await prisma.client.findFirst({
+                    where: { id: clientId, organizationId: orgId },
+                    select: { id: true },
+                });
+                if (!client) {
+                    return {
+                        content: [{ type: "text", text: "Error: Cliente no encontrado en tu organización." }],
+                    };
+                }
+            }
+
+            // Verify project belongs to org if provided
+            if (projectId) {
+                const project = await prisma.project.findFirst({
+                    where: { id: projectId, organizationId: orgId },
+                    select: { id: true },
+                });
+                if (!project) {
+                    return {
+                        content: [{ type: "text", text: "Error: Proyecto no encontrado en tu organización." }],
+                    };
+                }
+            }
+
+            const ticket = await prisma.ticket.create({
+                data: {
+                    title,
+                    description,
+                    guestName,
+                    guestEmail,
+                    category: category || "SUPPORT",
+                    priority: priority || "MEDIUM",
+                    status: "OPEN",
+                    clientId,
+                    projectId,
+                    organizationId: orgId,
+                },
+                select: {
+                    id: true,
+                    title: true,
+                    status: true,
+                    priority: true,
+                    category: true,
+                },
+            });
+
+            return {
+                content: [{ type: "text", text: JSON.stringify({ success: true, ticket }, null, 2) }],
+            };
+        }
+    );
+
+    server.tool(
+        "update_ticket",
+        "Actualizar un ticket de soporte existente",
+        {
+            ticketId: z.string().describe("ID del ticket a actualizar"),
+            status: z.enum(["OPEN", "IN_PROGRESS", "WAITING_CLIENT", "RESOLVED", "CLOSED"]).optional().describe("Nuevo estado"),
+            priority: z.enum(["LOW", "MEDIUM", "HIGH", "URGENT"]).optional().describe("Nueva prioridad"),
+            category: z.enum(["BUG", "FEATURE_REQUEST", "QUESTION", "SUPPORT", "BILLING"]).optional().describe("Nueva categoría"),
+        },
+        async ({ ticketId, status, priority, category }, extra) => {
+            const orgId = getOrgId(extra);
+
+            // Verify ticket belongs to org
+            const existing = await prisma.ticket.findFirst({
+                where: { id: ticketId, organizationId: orgId },
+                select: { id: true },
+            });
+
+            if (!existing) {
+                return {
+                    content: [{ type: "text", text: "Error: Ticket no encontrado en tu organización." }],
+                };
+            }
+
+            const ticket = await prisma.ticket.update({
+                where: { id: ticketId },
+                data: {
+                    ...(status && { status }),
+                    ...(priority && { priority }),
+                    ...(category && { category }),
+                },
+                select: {
+                    id: true,
+                    title: true,
+                    status: true,
+                    priority: true,
+                    category: true,
+                },
+            });
+
+            return {
+                content: [{ type: "text", text: JSON.stringify({ success: true, ticket }, null, 2) }],
+            };
+        }
+    );
+
+    server.tool(
+        "delete_ticket",
+        "Eliminar un ticket de soporte (CUIDADO: no se puede deshacer)",
+        {
+            ticketId: z.string().describe("ID del ticket a eliminar"),
+        },
+        async ({ ticketId }, extra) => {
+            const orgId = getOrgId(extra);
+
+            // Verify ticket belongs to org
+            const existing = await prisma.ticket.findFirst({
+                where: { id: ticketId, organizationId: orgId },
+                select: { id: true, title: true },
+            });
+
+            if (!existing) {
+                return {
+                    content: [{ type: "text", text: "Error: Ticket no encontrado en tu organización." }],
+                };
+            }
+
+            await prisma.ticket.delete({
+                where: { id: ticketId },
+            });
+
+            return {
+                content: [{ type: "text", text: JSON.stringify({ success: true, message: `Ticket "${existing.title}" eliminado.` }, null, 2) }],
+            };
+        }
+    );
+
     return server;
 };
 
