@@ -36,7 +36,7 @@ const SKIP_ROUTES = [
   "/api/health",
 ];
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Skip static assets and internal routes
