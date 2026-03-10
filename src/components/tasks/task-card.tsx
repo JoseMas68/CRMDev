@@ -9,6 +9,7 @@ import {
   FolderKanban,
   Trash2,
   CheckCircle2,
+  CheckSquare,
   GitBranch,
   GitPullRequest,
   ExternalLink,
