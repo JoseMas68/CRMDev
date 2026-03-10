@@ -6,7 +6,7 @@ async function AdminDashboard() {
   const result = await getGlobalStats();
 
   if (!result.success) {
-    const error = "error" in result ? result.error : "Unknown error";
+    const error = "error" in result && result.error ? result.error : "Unknown error";
     return (
       <div className="p-8">
         <h1 className="text-3xl font-bold mb-4">Admin Dashboard</h1>
