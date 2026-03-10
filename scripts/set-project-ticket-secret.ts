@@ -28,7 +28,7 @@ async function main() {
     await prisma.project.update({
       where: { id: PROJECT_ID },
       data: {
-        customData,
+        customData: customData as unknown, // Cast to JsonValue
       },
     });
 
