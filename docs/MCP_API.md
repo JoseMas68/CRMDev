@@ -22,6 +22,31 @@ Authorization: Bearer crm_YOUR_API_KEY_HERE
 
 ## Formato de Request
 
+### Discovery (GET)
+Para obtener la lista de todos los endpoints disponibles:
+
+```bash
+curl -X GET https://crmdev.tech/api/mcp/rest \
+  -H "Authorization: Bearer crm_YOUR_KEY"
+```
+
+**Respuesta:**
+```json
+{
+  "success": true,
+  "count": 18,
+  "tools": {
+    "list_projects": {
+      "description": "Listar todos los proyectos de la organización activa del usuario",
+      "parameters": { ... }
+    },
+    ...
+  }
+}
+```
+
+### Ejecutar Tool (POST)
+
 ```json
 {
   "tool": "nombre_del_tool",
