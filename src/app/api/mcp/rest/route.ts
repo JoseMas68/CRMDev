@@ -35,6 +35,196 @@ const restRequestSchema = z.object({
   arguments: z.record(z.any()).optional(),
 });
 
+// Tool definitions for discovery
+const toolDefinitions = {
+  list_projects: {
+    description: "Listar todos los proyectos de la organización activa del usuario",
+    parameters: {
+      limit: { type: "number", description: "Límite de proyectos a devolver, por defecto 10", optional: true },
+      status: { type: "string", description: "Filtrar por estado: NOT_STARTED, IN_PROGRESS, ON_HOLD, COMPLETED, CANCELLED", optional: true },
+    },
+  },
+  create_project: {
+    description: "Crear un nuevo proyecto en la organización",
+    parameters: {
+      name: { type: "string", description: "Nombre del proyecto", required: true },
+      description: { type: "string", description: "Descripción del proyecto", optional: true },
+      type: { type: "string", description: "Tipo: GITHUB, WORDPRESS, VERCEL, OTHER", optional: true },
+      status: { type: "string", description: "Estado: NOT_STARTED, IN_PROGRESS, ON_HOLD, COMPLETED, CANCELLED", optional: true },
+      clientId: { type: "string", description: "ID del cliente asociado", optional: true },
+    },
+  },
+  update_project: {
+    description: "Actualizar un proyecto existente",
+    parameters: {
+      projectId: { type: "string", description: "ID del proyecto", required: true },
+      name: { type: "string", description: "Nuevo nombre", optional: true },
+      description: { type: "string", description: "Nueva descripción", optional: true },
+      status: { type: "string", description: "Nuevo estado", optional: true },
+      progress: { type: "number", description: "Progreso (0-100)", optional: true },
+    },
+  },
+  delete_project: {
+    description: "Eliminar un proyecto (irreversible)",
+    parameters: {
+      projectId: { type: "string", description: "ID del proyecto", required: true },
+    },
+  },
+  list_tasks: {
+    description: "Listar tareas con filtros",
+    parameters: {
+      limit: { type: "number", description: "Límite de tareas a devolver, por defecto 20", optional: true },
+      projectId: { type: "string", description: "Filtrar por proyecto", optional: true },
+      status: { type: "string", description: "Estado: TODO, IN_PROGRESS, IN_REVIEW, DONE, CANCELLED", optional: true },
+    },
+  },
+  create_task: {
+    description: "Crear una nueva tarea con asignación y fecha límite",
+    parameters: {
+      title: { type: "string", description: "Título de la tarea", required: true },
+      description: { type: "string", description: "Descripción detallada", optional: true },
+      projectId: { type: "string", description: "ID del proyecto", optional: true },
+      assigneeId: { type: "string", description: "ID del usuario asignado (usar list_members para obtener IDs)", optional: true },
+      status: { type: "string", description: "Estado inicial: TODO, IN_PROGRESS, IN_REVIEW, DONE, CANCELLED", optional: true },
+      priority: { type: "string", description: "Prioridad: LOW, MEDIUM, HIGH, URGENT", optional: true },
+      dueDate: { type: "string", description: "Fecha límite ISO 8601 (ej: 2026-03-15)", optional: true },
+    },
+  },
+  update_task: {
+    description: "Actualizar una tarea",
+    parameters: {
+      taskId: { type: "string", description: "ID de la tarea", required: true },
+      title: { type: "string", description: "Nuevo título", optional: true },
+      description: { type: "string", description: "Nueva descripción", optional: true },
+      status: { type: "string", description: "Nuevo estado", optional: true },
+      priority: { type: "string", description: "Nueva prioridad", optional: true },
+    },
+  },
+  delete_task: {
+    description: "Eliminar una tarea (irreversible)",
+    parameters: {
+      taskId: { type: "string", description: "ID de la tarea", required: true },
+    },
+  },
+  list_clients: {
+    description: "Listar clientes con filtros",
+    parameters: {
+      limit: { type: "number", description: "Límite de clientes a devolver, por defecto 20", optional: true },
+      status: { type: "string", description: "Estado: LEAD, PROSPECT, CUSTOMER, INACTIVE, CHURNED", optional: true },
+    },
+  },
+  create_client: {
+    description: "Crear un nuevo cliente",
+    parameters: {
+      name: { type: "string", description: "Nombre del cliente", required: true },
+      email: { type: "string", description: "Email del cliente", optional: true },
+      company: { type: "string", description: "Empresa", optional: true },
+      phone: { type: "string", description: "Teléfono", optional: true },
+      status: { type: "string", description: "Estado: LEAD, PROSPECT, CUSTOMER, INACTIVE, CHURNED", optional: true },
+      source: { type: "string", description: "Fuente del lead", optional: true },
+      notes: { type: "string", description: "Notas", optional: true },
+    },
+  },
+  update_client: {
+    description: "Actualizar un cliente",
+    parameters: {
+      clientId: { type: "string", description: "ID del cliente", required: true },
+      name: { type: "string", description: "Nuevo nombre", optional: true },
+      email: { type: "string", description: "Nuevo email", optional: true },
+      company: { type: "string", description: "Nueva empresa", optional: true },
+      status: { type: "string", description: "Nuevo estado", optional: true },
+      notes: { type: "string", description: "Nuevas notas", optional: true },
+    },
+  },
+  delete_client: {
+    description: "Eliminar un cliente (irreversible)",
+    parameters: {
+      clientId: { type: "string", description: "ID del cliente", required: true },
+    },
+  },
+  list_members: {
+    description: "Listar miembros de la organización para asignar tareas",
+    parameters: {
+      limit: { type: "number", description: "Límite de miembros a devolver, por defecto 50", optional: true },
+    },
+  },
+  list_tickets: {
+    description: "Listar tickets de soporte",
+    parameters: {
+      limit: { type: "number", description: "Límite de tickets a devolver, por defecto 20", optional: true },
+      status: { type: "string", description: "Estado: OPEN, IN_PROGRESS, WAITING_CLIENT, RESOLVED, CLOSED", optional: true },
+      priority: { type: "string", description: "Prioridad: LOW, MEDIUM, HIGH, URGENT", optional: true },
+      category: { type: "string", description: "Categoría: BUG, FEATURE_REQUEST, QUESTION, SUPPORT, BILLING", optional: true },
+      clientId: { type: "string", description: "Filtrar por cliente", optional: true },
+    },
+  },
+  create_ticket: {
+    description: "Crear un nuevo ticket de soporte",
+    parameters: {
+      title: { type: "string", description: "Título del ticket", required: true },
+      description: { type: "string", description: "Descripción detallada del problema", required: true },
+      guestName: { type: "string", description: "Nombre del cliente/invitado", required: true },
+      guestEmail: { type: "string", description: "Email del cliente/invitado", required: true },
+      category: { type: "string", description: "Categoría: BUG, FEATURE_REQUEST, QUESTION, SUPPORT, BILLING", optional: true },
+      priority: { type: "string", description: "Prioridad: LOW, MEDIUM, HIGH, URGENT", optional: true },
+      clientId: { type: "string", description: "ID del cliente", optional: true },
+      projectId: { type: "string", description: "ID del proyecto relacionado", optional: true },
+    },
+  },
+  update_ticket: {
+    description: "Actualizar un ticket",
+    parameters: {
+      ticketId: { type: "string", description: "ID del ticket", required: true },
+      status: { type: "string", description: "Nuevo estado: OPEN, IN_PROGRESS, WAITING_CLIENT, RESOLVED, CLOSED", optional: true },
+      priority: { type: "string", description: "Nueva prioridad: LOW, MEDIUM, HIGH, URGENT", optional: true },
+      category: { type: "string", description: "Nueva categoría: BUG, FEATURE_REQUEST, QUESTION, SUPPORT, BILLING", optional: true },
+    },
+  },
+  delete_ticket: {
+    description: "Eliminar un ticket (irreversible)",
+    parameters: {
+      ticketId: { type: "string", description: "ID del ticket", required: true },
+    },
+  },
+  get_project_time_report: {
+    description: "Obtener reporte de tiempo de un proyecto",
+    parameters: {
+      projectId: { type: "string", description: "ID del proyecto", required: true },
+    },
+  },
+};
+
+export async function GET(req: NextRequest) {
+  try {
+    // Auth check - optional for discovery, but still validate if key provided
+    const authHeader = req.headers.get("authorization");
+    if (authHeader?.startsWith("Bearer ")) {
+      const token = authHeader.split(" ")[1];
+      const authData = await getOrgIdFromToken(token);
+      if (!authData) {
+        return NextResponse.json({ error: "Invalid API Key" }, { status: 403 });
+      }
+    }
+
+    const origin = req.headers.get("origin");
+    const corsHeaders = getCorsHeaders(origin);
+
+    return NextResponse.json(
+      {
+        success: true,
+        tools: toolDefinitions,
+        count: Object.keys(toolDefinitions).length,
+      },
+      { headers: corsHeaders }
+    );
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Internal server error", message: error instanceof Error ? error.message : String(error) },
+      { status: 500 }
+    );
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
     // Auth
