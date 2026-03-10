@@ -26,6 +26,7 @@ const PUBLIC_ROUTES = [
   "/api/auth",
   "/api/webhooks",
   "/accept-invitation",
+  "/support",
 ];
 
 // Static assets and API routes to skip
