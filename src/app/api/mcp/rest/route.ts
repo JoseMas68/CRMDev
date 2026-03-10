@@ -19,9 +19,17 @@ async function getOrgIdFromToken(token: string): Promise<{ organizationId: strin
 // Schema para validar requests
 const restRequestSchema = z.object({
   tool: z.enum([
+    // Projects (4)
     'list_projects', 'create_project', 'update_project', 'delete_project',
+    // Tasks (4)
     'list_tasks', 'create_task', 'update_task', 'delete_task',
+    // Clients (4)
     'list_clients', 'create_client', 'update_client', 'delete_client',
+    // Members (1)
+    'list_members',
+    // Tickets (4)
+    'list_tickets', 'create_ticket', 'update_ticket', 'delete_ticket',
+    // Time (1)
     'get_project_time_report'
   ]),
   arguments: z.record(z.any()).optional(),
@@ -180,18 +188,36 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "Project not found" }, { status: 400 });
           }
         }
+        // Verify assignee belongs to org if provided
+        if (args.assigneeId) {
+          const member = await prisma.member.findFirst({
+            where: { userId: args.assigneeId, organizationId },
+            select: { id: true },
+          });
+          if (!member) {
+            return NextResponse.json({ error: "Assignee is not a member of your organization" }, { status: 400 });
+          }
+        }
         result = await prisma.task.create({
           data: {
             title: args.title,
             description: args.description,
             projectId: args.projectId,
+            assigneeId: args.assigneeId,
             status: args.status || "TODO",
             priority: args.priority || "MEDIUM",
             dueDate: args.dueDate ? new Date(args.dueDate) : null,
             organizationId,
             creatorId: userId,
           },
-          select: { id: true, title: true, status: true, priority: true },
+          select: {
+            id: true,
+            title: true,
+            status: true,
+            priority: true,
+            dueDate: true,
+            assignee: { select: { name: true } },
+          },
         });
         break;
 
@@ -323,6 +349,121 @@ export async function POST(req: NextRequest) {
             minutes: e.duration,
           })),
         };
+        break;
+
+      // MEMBERS
+      case 'list_members':
+        const members = await prisma.member.findMany({
+          where: { organizationId },
+          select: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                image: true,
+              }
+            },
+            role: true,
+          },
+          take: args.limit || 50,
+          orderBy: { createdAt: "asc" },
+        });
+        result = members;
+        break;
+
+      // TICKETS
+      case 'list_tickets':
+        result = await prisma.ticket.findMany({
+          where: {
+            organizationId,
+            ...(args.status && { status: args.status }),
+            ...(args.priority && { priority: args.priority }),
+            ...(args.category && { category: args.category }),
+            ...(args.clientId && { clientId: args.clientId }),
+          },
+          select: {
+            id: true,
+            title: true,
+            description: true,
+            status: true,
+            priority: true,
+            category: true,
+            guestName: true,
+            guestEmail: true,
+            createdAt: true,
+            updatedAt: true,
+            client: { select: { name: true } },
+            project: { select: { name: true } },
+          },
+          take: args.limit || 20,
+          orderBy: { createdAt: "desc" },
+        });
+        break;
+
+      case 'create_ticket':
+        // Verify client if provided
+        if (args.clientId) {
+          const ticketClient = await prisma.client.findFirst({
+            where: { id: args.clientId, organizationId },
+            select: { id: true },
+          });
+          if (!ticketClient) {
+            return NextResponse.json({ error: "Client not found" }, { status: 400 });
+          }
+        }
+        result = await prisma.ticket.create({
+          data: {
+            title: args.title,
+            description: args.description,
+            guestName: args.guestName,
+            guestEmail: args.guestEmail,
+            category: args.category || "SUPPORT",
+            priority: args.priority || "MEDIUM",
+            status: "OPEN",
+            clientId: args.clientId,
+            projectId: args.projectId,
+            organizationId,
+          },
+          select: {
+            id: true,
+            title: true,
+            status: true,
+            priority: true,
+            category: true,
+          },
+        });
+        break;
+
+      case 'update_ticket':
+        const existingTicket = await prisma.ticket.findFirst({
+          where: { id: args.ticketId, organizationId },
+          select: { id: true },
+        });
+        if (!existingTicket) {
+          return NextResponse.json({ error: "Ticket not found" }, { status: 404 });
+        }
+        result = await prisma.ticket.update({
+          where: { id: args.ticketId },
+          data: {
+            ...(args.status && { status: args.status }),
+            ...(args.priority && { priority: args.priority }),
+            ...(args.category && { category: args.category }),
+          },
+          select: { id: true, title: true, status: true, priority: true, category: true },
+        });
+        break;
+
+      case 'delete_ticket':
+        const toDeleteTicket = await prisma.ticket.findFirst({
+          where: { id: args.ticketId, organizationId },
+          select: { id: true, title: true },
+        });
+        if (!toDeleteTicket) {
+          return NextResponse.json({ error: "Ticket not found" }, { status: 404 });
+        }
+        await prisma.ticket.delete({ where: { id: args.ticketId } });
+        result = { success: true, message: `Ticket "${toDeleteTicket.title}" deleted` };
         break;
 
       default:
