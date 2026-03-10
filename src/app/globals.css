@@ -69,6 +69,102 @@
     --charcoal-card: 240 6% 10%;
     --charcoal-border: 240 4% 16%;
   }
+
+  /**
+   * TEMA BUSINESS (Profesional Claro)
+   * Tema corporativo con azul y blanco
+   */
+  .theme-business {
+    --background: 0 0% 98%;           /* Gris muy claro */
+    --foreground: 220 20% 15%;        /* Gris oscuro */
+    --card: 0 0% 100%;                /* Blanco puro */
+    --card-foreground: 220 20% 15%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 20% 15%;
+    --primary: 210 100% 45%;          /* Azul corporativo #0066CC */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 24 95% 53%;             /* Naranja #ff6b35 */
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 90%;
+    --input: 214.3 31.8% 90%;
+    --ring: 210 100% 45%;
+    --radius: 0.5rem;
+    --chart-1: 210 100% 45%;          /* Azul */
+    --chart-2: 142 71% 45%;           /* Verde */
+    --chart-3: 199 89% 48%;           /* Cyan */
+    --chart-4: 24 95% 53%;            /* Naranja */
+    --chart-5: 0 84% 60%;             /* Rojo */
+  }
+
+  /**
+   * TEMA BUSINESS-DARK (Profesional Oscuro)
+   * Tema corporativo elegante en modo oscuro
+   */
+  .theme-business-dark {
+    --background: 222 47% 11%;         /* #0f172a slate oscuro */
+    --foreground: 210 40% 98%;         /* Blanco suave */
+    --card: 222 47% 14%;               /* #1e293b slate más claro */
+    --card-foreground: 210 40% 98%;
+    --popover: 222 47% 14%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217 91% 60%;            /* #3b82f6 azul brillante */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 217 91% 60%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 222 47% 18%;              /* #334155 slate medio */
+    --muted-foreground: 215 20% 65%;
+    --accent: 25 95% 53%;              /* #f97316 naranja vibrante */
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 62.8% 50%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 222 47% 20%;             /* #334155 */
+    --input: 222 47% 20%;
+    --ring: 217 91% 60%;               /* azul brillante */
+    --radius: 0.5rem;
+    --chart-1: 217 91% 60%;            /* Azul brillante */
+    --chart-2: 25 95% 53%;            /* Naranja */
+    --chart-3: 142 71% 45%;            /* Verde */
+    --chart-4: 199 89% 48%;            /* Cyan */
+    --chart-5: 0 62.8% 50%;            /* Rojo */
+  }
+
+  /**
+   * TEMA LIGHT (Minimalista)
+   * Tema claro, limpio y minimalista
+   */
+  .theme-light {
+    --background: 0 0% 100%;           /* Blanco puro */
+    --foreground: 220 20% 25%;         /* Gris oscuro para texto */
+    --card: 0 0% 100%;                 /* Blanco */
+    --card-foreground: 220 20% 25%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 20% 25%;
+    --primary: 215 25% 27%;            /* Gris azulado */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 142 71% 45%;             /* Verde suave */
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 215 25% 27%;
+    --radius: 0.5rem;
+    --chart-1: 215 25% 27%;
+    --chart-2: 142 71% 45%;
+    --chart-3: 199 89% 48%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 0 84% 60%;
+  }
 }
 
 @layer base {
@@ -78,22 +174,77 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 
-  /* JetBrains Mono for everything */
-  .font-mono,
-  .font-sans,
-  code,
-  kbd,
-  pre,
-  samp,
-  input,
-  textarea,
-  button,
-  select {
+  /* TEMA DEV (.dark) - JetBrains Mono */
+  html.dark body {
     font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace !important;
+  }
+
+  html.dark .font-mono,
+  html.dark .font-sans,
+  html.dark code,
+  html.dark kbd,
+  html.dark pre,
+  html.dark samp,
+  html.dark input,
+  html.dark textarea,
+  html.dark button,
+  html.dark select {
+    font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace !important;
+  }
+
+  /* TEMAS BUSINESS, BUSINESS-DARK, LIGHT - Inter */
+  html.theme-business body,
+  html.theme-business-dark body,
+  html.theme-light body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+  }
+
+  html.theme-business .font-sans,
+  html.theme-business-dark .font-sans,
+  html.theme-business input,
+  html.theme-business-dark input,
+  html.theme-business textarea,
+  html.theme-business-dark textarea,
+  html.theme-business button,
+  html.theme-business-dark button,
+  html.theme-business select,
+  html.theme-business-dark select,
+  html.theme-light .font-sans,
+  html.theme-light input,
+  html.theme-light textarea,
+  html.theme-light button,
+  html.theme-light select {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+  }
+
+  /* Mantener JetBrains Mono solo para código en temas no-dev */
+  html.theme-business code,
+  html.theme-business-dark code,
+  html.theme-business kbd,
+  html.theme-business-dark kbd,
+  html.theme-business pre,
+  html.theme-business-dark pre,
+  html.theme-business samp,
+  html.theme-business-dark samp,
+  html.theme-business .font-mono,
+  html.theme-business-dark .font-mono,
+  html.theme-light code,
+  html.theme-light kbd,
+  html.theme-light pre,
+  html.theme-light samp,
+  html.theme-light .font-mono {
+    font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace !important;
+  }
+
+  /* Hover states para dropdowns en temas business y light */
+  html.theme-business .dropdown-menu-item:hover,
+  html.theme-business-dark .dropdown-menu-item:hover,
+  html.theme-light .dropdown-menu-item:hover {
+    background-color: hsl(var(--accent)) !important;
+    color: hsl(var(--accent-foreground)) !important;
   }
 
   /* Custom scrollbar */
@@ -216,6 +367,73 @@
 
   .data-table-row {
     @apply hover:bg-muted/50 transition-colors;
+  }
+
+  /**
+   * Estilos específicos para tema Business
+   * Sombras más suaves y bordes más sutiles
+   */
+  html.theme-business .card-improved {
+    @apply shadow-sm hover:shadow-md;
+  }
+
+  html.theme-business .kanban-card {
+    @apply shadow-sm hover:shadow-md;
+  }
+
+  html.theme-business button {
+    @apply font-medium;
+  }
+
+  html.theme-business .sidebar-link {
+    @apply hover:bg-gray-100;
+  }
+
+  html.theme-business .sidebar-link-active {
+    @apply bg-gray-100 text-blue-600;
+  }
+
+  /**
+   * Estilos específicos para tema Business-Dark
+   */
+  html.theme-business-dark .card-improved {
+    @apply shadow-sm hover:shadow-md;
+  }
+
+  html.theme-business-dark .kanban-card {
+    @apply shadow-sm hover:shadow-md;
+  }
+
+  html.theme-business-dark button {
+    @apply font-medium;
+  }
+
+  html.theme-business-dark .sidebar-link {
+    @apply hover:bg-slate-800;
+  }
+
+  html.theme-business-dark .sidebar-link-active {
+    @apply bg-slate-800 text-blue-400;
+  }
+
+  /**
+   * Estilos específicos para tema Light
+   * Minimalista con menos sombras
+   */
+  html.theme-light .card-improved {
+    @apply shadow-none hover:shadow-sm border-gray-200;
+  }
+
+  html.theme-light .kanban-card {
+    @apply shadow-none hover:shadow-sm border-gray-200;
+  }
+
+  html.theme-light .sidebar-link {
+    @apply hover:bg-gray-100;
+  }
+
+  html.theme-light .sidebar-link-active {
+    @apply bg-gray-100 text-gray-900;
   }
 }
 

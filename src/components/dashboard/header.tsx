@@ -26,6 +26,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MobileSidebar } from "@/components/dashboard/mobile-sidebar";
+import { ThemeSwitcher } from "@/components/theme-switcher";
 import { toast } from "sonner";
 
 interface HeaderProps {
@@ -128,6 +129,9 @@ export function DashboardHeader({ user }: HeaderProps) {
 
         {/* Right side actions */}
         <div className="flex items-center gap-2 ml-auto">
+          {/* Theme Switcher */}
+          <ThemeSwitcher />
+
           {/* Search (mobile) */}
           <Button variant="ghost" size="icon" className="md:hidden">
             <Search className="h-5 w-5" />
@@ -162,15 +166,9 @@ export function DashboardHeader({ user }: HeaderProps) {
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
-                <Link href="/settings" className="flex items-center gap-2">
+                <Link href="/settings/profile" className="flex items-center gap-2">
                   <User className="h-4 w-4" />
                   <span>Mi Perfil</span>
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href="/settings" className="flex items-center gap-2">
-                  <Settings className="h-4 w-4" />
-                  <span>Configuración</span>
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />

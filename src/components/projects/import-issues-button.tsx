@@ -79,17 +79,17 @@ export function ImportIssuesButton({ projectId, repoUrl }: ImportIssuesButtonPro
             Importar Issues de GitHub
           </AlertDialogTitle>
           <AlertDialogDescription className="space-y-2">
-            <p>
+            <div>
               Se importaran todos los issues abiertos de{" "}
               <code className="bg-muted px-1.5 py-0.5 rounded text-sm font-mono">
                 {repoName}
               </code>{" "}
               como tareas en este proyecto.
-            </p>
-            <p className="text-sm">
+            </div>
+            <div className="text-sm">
               Los issues ya importados seran ignorados. Las prioridades se asignaran
               automaticamente segun los labels del issue.
-            </p>
+            </div>
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

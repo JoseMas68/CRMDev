@@ -141,20 +141,21 @@ export function DealCard({ deal, isDragging, clients }: DealCardProps) {
         onClick={handleCardClick}
         className={cn(
           "kanban-card group p-0 overflow-hidden cursor-pointer",
-          (isDragging || isSortableDragging) && "kanban-card-dragging"
+          "hover:shadow-lg transition-all duration-200 hover:-translate-y-1",
+          (isDragging || isSortableDragging) && "kanban-card-dragging scale-105"
         )}
       >
         <motion.div
-          whileHover={{ scale: 1.015 }}
+          whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           transition={{ type: "spring", stiffness: 400, damping: 25 }}
-          className="p-3 shadow-sm h-full flex flex-col"
+          className="p-4 h-full flex flex-col gap-3"
         >
-          {/* Header with title and menu */}
-          <div className="flex items-start justify-between gap-2 mb-2">
+          {/* Header with title and menu - Improved layout */}
+          <div className="flex items-start gap-3 pr-10">
             <Link
               href={`/pipeline/${deal.id}`}
-              className="font-medium text-sm line-clamp-2 flex-1 hover:text-primary hover:underline"
+              className="font-semibold text-sm line-clamp-2 flex-1 hover:text-primary hover:underline leading-snug"
               onClick={(e: React.MouseEvent) => {
                 if (isDragging || isSortableDragging) {
                   e.preventDefault();
@@ -163,16 +164,19 @@ export function DealCard({ deal, isDragging, clients }: DealCardProps) {
             >
               {deal.title}
             </Link>
-            <div className="flex items-center gap-1">
+
+            {/* Action menu - Better positioned */}
+            <div className="absolute top-3 right-3 flex items-center gap-1">
               {/* Botón de ver detalle - visible en móvil */}
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-6 w-6 sm:hidden opacity-100"
+                className="h-8 w-8 sm:hidden opacity-100 hover:bg-muted"
                 onClick={(e) => {
                   e.stopPropagation();
                   router.push(`/pipeline/${deal.id}`);
                 }}
+                aria-label="Ver detalles"
               >
                 <ChevronRight className="h-4 w-4" />
               </Button>
@@ -183,13 +187,14 @@ export function DealCard({ deal, isDragging, clients }: DealCardProps) {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-6 w-6 hidden sm:flex opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="h-8 w-8 hidden sm:flex opacity-0 group-hover:opacity-100 transition-opacity hover:bg-muted"
                     onClick={(e) => e.stopPropagation()}
+                    aria-label="Más opciones"
                   >
                     <MoreHorizontal className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
+                <DropdownMenuContent align="end" className="w-48">
                   <DropdownMenuItem
                     onClick={(e) => {
                       e.stopPropagation();
@@ -236,21 +241,21 @@ export function DealCard({ deal, isDragging, clients }: DealCardProps) {
             </div>
           </div>
 
-          {/* Value */}
-          <div className="text-lg font-bold text-primary mb-2">
+          {/* Value - Better emphasized */}
+          <div className="text-lg font-bold text-primary">
             {formatCurrency(deal.value)}
           </div>
 
-          {/* Client */}
-          <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
-            <User className="h-3 w-3" />
+          {/* Client - Improved spacing */}
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <User className="h-4 w-4 flex-shrink-0" />
             <span className="truncate">{deal.client?.name || "Sin cliente"}</span>
           </div>
 
-          {/* Expected close date */}
+          {/* Expected close date - Better spacing */}
           {deal.expectedCloseDate && (
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <Calendar className="h-3 w-3" />
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Calendar className="h-4 w-4 flex-shrink-0" />
               <span>{formatDate(deal.expectedCloseDate)}</span>
             </div>
           )}

@@ -39,6 +39,7 @@ export function Providers({ children }: ProvidersProps) {
       defaultTheme="dark"
       enableSystem={false}
       disableTransitionOnChange
+      themes={["light", "dark", "theme-business", "theme-business-dark", "theme-light"]}
     >
       <QueryClientProvider client={queryClient}>
         {children}

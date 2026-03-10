@@ -150,15 +150,16 @@ export function TaskCard({ task, isDragging, projects, members, onClick, useDrag
         className={cn(
           "bg-card border rounded-lg shadow-sm group relative overflow-hidden",
           !useDragHandle && "cursor-grab active:cursor-grabbing",
-          "hover:shadow-md transition-shadow",
-          (isDragging || isSortableDragging) && "shadow-lg opacity-50",
+          "hover:shadow-md transition-all duration-200 hover:-translate-y-0.5",
+          (isDragging || isSortableDragging) && "shadow-xl opacity-50 scale-105",
           isOverdue && "border-destructive/50"
         )}
       >
         <motion.div
-          whileHover={{ scale: 1.015 }}
+          whileHover={{ scale: useDragHandle ? 1.01 : 1.015 }}
+          whileTap={{ scale: 0.98 }}
           transition={{ type: "spring", stiffness: 400, damping: 25 }}
-          className="p-3 h-full flex flex-col"
+          className="p-4 h-full flex flex-col gap-3"
         >
           {/* Drag Handle - Only shown when useDragHandle is true */}
           {useDragHandle && (
@@ -166,16 +167,18 @@ export function TaskCard({ task, isDragging, projects, members, onClick, useDrag
               ref={setHandleRef}
               {...attributes}
               {...listeners}
-              className="cursor-grab active:cursor-grabbing touch-none absolute top-2 right-2 p-1 hover:bg-muted rounded"
+              className="absolute top-3 right-3 p-1.5 hover:bg-muted rounded-md cursor-grab active:cursor-grabbing touch-none transition-colors z-10"
+              title="Arrastrar para reordenar"
             >
               <GripVertical className="h-4 w-4 text-muted-foreground" />
             </div>
           )}
-          {/* Header */}
-          <div className="flex items-start justify-between gap-2 mb-2">
+
+          {/* Header - Improved spacing and layout */}
+          <div className="flex items-start gap-3 pr-8">
             <h4
               className={cn(
-                "font-medium text-sm line-clamp-2",
+                "font-medium text-sm line-clamp-2 flex-1 leading-snug",
                 onClick && "cursor-pointer hover:text-primary transition-colors"
               )}
               onClick={(e) => {
@@ -187,18 +190,21 @@ export function TaskCard({ task, isDragging, projects, members, onClick, useDrag
             >
               {task.title}
             </h4>
+
+            {/* Action button - Better positioned and sized */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
+                  className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 hover:bg-muted"
                   onClick={(e) => e.stopPropagation()}
+                  aria-label="Más opciones"
                 >
                   <MoreHorizontal className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
+              <DropdownMenuContent align="end" className="w-48">
                 {onClick && (
                   <DropdownMenuItem
                     onClick={(e) => {
@@ -236,44 +242,44 @@ export function TaskCard({ task, isDragging, projects, members, onClick, useDrag
             </DropdownMenu>
           </div>
 
-          {/* Description preview */}
+          {/* Description preview - Improved spacing */}
           {task.description && (
-            <p className="text-xs text-muted-foreground line-clamp-2 mb-2">
+            <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
               {task.description}
             </p>
           )}
 
-          {/* Metadata */}
+          {/* Metadata - Better organized */}
           <div className="flex flex-wrap items-center gap-2">
             <Badge
               variant="secondary"
-              className={cn("text-xs font-normal", priorityColors[task.priority])}
+              className={cn("text-xs font-normal px-2 py-1", priorityColors[task.priority])}
             >
               {priorityLabels[task.priority]}
             </Badge>
 
             {task.project && (
-              <span className="text-xs text-muted-foreground flex items-center gap-1">
-                <FolderKanban className="h-3 w-3" />
+              <span className="text-xs text-muted-foreground flex items-center gap-1.5">
+                <FolderKanban className="h-3.5 w-3.5" />
                 {task.project.name}
               </span>
             )}
           </div>
 
-          {/* GitHub Links - CRMDev */}
+          {/* GitHub Links - CRMDev - Better spacing */}
           {(task.issueUrl || task.prUrl || task.commitHash) && (
-            <div className="flex flex-wrap items-center gap-2 mt-2">
+            <div className="flex flex-wrap items-center gap-2">
               {task.issueUrl && (
                 <a
                   href={task.issueUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-xs text-muted-foreground hover:text-primary flex items-center gap-1"
+                  className="text-xs text-muted-foreground hover:text-primary flex items-center gap-1.5 px-2 py-1 rounded-md hover:bg-muted/50 transition-colors"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <GitBranch className="h-3 w-3" />
-                  Issue
-                  <ExternalLink className="h-2 w-2" />
+                  <GitBranch className="h-3.5 w-3.5" />
+                  <span>Issue</span>
+                  <ExternalLink className="h-2.5 w-2.5" />
                 </a>
               )}
               {task.prUrl && (
@@ -281,30 +287,30 @@ export function TaskCard({ task, isDragging, projects, members, onClick, useDrag
                   href={task.prUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-xs text-muted-foreground hover:text-primary flex items-center gap-1"
+                  className="text-xs text-muted-foreground hover:text-primary flex items-center gap-1.5 px-2 py-1 rounded-md hover:bg-muted/50 transition-colors"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <GitPullRequest className="h-3 w-3" />
-                  PR
-                  <ExternalLink className="h-2 w-2" />
+                  <GitPullRequest className="h-3.5 w-3.5" />
+                  <span>PR</span>
+                  <ExternalLink className="h-2.5 w-2.5" />
                 </a>
               )}
               {task.commitHash && (
-                <code className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded font-mono">
+                <code className="text-[10px] text-muted-foreground bg-muted px-2 py-1 rounded-md font-mono">
                   {task.commitHash.slice(0, 7)}
                 </code>
               )}
             </div>
           )}
 
-          {/* Dev Labels - CRMDev */}
+          {/* Dev Labels - CRMDev - Better spacing */}
           {task.labels && task.labels.length > 0 && (
-            <div className="flex flex-wrap gap-1 mt-2">
+            <div className="flex flex-wrap gap-1.5">
               {task.labels.map((label) => (
                 <Badge
                   key={label}
                   variant={label as "bug" | "feature" | "enhancement" | "documentation" | "refactor" | "hotfix"}
-                  className="text-[10px] px-1.5 py-0"
+                  className="text-[10px] px-2 py-0.5 font-medium"
                 >
                   {label}
                 </Badge>
@@ -312,30 +318,38 @@ export function TaskCard({ task, isDragging, projects, members, onClick, useDrag
             </div>
           )}
 
-          {/* Footer */}
-          <div className="flex items-center justify-between mt-3 pt-2 border-t">
-            {task.dueDate ? (
-              <span
-                className={cn(
-                  "text-xs flex items-center gap-1",
-                  isOverdue ? "text-destructive" : "text-muted-foreground"
-                )}
-              >
-                <Calendar className="h-3 w-3" />
-                {formatDate(task.dueDate)}
-              </span>
-            ) : (
-              <span />
-            )}
+          {/* Footer - Better organized with consistent spacing */}
+          <div className="flex items-center justify-between pt-3 border-t mt-auto">
+            <div className="flex items-center gap-3">
+              {task.dueDate && (
+                <span
+                  className={cn(
+                    "text-xs flex items-center gap-1.5",
+                    isOverdue ? "text-destructive font-medium" : "text-muted-foreground"
+                  )}
+                >
+                  <Calendar className="h-3.5 w-3.5" />
+                  <span>{formatDate(task.dueDate)}</span>
+                </span>
+              )}
+
+              {/* Subtasks count - Better positioned */}
+              {task._count.subtasks > 0 && (
+                <span className="text-xs text-muted-foreground flex items-center gap-1.5">
+                  <CheckSquare className="h-3.5 w-3.5" />
+                  <span>{task._count.subtasks}</span>
+                </span>
+              )}
+            </div>
 
             {task.assignee && (
-              <div className="flex items-center gap-1.5" title={`Asignado a: ${task.assignee.name}`}>
-                <Avatar className="h-6 w-6">
+              <div className="flex items-center gap-2" title={`Asignado a: ${task.assignee.name}`}>
+                <Avatar className="h-7 w-7 border border-border/50">
                   <AvatarImage
                     src={task.assignee.image || undefined}
                     alt={task.assignee.name}
                   />
-                  <AvatarFallback className="text-[10px]">
+                  <AvatarFallback className="text-[10px] font-medium">
                     {task.assignee.name
                       .split(" ")
                       .map((n) => n[0])
@@ -344,19 +358,12 @@ export function TaskCard({ task, isDragging, projects, members, onClick, useDrag
                       .slice(0, 2)}
                   </AvatarFallback>
                 </Avatar>
-                <span className="text-xs text-muted-foreground truncate max-w-[100px]">
+                <span className="text-xs text-muted-foreground truncate max-w-[80px] hidden sm:inline-block">
                   {task.assignee.name.split(" ")[0]}
                 </span>
               </div>
             )}
           </div>
-
-          {/* Subtasks count */}
-          {task._count.subtasks > 0 && (
-            <div className="mt-2 text-xs text-muted-foreground">
-              {task._count.subtasks} subtarea{task._count.subtasks > 1 ? "s" : ""}
-            </div>
-          )}
         </motion.div>
       </div>
 

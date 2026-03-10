@@ -7,6 +7,12 @@ const config: Config = {
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
+  // Soporte para múltiples temas personalizados
+  safelist: [
+    "dark",
+    "theme-business",
+    "theme-light",
+  ],
   theme: {
     container: {
       center: true,
