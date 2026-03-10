@@ -1,44 +1,43 @@
 import { NextRequest, NextResponse } from "next/server";
 import { activeTransports } from "@/lib/mcp";
+import { getCorsHeaders, handleOptionsRequest } from "@/lib/cors";
+
+// Helper to create response with CORS headers
+function createJsonResponse(data: any, status: number, origin: string | null) {
+  const corsHeaders = getCorsHeaders(origin);
+  return NextResponse.json(data, {
+    status,
+    headers: corsHeaders,
+  });
+}
+
+function createTextResponse(data: string, status: number, origin: string | null) {
+  const corsHeaders = getCorsHeaders(origin);
+  return new Response(data, {
+    status,
+    headers: corsHeaders,
+  });
+}
 
 export async function POST(req: NextRequest) {
+    const origin = req.headers.get("origin");
+
     // Authentication validation (similar to SSE for extra security)
     const authHeader = req.headers.get("authorization");
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-        return NextResponse.json({ error: "Unauthorized" }, {
-            status: 401,
-            headers: {
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Methods": "POST, OPTIONS",
-                "Access-Control-Allow-Headers": "Content-Type, Authorization",
-            },
-        });
+        return createJsonResponse({ error: "Unauthorized" }, 401, origin);
     }
 
     // Find the sessionId in the query params or URL
     const sessionId = req.nextUrl.searchParams.get("sessionId");
     if (!sessionId) {
-        return NextResponse.json({ error: "Missing sessionId" }, {
-            status: 400,
-            headers: {
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Methods": "POST, OPTIONS",
-                "Access-Control-Allow-Headers": "Content-Type, Authorization",
-            },
-        });
+        return createJsonResponse({ error: "Missing sessionId" }, 400, origin);
     }
 
     // Find the exact transport matching this session
     const transport = activeTransports.get(sessionId);
     if (!transport) {
-        return NextResponse.json({ error: "Session not found or disconnected" }, {
-            status: 404,
-            headers: {
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Methods": "POST, OPTIONS",
-                "Access-Control-Allow-Headers": "Content-Type, Authorization",
-            },
-        });
+        return createJsonResponse({ error: "Session not found or disconnected" }, 404, origin);
     }
 
     try {
@@ -52,34 +51,15 @@ export async function POST(req: NextRequest) {
             transport.transport.onmessage({ ...body, _meta });
         }
 
-        return new Response("Accepted", {
-            status: 202,
-            headers: {
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Methods": "POST, OPTIONS",
-                "Access-Control-Allow-Headers": "Content-Type, Authorization",
-            },
-        });
+        return createTextResponse("Accepted", 202, origin);
     } catch (error) {
         console.error("[MCP_POST_MESSAGE]", error);
-        return NextResponse.json({ error: "Invalid JSON or Internal Error" }, {
-            status: 500,
-            headers: {
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Methods": "POST, OPTIONS",
-                "Access-Control-Allow-Headers": "Content-Type, Authorization",
-            },
-        });
+        return createJsonResponse({ error: "Invalid JSON or Internal Error" }, 500, origin);
     }
 }
 
 // OPTIONS for CORS (Claude / other web-based clients sending preflights)
-export async function OPTIONS() {
-    return new Response(null, {
-        headers: {
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
-            "Access-Control-Allow-Headers": "Content-Type, Authorization",
-        }
-    });
+export async function OPTIONS(req: NextRequest) {
+    const origin = req.headers.get("origin");
+    return handleOptionsRequest(origin);
 }

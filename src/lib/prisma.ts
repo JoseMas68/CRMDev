@@ -43,6 +43,10 @@ const TENANT_MODELS = [
   "customField",
   "pipelineStage",
   "activity",
+  "ticket",
+  "timeEntry",
+  "projectMember",
+  "apiKey",
 ] as const;
 
 type TenantModel = (typeof TENANT_MODELS)[number];

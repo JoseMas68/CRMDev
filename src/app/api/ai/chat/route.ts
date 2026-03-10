@@ -5,6 +5,7 @@ import OpenAI from "openai";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getPrismaWithSession } from "@/lib/prisma";
+import { checkRateLimit, getRateLimitKey, RATE_LIMITS } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const maxDuration = 60; // 60 segundos para responses largos
@@ -304,6 +305,21 @@ export async function POST(req: NextRequest) {
     }
 
     const { activeOrganizationId } = session.session;
+
+    // Rate limiting
+    const rateLimitKey = getRateLimitKey("ai:chat", session.user.id, activeOrganizationId);
+    const rateLimitResult = await checkRateLimit(
+      rateLimitKey,
+      RATE_LIMITS.aiChat.limit,
+      RATE_LIMITS.aiChat.window
+    );
+
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { error: "Too many requests", retryAfter: 60 },
+        { status: 429 }
+      );
+    }
 
     // 2. Obtener API Key de OpenAI de la organización
     const org = await prisma.organization.findUnique({

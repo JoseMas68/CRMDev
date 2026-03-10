@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { checkRateLimit, getRateLimitKey, RATE_LIMITS } from "@/lib/rate-limit";
 
 /**
  * POST /api/time-entry
@@ -21,6 +22,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Rate limiting
+    const rateLimitKey = getRateLimitKey("time:entry", session.user.id, session.session.activeOrganizationId ?? undefined);
+    const rateLimitResult = await checkRateLimit(
+      rateLimitKey,
+      RATE_LIMITS.timeEntry.limit,
+      RATE_LIMITS.timeEntry.window
+    );
+
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { success: false, error: "Too many requests", retryAfter: 60 },
+        { status: 429 }
+      );
+    }
+
     const body = await request.json();
     const { taskId, startTime, endTime, duration, description } = body;
 
@@ -36,7 +52,7 @@ export async function POST(request: NextRequest) {
     const task = await prisma.task.findFirst({
       where: {
         id: taskId,
-        organizationId: session.session.activeOrganizationId!,
+        organizationId: session.session.activeOrganizationId ?? undefined,
       },
       include: {
         project: true,
@@ -94,9 +110,24 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // Rate limiting (GET requests are usually less aggressive)
+    const rateLimitKey = getRateLimitKey("time:entry:get", session.user.id, session.session.activeOrganizationId ?? undefined);
+    const rateLimitResult = await checkRateLimit(
+      rateLimitKey,
+      RATE_LIMITS.timeEntry.limit,
+      RATE_LIMITS.timeEntry.window
+    );
+
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { success: false, error: "Too many requests", retryAfter: 60 },
+        { status: 429 }
+      );
+    }
+
     const timeEntries = await prisma.timeEntry.findMany({
       where: {
-        organizationId: session.session.activeOrganizationId!,
+        organizationId: session.session.activeOrganizationId ?? undefined,
         userId: session.user.id,
       },
       include: {

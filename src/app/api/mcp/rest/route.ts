@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+import { getCorsHeaders, handleOptionsRequest } from "@/lib/cors";
+import { checkRateLimit, getRateLimitKey, RATE_LIMITS } from "@/lib/rate-limit";
 
 // Use Node.js runtime for Prisma support
 export const runtime = 'nodejs';
@@ -41,6 +43,21 @@ export async function POST(req: NextRequest) {
     }
 
     const { organizationId, userId } = authData;
+
+    // Rate limiting
+    const rateLimitKey = getRateLimitKey("mcp:rest", userId, organizationId);
+    const rateLimitResult = await checkRateLimit(
+      rateLimitKey,
+      RATE_LIMITS.mcpRest.limit,
+      RATE_LIMITS.mcpRest.window
+    );
+
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { error: "Too many requests", retryAfter: 10 },
+        { status: 429 }
+      );
+    }
 
     // Update last used
     await prisma.apiKey.updateMany({
@@ -312,7 +329,14 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "Unknown tool" }, { status: 400 });
     }
 
-    return NextResponse.json({ success: true, data: result });
+    // Add CORS headers to response
+    const origin = req.headers.get("origin");
+    const corsHeaders = getCorsHeaders(origin);
+
+    return NextResponse.json(
+      { success: true, data: result },
+      { headers: corsHeaders }
+    );
   } catch (error) {
     console.error("[MCP_REST]", error);
     if (error instanceof z.ZodError) {
@@ -328,12 +352,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
-export async function OPTIONS() {
-  return new Response(null, {
-    headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type, Authorization",
-    },
-  });
+export async function OPTIONS(req: NextRequest) {
+  const origin = req.headers.get("origin");
+  return handleOptionsRequest(origin);
 }

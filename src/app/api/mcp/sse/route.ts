@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { mcpServer, activeTransports } from "@/lib/mcp";
 import { prisma } from "@/lib/prisma";
+import { getCorsHeaders, handleOptionsRequest } from "@/lib/cors";
 
 // Use Node.js runtime for Prisma support
 export const runtime = 'nodejs';
@@ -71,23 +72,21 @@ export async function GET(req: NextRequest) {
     });
 
     // Return the web stream
+    const origin = req.headers.get("origin");
+    const corsHeaders = getCorsHeaders(origin);
+
     return new Response(stream, {
         headers: {
             "Content-Type": "text/event-stream",
             "Cache-Control": "no-cache",
             "Connection": "keep-alive",
-            "Access-Control-Allow-Origin": "*",
+            ...corsHeaders,
         },
     });
 }
 
 // OPTIONS for CORS (Claude / other web-based clients sending preflights)
-export async function OPTIONS() {
-    return new Response(null, {
-        headers: {
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
-            "Access-Control-Allow-Headers": "Content-Type, Authorization",
-        }
-    });
+export async function OPTIONS(req: NextRequest) {
+    const origin = req.headers.get("origin");
+    return handleOptionsRequest(origin);
 }

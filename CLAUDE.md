@@ -5,17 +5,18 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project Overview
 
 CRMPro is a **multi-tenant SaaS CRM** built with:
-- **Next.js 15** (App Router, React Server Components)
+- **Next.js 15** (App Router, React Server Components) with **Turbopack** in dev
 - **Better Auth** with organization plugin for multi-tenancy
 - **Prisma** with PostgreSQL (Neon/Supabase) - shared database with tenant isolation
 - **MCP (Model Context Protocol)** for AI agent integrations
+- **OpenAI API** for AI Assistant chat functionality
 - **Stripe** for subscriptions
 - **Resend** for emails
 
 ## Development Commands
 
 ```bash
-# Development server (with Turbopack)
+# Development server (with Turbopack - default)
 pnpm dev
 
 # Build for production
@@ -35,6 +36,7 @@ pnpm db:push          # Push schema changes to DB (dev)
 pnpm db:studio        # Open Prisma Studio GUI
 pnpm db:generate      # Generate Prisma client
 pnpm db:migrate       # Create migration
+pnpm db:migrate:deploy # Deploy migrations in production
 pnpm db:setup         # Generate + push in one command
 pnpm db:cleanup-users # Clean up users script
 
@@ -131,12 +133,68 @@ import { authClient } from "@/lib/auth-client";
 - **Tasks**: list, create, update, delete
 - **Clients**: list, create, update, delete
 - **Time**: get_project_time_report
+- **Members**: list (for AI agent to see available assignees)
 
 ### User Setup
 Users configure their own AI assistant:
 - See [CLAUDE_DESKTOP_SETUP.md](CLAUDE_DESKTOP_SETUP.md) for Claude Desktop instructions
 - Each user sets their own `CRM_API_KEY` in their config
 - For REST API: POST to `/api/mcp/rest` with `Authorization: Bearer crm_KEY`
+
+## AI Assistant (OpenAI Integration)
+
+### Chat Endpoint ([src/app/api/ai/chat/route.ts](src/app/api/ai/chat/route.ts))
+- **OpenAI API** integration for chat functionality
+- Available at `/api/ai/chat` (Server Action)
+- **Tools available to AI**:
+  - `list_members`: List organization members for task assignment
+  - `list_tasks`: View tasks with assignee and due date info
+  - `create_task`: Create tasks with optional assigneeId
+  - `list_projects`, `create_project`, etc.
+- **Context-aware**: AI knows which user is making the request
+- **Assignment capable**: AI can assign tasks to specific members
+
+## UI Component Patterns
+
+### Select Component Best Practices
+**CRITICAL**: Radix UI Select components **cannot have empty string values** in SelectItem. Use `"none"` or `"all"` instead.
+
+```typescript
+// ❌ WRONG - Will throw error
+<SelectItem value="">Sin proyecto</SelectItem>
+
+// ✅ CORRECT - Use special value
+<SelectItem value="none">Sin proyecto</SelectItem>
+
+// When processing:
+if (editProjectId && editProjectId !== "none") {
+  updateData.projectId = editProjectId;
+} else {
+  updateData.projectId = null;
+}
+```
+
+### Mobile-First Responsive Patterns
+- **Hide on mobile**: `hidden sm:block` or `lg:hidden`
+- **Full width on mobile**: `w-full sm:w-[200px]`
+- **Flexible containers**: `flex-1 sm:flex-none`
+- **Dialogs**: Use `w-[95vw]` for mobile-friendly width
+
+### Common Responsive Classes
+```typescript
+// Stats panels - desktop only
+<div className="hidden sm:block">
+  <TaskStats stats={stats} />
+</div>
+
+// Mobile-only buttons
+<Button className="lg:hidden">
+  <Edit2 className="h-4 w-4" />
+</Button>
+
+// Responsive width inputs
+<Input className="w-full sm:w-auto" />
+```
 
 ## Database Schema Notes
 
@@ -184,6 +242,9 @@ NEXT_PUBLIC_MCP_PUBLIC_URL="http://localhost:3000"  # SSE endpoint base URL
 # Producción:
 # NEXT_PUBLIC_MCP_PUBLIC_URL="https://crmdev.tech"
 
+# OpenAI (for AI Assistant)
+OPENAI_API_KEY="sk-..."
+
 # Stripe (optional)
 STRIPE_SECRET_KEY="sk_test_..."
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY="pk_test_..."
@@ -205,10 +266,12 @@ GITHUB_CLIENT_SECRET="..."
 | [src/lib/auth.ts](src/lib/auth.ts) | Better Auth server config |
 | [src/lib/prisma.ts](src/lib/prisma.ts) | Prisma with tenant middleware |
 | [src/lib/mcp.ts](src/lib/mcp.ts) | MCP server + tools registration |
+| [src/app/api/ai/chat/route.ts](src/app/api/ai/chat/route.ts) | OpenAI chat endpoint |
 | [src/middleware.ts](src/middleware.ts) | Route protection |
 | [src/app/api/mcp/sse/route.ts](src/app/api/mcp/sse/route.ts) | SSE endpoint for MCP |
 | [src/app/api/mcp/message/route.ts](src/app/api/mcp/message/route.ts) | MCP message handler |
 | [prisma/schema.prisma](prisma/schema.prisma) | Database schema |
+| [next.config.ts](next.config.ts) | Next.js config with standalone output |
 
 ## Common Patterns
 
@@ -230,13 +293,20 @@ GITHUB_CLIENT_SECRET="..."
 2. Use Zod with appropriate types
 3. Export both schema and inferred TypeScript type
 
+### Mobile-Responsive Task Editing
+Tasks support full editing on mobile devices:
+- Edit button appears on mobile only (`lg:hidden`)
+- All fields editable: title, description, priority, status, project, assignee, due date
+- Select components use special values (`"none"`) instead of empty strings
+- Dialog is mobile-responsive with `w-[95vw]` width
+
 ## Deployment Notes
 
-- **Output**: Standalone (for Docker/EasyPanel)
+- **Output**: Standalone (for Docker/EasyPanel) - configured in next.config.ts
 - **Database**: PostgreSQL with connection pooling (Prisma Accelerate recommended)
 - **Webhooks**: Stripe, GitHub (for task syncing)
 - **Cron**: `/api/cron/wp-monitor` for WordPress monitoring
-- Next.js 15 uses Turbopack by default in dev
+- Next.js 15 uses Turbopack by default in dev (`pnpm dev`)
 
 ## Troubleshooting
 
@@ -254,3 +324,36 @@ GITHUB_CLIENT_SECRET="..."
 - Cookie name: `crmdev.session`
 - Middleware checks cookie only (not full session)
 - Full validation in server components/actions
+
+### Select component errors?
+- **"A <Select.Item /> must have a value prop that is not an empty string"**
+- Solution: Use `"none"`, `"all"`, or any non-empty string instead of `""`
+- Handle the special value in your change handlers
+
+### TypeScript errors with null checks?
+- Always add null checks at function level, not just component level
+- Example:
+  ```typescript
+  function handleEdit() {
+    if (!task) return;  // Add this
+    setEditTitle(task.title);
+  }
+  ```
+
+## Recent Features (2026)
+
+### AI Assistant Improvements
+- AI can now list members and assign tasks to specific users
+- Task creation supports `assigneeId` parameter
+- Better context awareness for task management
+
+### Mobile Enhancements
+- Full task editing capability on mobile devices
+- Member filter with responsive width (full on mobile, fixed on desktop)
+- Hidden stats panels on mobile to save space
+- Improved button positioning to avoid overlap
+
+### UI Fixes
+- Select components no longer use empty string values
+- Better mobile dialog widths
+- Improved button positioning in dialogs
