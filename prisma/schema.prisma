@@ -32,6 +32,9 @@ model User {
   avatarUrl      String?
   isVerifiedDev  Boolean   @default(false)
 
+  // SaaS SuperAdmin
+  isSuperAdmin   Boolean   @default(false)
+
   // Relations
   sessions      Session[]
   accounts      Account[]
