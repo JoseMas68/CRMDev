@@ -36,7 +36,7 @@ const SKIP_ROUTES = [
   "/api/health",
 ];
 
-export async function middleware(request: NextRequest) {
+export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Skip static assets and internal routes
@@ -59,24 +59,8 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  // Admin routes protection - verify superadmin
-  if (pathname.startsWith("/admin")) {
-    // Import auth dynamically for Edge Runtime compatibility
-    const { auth } = await import("@/lib/auth");
-
-    // Get full session to verify superadmin status
-    const session = await auth.api.getSession({
-      headers: request.headers,
-    });
-
-    if (!session?.user?.isSuperAdmin) {
-      // Not a superadmin - redirect to regular dashboard
-      return NextResponse.redirect(new URL("/dashboard", request.url));
-    }
-  }
-
   // Session cookie exists - allow request
-  // Full auth validation happens in server components/actions
+  // Full auth validation (including superadmin check) happens in server components/actions
   return NextResponse.next();
 }
 
