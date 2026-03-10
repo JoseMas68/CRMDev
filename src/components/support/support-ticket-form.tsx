@@ -205,7 +205,7 @@ export function SupportTicketForm({ orgSlug, projects }: SupportTicketFormProps)
               <SelectValue placeholder="Selecciona un proyecto si aplica" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Sin proyecto</SelectItem>
+              <SelectItem value="none">Sin proyecto</SelectItem>
               {projects.map((project) => (
                 <SelectItem key={project.id} value={project.id}>
                   {project.name}

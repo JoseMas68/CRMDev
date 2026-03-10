@@ -188,3 +188,68 @@ export async function toggleSuperAdmin(userId: string) {
     return { success: false, error: "Error al actualizar superadmin" };
   }
 }
+
+/**
+ * Elimina un usuario
+ */
+export async function deleteUser(id: string) {
+  const verification = await verifySuperAdmin();
+  if (!verification.success) {
+    return verification;
+  }
+
+  try {
+    // Verificar que el usuario existe
+    const user = await prisma.user.findUnique({
+      where: { id },
+      include: {
+        _count: {
+          select: {
+            members: true,
+            sessions: true,
+          },
+        },
+      },
+    });
+
+    if (!user) {
+      return { success: false, error: "Usuario no encontrado" };
+    }
+
+    // No permitir eliminarse a sí mismo
+    if (verification.session?.user?.id === id) {
+      return { success: false, error: "No puedes eliminar tu propio usuario" };
+    }
+
+    // Verificar si es el último superadmin
+    if (user.isSuperAdmin) {
+      const superAdminCount = await prisma.user.count({
+        where: { isSuperAdmin: true },
+      });
+
+      if (superAdminCount <= 1) {
+        return {
+          success: false,
+          error: "No puedes eliminar al último superadmin",
+        };
+      }
+    }
+
+    // Eliminar usuario (cascade delete se encargará de las relaciones)
+    await prisma.user.delete({
+      where: { id },
+    });
+
+    revalidatePath("/admin/users");
+
+    return {
+      success: true,
+      data: {
+        message: `Usuario "${user.name}" eliminado correctamente`,
+      },
+    };
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    return { success: false, error: "Error al eliminar usuario" };
+  }
+}

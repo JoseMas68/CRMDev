@@ -47,7 +47,7 @@ export const createTicketSchema = z.object({
     .email("Email inválido")
     .max(255, "El email es demasiado largo"),
 
-  projectId: z.string().cuid("ID de proyecto inválido").optional(),
+  projectId: z.string().cuid("ID de proyecto inválido").optional().transform(val => val === "none" ? undefined : val),
 
   attachments: z
     .array(z.string().url("URL de attachment inválida"))

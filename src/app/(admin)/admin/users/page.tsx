@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getAllUsers, toggleSuperAdmin } from "@/actions/admin/users";
+import { getAllUsers, toggleSuperAdmin, deleteUser } from "@/actions/admin/users";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -56,6 +56,7 @@ export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [togglingUserId, setTogglingUserId] = useState<string | null>(null);
+  const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [superAdminFilter, setSuperAdminFilter] = useState<string>("all");
 
@@ -92,6 +93,19 @@ export default function UsersPage() {
       toast.error("error" in result ? result.error : "Error desconocido");
     }
     setTogglingUserId(null);
+  }
+
+  async function handleDelete(id: string, name: string) {
+    setDeletingUserId(id);
+    const result = await deleteUser(id);
+
+    if (result.success) {
+      toast.success(result.data?.message || "Usuario eliminado");
+      loadUsers();
+    } else {
+      toast.error(result.error);
+    }
+    setDeletingUserId(null);
   }
 
   function getInitials(name: string) {
@@ -276,6 +290,48 @@ export default function UsersPage() {
                                     "Revocar"
                                   ) : (
                                     "Hacer superadmin"
+                                  )}
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+
+                          <DropdownMenuSeparator />
+
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <DropdownMenuItem
+                                className="text-destructive"
+                                onSelect={(e) => e.preventDefault()}
+                              >
+                                Eliminar usuario
+                              </DropdownMenuItem>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>
+                                  ¿Eliminar usuario?
+                                </AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Esta acción eliminará permanentemente al usuario <strong>{user.name}</strong> y todos sus datos. Esta acción no se puede deshacer.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel disabled={deletingUserId === user.id}>
+                                  Cancelar
+                                </AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => handleDelete(user.id, user.name)}
+                                  disabled={deletingUserId === user.id}
+                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                >
+                                  {deletingUserId === user.id ? (
+                                    <>
+                                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                      Eliminando...
+                                    </>
+                                  ) : (
+                                    "Eliminar"
                                   )}
                                 </AlertDialogAction>
                               </AlertDialogFooter>
