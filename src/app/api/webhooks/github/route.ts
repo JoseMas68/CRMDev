@@ -469,9 +469,27 @@ export async function POST(request: NextRequest) {
     const signature = request.headers.get("x-hub-signature-256");
     const event = request.headers.get("x-github-event");
 
-    // Verify webhook signature
-    if (WEBHOOK_SECRET && !verifySignature(rawBody, signature)) {
-      console.error("Invalid webhook signature");
+    // MANDATORY: Secret must be configured
+    if (!WEBHOOK_SECRET) {
+      console.error("[GITHUB_WEBHOOK] GITHUB_WEBHOOK_SECRET not configured");
+      return NextResponse.json(
+        { error: "Webhook configuration error" },
+        { status: 500 }
+      );
+    }
+
+    // MANDATORY: Signature header must be present
+    if (!signature) {
+      console.error("[GITHUB_WEBHOOK] Missing x-hub-signature-256 header");
+      return NextResponse.json(
+        { error: "Missing signature" },
+        { status: 401 }
+      );
+    }
+
+    // MANDATORY: Verify signature
+    if (!verifySignature(rawBody, signature)) {
+      console.error("[GITHUB_WEBHOOK] Invalid signature");
       return NextResponse.json(
         { error: "Invalid signature" },
         { status: 401 }

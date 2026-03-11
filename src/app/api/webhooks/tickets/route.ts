@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { TicketCategory, TicketPriority } from "@prisma/client";
+import crypto from "crypto";
 
+import { checkRateLimit } from "@/lib/rate-limit";
 import { prisma } from "@/lib/prisma";
 
 interface TicketWebhookPayload {
@@ -54,30 +56,92 @@ function normalizeCategory(value?: string | null): TicketCategory {
   }
 }
 
+/**
+ * Verify ticket webhook signature using HMAC-SHA256
+ * Expects signature format: sha256=<hex>
+ * Uses timing-safe comparison to prevent timing attacks
+ */
+function verifyWebhookSignature(
+  payload: string,
+  signature: string | null,
+  secret: string
+): boolean {
+  // Require both signature and secret
+  if (!signature || !secret) {
+    return false;
+  }
+
+  // Validate signature format
+  if (!signature.startsWith("sha256=")) {
+    return false;
+  }
+
+  try {
+    // Compute expected signature
+    const hmac = crypto.createHmac("sha256", secret);
+    hmac.update(payload);
+    const expectedDigest = `sha256=${hmac.digest("hex")}`;
+
+    // Timing-safe comparison
+    const signatureBuffer = Buffer.from(signature.slice(7)); // Remove "sha256="
+    const expectedBuffer = Buffer.from(expectedDigest.slice(7));
+
+    if (signatureBuffer.length !== expectedBuffer.length) {
+      return false;
+    }
+
+    return crypto.timingSafeEqual(signatureBuffer, expectedBuffer);
+  } catch {
+    return false;
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
-    const contentType = req.headers.get("content-type") || "";
+    // 1. Rate limiting by IP first (before any processing)
+    const ip = req.headers.get("x-forwarded-for") || "unknown";
+    const rateLimitResult = await checkRateLimit(
+      `ticket-webhook:${ip}`,
+      10,  // 10 requests
+      "60 s" as const  // per minute
+    );
+
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { success: false, error: "Too many requests" },
+        { status: 429 }
+      );
+    }
+
+    // 2. Get raw body BEFORE parsing (needed for signature verification)
+    const rawBody = await req.text();
+    const signature = req.headers.get("x-webhook-signature");
+
+    // 3. Parse body after reading raw
     let body: Record<string, unknown> = {};
+    const contentType = req.headers.get("content-type") || "";
 
     if (contentType.includes("application/json")) {
-      body = (await req.json()) ?? {};
+      body = JSON.parse(rawBody);
     } else if (
       contentType.includes("application/x-www-form-urlencoded") ||
       contentType.includes("multipart/form-data")
     ) {
-      const form = await req.formData();
-      body = Object.fromEntries(form.entries());
-      const attachmentEntries = form.getAll("attachments");
-      if (attachmentEntries.length) {
-        body.attachments = attachmentEntries;
+      const formData = new URLSearchParams(rawBody);
+      body = Object.fromEntries(formData.entries());
+      // Handle attachments
+      if (contentType.includes("multipart/form-data")) {
+        const form = await req.formData();
+        const attachmentEntries = form.getAll("attachments");
+        if (attachmentEntries.length) {
+          body.attachments = attachmentEntries;
+        }
       }
     } else {
-      // fallback attempt to parse as json
-      body = (await req.json().catch(() => ({}))) ?? {};
+      body = JSON.parse(rawBody);
     }
 
     const {
-      secret,
       projectId,
       subject,
       description,
@@ -89,13 +153,15 @@ export async function POST(req: NextRequest) {
       clientId,
     } = body as TicketWebhookPayload;
 
-    if (!secret || !projectId || !subject || !description) {
+    // 4. Validate required fields (removed secret from required fields)
+    if (!projectId || !subject || !description) {
       return NextResponse.json(
         { success: false, error: "Missing required fields" },
         { status: 400 }
       );
     }
 
+    // 5. Get project and secret
     const project = await prisma.project.findUnique({
       where: { id: projectId },
       select: {
@@ -114,9 +180,21 @@ export async function POST(req: NextRequest) {
     }
 
     const customData = (project.customData as Record<string, unknown> | null) ?? {};
-    const projectSecret = (customData.ticketWebhookSecret as string | undefined) ?? process.env.TICKET_WEBHOOK_SECRET;
+    const projectSecret = (customData.ticketWebhookSecret as string | undefined)
+      ?? process.env.TICKET_WEBHOOK_SECRET;
 
-    if (!projectSecret || projectSecret !== secret) {
+    // 6. Require secret to be configured (no null bypass)
+    if (!projectSecret) {
+      console.error("[TICKET_WEBHOOK] No secret configured for project:", projectId);
+      return NextResponse.json(
+        { success: false, error: "Webhook not configured" },
+        { status: 500 }
+      );
+    }
+
+    // 7. Verify HMAC-SHA256 signature
+    if (!verifyWebhookSignature(rawBody, signature, projectSecret)) {
+      console.error("[TICKET_WEBHOOK] Invalid signature from IP:", ip);
       return NextResponse.json(
         { success: false, error: "Unauthorized" },
         { status: 401 }
