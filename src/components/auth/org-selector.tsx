@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Loader2, Plus, Building2, ArrowRight, Search, Users } from "lucide-react";
 import { toast } from "sonner";
 
-import { useListOrganizations, organization } from "@/lib/auth-client";
+import { organization } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -39,19 +39,30 @@ export function OrgSelector({ userId, userName }: OrgSelectorProps) {
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [hasSearched, setHasSearched] = useState(false);
 
-  // Fetch user's organizations
-  const { data: orgsData, isPending: isLoadingOrgs, refetch } = useListOrganizations();
-  const organizations = orgsData || [];
+  // Fetch user's organizations from our secure API
+  const [organizations, setOrganizations] = useState<any[]>([]);
+  const [isLoadingOrgs, setIsLoadingOrgs] = useState(true);
 
-  // Debug log - remove after fixing
   useEffect(() => {
-    console.log("OrgSelector Debug:", {
-      userId,
-      organizations,
-      isLoadingOrgs,
-      orgsData,
-    });
-  }, [organizations, isLoadingOrgs, orgsData, userId]);
+    async function fetchOrganizations() {
+      try {
+        const response = await fetch("/api/user/organizations");
+        const data = await response.json();
+
+        if (data.success) {
+          setOrganizations(data.data);
+        } else {
+          console.error("Error fetching organizations:", data.error);
+        }
+      } catch (error) {
+        console.error("Error fetching organizations:", error);
+      } finally {
+        setIsLoadingOrgs(false);
+      }
+    }
+
+    fetchOrganizations();
+  }, []);
 
   async function handleCreateOrg(e: React.FormEvent) {
     e.preventDefault();
