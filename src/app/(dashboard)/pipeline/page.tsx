@@ -54,7 +54,7 @@ export default async function PipelinePage() {
       <div className="flex flex-col gap-3 sm:gap-4">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Pipeline de Ventas</h1>
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight">Pipeline de Ventas</h1>
             <p className="text-sm sm:text-base text-muted-foreground mt-1">
               {formatCurrency(totalValue)} en oportunidades abiertas
             </p>

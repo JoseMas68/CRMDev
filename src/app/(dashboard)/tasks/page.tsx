@@ -67,6 +67,11 @@ export default async function TasksPage({ searchParams }: TasksPageProps) {
 
   return (
     <div className="space-y-4 sm:space-y-6">
+      {/* Título */}
+      <div className="px-4 sm:px-0">
+        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight">Tareas</h1>
+      </div>
+
       {/* Actions bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex flex-col sm:flex-row sm:items-center gap-3">

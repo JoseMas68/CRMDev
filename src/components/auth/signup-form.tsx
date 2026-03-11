@@ -218,7 +218,7 @@ export function SignupForm() {
         </Link>
       </p>
 
-      <p className="text-center text-sm text-muted-foreground">
+      <p className="text-center text-xs sm:text-sm text-muted-foreground">
         ¿Ya tienes una cuenta?{" "}
         <Link href="/login" className="text-primary hover:underline font-medium">
           Iniciar sesión
