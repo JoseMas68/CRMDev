@@ -16,8 +16,17 @@ interface SupportPortalPageProps {
 
 export async function generateMetadata({ params }: SupportPortalPageProps) {
   const { orgSlug } = await params;
+
+  // Get org for metadata
+  const org = await prisma.organization.findUnique({
+    where: { slug: orgSlug },
+    select: { name: true },
+  });
+
+  const orgName = org?.name || orgSlug;
+
   return {
-    title: `Portal de Soporte - ${orgSlug}`,
+    title: `Portal de Soporte de ${orgName}`,
     description: "Reporta incidencias, solicita features o contacta con el equipo de soporte",
   };
 }
@@ -28,7 +37,7 @@ export default async function SupportPortalPage({ params }: SupportPortalPagePro
   // Verify organization exists
   const org = await prisma.organization.findUnique({
     where: { slug: orgSlug },
-    select: { id: true, name: true },
+    select: { id: true, name: true, logo: true },
   });
 
   if (!org) {
@@ -49,11 +58,23 @@ export default async function SupportPortalPage({ params }: SupportPortalPagePro
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-4">
-            <div className="bg-primary/10 p-3 rounded-full">
-              <MessageSquare className="h-8 w-8 text-primary" />
-            </div>
+            {org.logo ? (
+              <div className="bg-white dark:bg-slate-800 p-3 rounded-full shadow-sm">
+                <img
+                  src={org.logo}
+                  alt={`${org.name} logo`}
+                  className="h-12 w-12 object-contain"
+                />
+              </div>
+            ) : (
+              <div className="bg-primary/10 p-3 rounded-full">
+                <MessageSquare className="h-8 w-8 text-primary" />
+              </div>
+            )}
           </div>
-          <h1 className="text-3xl font-bold mb-2">Portal de Soporte</h1>
+          <h1 className="text-3xl sm:text-4xl font-bold mb-2">
+            Portal de Soporte de <span className="text-primary">{org.name}</span>
+          </h1>
           <p className="text-muted-foreground">
             ¿Necesitas ayuda? Crea un ticket y nuestro equipo te responderá lo antes posible.
           </p>
