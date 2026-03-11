@@ -177,7 +177,7 @@ export default function HomePage() {
 
         <div className="grid gap-6 sm:gap-8 md:grid-cols-2 lg:grid-cols-3">
           <FeatureCard
-            icon={<Github className="h-6 w-6 sm:h-8 sm:w-8" />}
+            icon={<GitPullRequest className="h-6 w-6 sm:h-8 sm:w-8" />}
             title="Sincronización GitHub"
             description="Vincula repos a proyectos. Rastrea PRs, issues y commits automáticamente."
           />
