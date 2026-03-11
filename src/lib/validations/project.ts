@@ -97,6 +97,118 @@ export const createProjectSchema = z.object({
     .optional()
     .default([]),
 
+  // 1. INFORMACIÓN DE PRODUCCIÓN
+  productionUrl: z
+    .string()
+    .url("Invalid production URL")
+    .max(500)
+    .optional()
+    .nullable()
+    .or(z.literal("")),
+
+  stagingUrl: z
+    .string()
+    .url("Invalid staging URL")
+    .max(500)
+    .optional()
+    .nullable()
+    .or(z.literal("")),
+
+  developmentUrl: z
+    .string()
+    .url("Invalid development URL")
+    .max(500)
+    .optional()
+    .nullable()
+    .or(z.literal("")),
+
+  hostingProvider: z
+    .string()
+    .max(100)
+    .optional()
+    .nullable()
+    .or(z.literal("")),
+
+  // 2. ALMACENAMIENTO Y DOCUMENTACIÓN
+  driveFolder: z
+    .string()
+    .url("Invalid Drive folder URL")
+    .max(500)
+    .optional()
+    .nullable()
+    .or(z.literal("")),
+
+  figmaLink: z
+    .string()
+    .url("Invalid Figma URL")
+    .max(500)
+    .optional()
+    .nullable()
+    .or(z.literal("")),
+
+  githubLink: z
+    .string()
+    .url("Invalid GitHub URL")
+    .max(500)
+    .optional()
+    .nullable()
+    .or(z.literal("")),
+
+  documentationLink: z
+    .string()
+    .url("Invalid documentation URL")
+    .max(500)
+    .optional()
+    .nullable()
+    .or(z.literal("")),
+
+  // 3. CAJA FUERTE PARA ENV
+  envVars: z
+    .string()
+    .max(10000, "Environment variables too long")
+    .optional()
+    .nullable()
+    .or(z.literal("")),
+
+  envVarsLastUpdated: z.coerce.date().optional().nullable(),
+
+  // 4. INFORMACIÓN TÉCNICA
+  techDatabase: z
+    .string()
+    .max(100)
+    .optional()
+    .nullable()
+    .or(z.literal("")),
+
+  runtimeVersion: z
+    .string()
+    .max(100)
+    .optional()
+    .nullable()
+    .or(z.literal("")),
+
+  // 5. CONTACTOS CLAVE
+  devopsContact: z
+    .string()
+    .max(200)
+    .optional()
+    .nullable()
+    .or(z.literal("")),
+
+  primaryClientContact: z
+    .string()
+    .max(200)
+    .optional()
+    .nullable()
+    .or(z.literal("")),
+
+  emergencyContact: z
+    .string()
+    .max(200)
+    .optional()
+    .nullable()
+    .or(z.literal("")),
+
   customData: z.record(z.unknown()).optional(),
 });
 

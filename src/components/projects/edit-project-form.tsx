@@ -50,6 +50,22 @@ interface Project {
   repoUrl?: string | null;
   techStack?: string[];
   client: { id: string; name: string; email: string | null } | null;
+  // Extended fields
+  productionUrl?: string | null;
+  stagingUrl?: string | null;
+  developmentUrl?: string | null;
+  hostingProvider?: string | null;
+  driveFolder?: string | null;
+  figmaLink?: string | null;
+  githubLink?: string | null;
+  documentationLink?: string | null;
+  envVars?: string | null;
+  envVarsLastUpdated?: Date | null;
+  techDatabase?: string | null;
+  runtimeVersion?: string | null;
+  devopsContact?: string | null;
+  primaryClientContact?: string | null;
+  emergencyContact?: string | null;
 }
 
 interface EditProjectFormProps {
@@ -86,6 +102,22 @@ export function EditProjectForm({ project, clients }: EditProjectFormProps) {
       budget: project.budget || undefined,
       currency: project.currency,
       clientId: project.client?.id || undefined,
+      // Extended fields
+      productionUrl: project.productionUrl || undefined,
+      stagingUrl: project.stagingUrl || undefined,
+      developmentUrl: project.developmentUrl || undefined,
+      hostingProvider: project.hostingProvider || undefined,
+      driveFolder: project.driveFolder || undefined,
+      figmaLink: project.figmaLink || undefined,
+      githubLink: project.githubLink || undefined,
+      documentationLink: project.documentationLink || undefined,
+      envVars: project.envVars || undefined,
+      envVarsLastUpdated: project.envVarsLastUpdated || undefined,
+      techDatabase: project.techDatabase || undefined,
+      runtimeVersion: project.runtimeVersion || undefined,
+      devopsContact: project.devopsContact || undefined,
+      primaryClientContact: project.primaryClientContact || undefined,
+      emergencyContact: project.emergencyContact || undefined,
     },
   });
 
@@ -319,6 +351,190 @@ export function EditProjectForm({ project, clients }: EditProjectFormProps) {
                 </SelectContent>
               </Select>
             </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* 1. INFORMACIÓN DE PRODUCCIÓN */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Información de Producción</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="productionUrl">URL de Producción</Label>
+            <Input
+              id="productionUrl"
+              type="url"
+              placeholder="https://ejemplo.com"
+              disabled={isLoading}
+              {...register("productionUrl")}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="stagingUrl">URL de Staging</Label>
+            <Input
+              id="stagingUrl"
+              type="url"
+              placeholder="https://staging.ejemplo.com"
+              disabled={isLoading}
+              {...register("stagingUrl")}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="developmentUrl">URL de Desarrollo</Label>
+            <Input
+              id="developmentUrl"
+              type="url"
+              placeholder="http://localhost:3000"
+              disabled={isLoading}
+              {...register("developmentUrl")}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="hostingProvider">Proveedor de Hosting</Label>
+            <Input
+              id="hostingProvider"
+              placeholder="AWS, Vercel, DigitalOcean, Railway..."
+              disabled={isLoading}
+              {...register("hostingProvider")}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* 2. ALMACENAMIENTO Y DOCUMENTACIÓN */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Almacenamiento y Documentación</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="driveFolder">Carpeta Google Drive</Label>
+            <Input
+              id="driveFolder"
+              type="url"
+              placeholder="https://drive.google.com/drive/folders/..."
+              disabled={isLoading}
+              {...register("driveFolder")}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="figmaLink">Enlace Figma</Label>
+            <Input
+              id="figmaLink"
+              type="url"
+              placeholder="https://figma.com/file/..."
+              disabled={isLoading}
+              {...register("figmaLink")}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="githubLink">Enlace GitHub</Label>
+            <Input
+              id="githubLink"
+              type="url"
+              placeholder="https://github.com/..."
+              disabled={isLoading}
+              {...register("githubLink")}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="documentationLink">Documentación Técnica</Label>
+            <Input
+              id="documentationLink"
+              type="url"
+              placeholder="https://notion.so/... o https://..."
+              disabled={isLoading}
+              {...register("documentationLink")}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* 3. CAJA FUERTE PARA ENV */}
+      <Card className="border-2 border-orange-200 bg-orange-50/30">
+        <CardHeader>
+          <CardTitle className="text-orange-900">🔒 Caja Fuerte - Variables de Entorno</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="rounded-lg bg-orange-100/50 p-3 text-sm text-orange-800">
+            <p className="font-semibold mb-1">⚠️ Información Sensible</p>
+            <p>Solo admins y desarrolladores principales pueden ver esto. Los cambios quedan registrados.</p>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="envVars">Variables de Entorno (JSON)</Label>
+            <Textarea
+              id="envVars"
+              placeholder={`{\n  "DB_URL": "postgresql://...",\n  "API_KEY": "...",\n  "SECRET": "..."\n}`}
+              className="font-mono text-xs h-48"
+              disabled={isLoading}
+              {...register("envVars")}
+            />
+            <p className="text-xs text-muted-foreground">Formato JSON encriptado. Ej: {"{"}"DB_URL": "...", "API_KEY": "..."{"}"}</p>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* 4. INFORMACIÓN TÉCNICA */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Información Técnica</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="techDatabase">Base de Datos</Label>
+            <Input
+              id="techDatabase"
+              placeholder="PostgreSQL, MongoDB, MySQL..."
+              disabled={isLoading}
+              {...register("techDatabase")}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="runtimeVersion">Versión de Runtime</Label>
+            <Input
+              id="runtimeVersion"
+              placeholder="Node 20.x, Python 3.11, PHP 8.2..."
+              disabled={isLoading}
+              {...register("runtimeVersion")}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* 5. CONTACTOS CLAVE */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Contactos Clave</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="devopsContact">Contacto DevOps/Admin Principal</Label>
+            <Input
+              id="devopsContact"
+              placeholder="Nombre o email del DevOps/Admin"
+              disabled={isLoading}
+              {...register("devopsContact")}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="primaryClientContact">Contacto Principal del Cliente</Label>
+            <Input
+              id="primaryClientContact"
+              placeholder="Nombre o email del cliente"
+              disabled={isLoading}
+              {...register("primaryClientContact")}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="emergencyContact">Contacto de Emergencia</Label>
+            <Input
+              id="emergencyContact"
+              placeholder="Email o teléfono de emergencia"
+              disabled={isLoading}
+              {...register("emergencyContact")}
+            />
           </div>
         </CardContent>
       </Card>
