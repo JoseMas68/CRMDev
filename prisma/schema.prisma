@@ -377,6 +377,31 @@ model Project {
   techStack      String[]      @default([])
   labels         String[]      @default([])
 
+  // ===== 1. INFORMACIÓN DE PRODUCCIÓN =====
+  productionUrl     String?
+  stagingUrl        String?
+  developmentUrl    String?
+  hostingProvider   String?    // AWS, Vercel, DigitalOcean, Railway, etc
+
+  // ===== 2. ALMACENAMIENTO Y DOCUMENTACIÓN =====
+  driveFolder       String?    // Enlace a carpeta de Google Drive
+  figmaLink         String?    // Enlace a Figma
+  githubLink        String?    // Enlace a repositorio (alternativa a repoUrl)
+  documentationLink String?    // Enlace a documentación técnica
+
+  // ===== 3. CAJA FUERTE PARA ENV =====
+  envVars           String?    // JSON encriptado con variables de entorno
+  envVarsLastUpdated DateTime? // Última actualización de variables
+
+  // ===== 4. INFORMACIÓN TÉCNICA =====
+  techDatabase      String?    // PostgreSQL, MongoDB, MySQL, etc
+  runtimeVersion    String?    // Versión de Node, Python, PHP, etc
+
+  // ===== 5. CONTACTOS CLAVE =====
+  devopsContact     String?    // Email o nombre del DevOps principal
+  primaryClientContact String? // Email o nombre del cliente principal
+  emergencyContact  String?    // Email o teléfono de contacto de emergencia
+
   // Relations
   clientId       String?
   client         Client?       @relation(fields: [clientId], references: [id], onDelete: SetNull)
