@@ -42,19 +42,33 @@ async function getOrgBySlug(slug: string) {
 
 /**
  * Create a new ticket (public - for client portal)
+ * Now uses project-based support tokens instead of orgSlug
  */
 export async function createTicket(
-  orgSlug: string,
-  input: CreateTicketInput
+  input: CreateTicketInput & { organizationId: string; projectId: string }
 ): Promise<ActionResponse<{ ticketId: string; ticketNumber: string }>> {
   try {
-    const validatedData = createTicketSchema.parse(input);
+    // Extract org and project IDs before validation
+    const { organizationId, projectId, ...ticketData } = input;
+    const validatedData = createTicketSchema.parse(ticketData);
 
-    // Get organization by slug
-    const org = await getOrgBySlug(orgSlug);
+    // Get organization to verify it exists
+    const org = await prisma.organization.findUnique({
+      where: { id: organizationId },
+      select: { id: true, name: true },
+    });
+
     if (!org) {
       return { success: false, error: "Organización no encontrada" };
     }
+
+    // Get project name for AI context
+    const project = await prisma.project.findUnique({
+      where: { id: projectId },
+      select: { name: true },
+    });
+
+    const projectName = project?.name;
 
     // Generate ticket number (TICKET-{YYYY}-{0000})
     const year = new Date().getFullYear();
@@ -65,16 +79,6 @@ export async function createTicket(
       },
     });
     const ticketNumber = `TICKET-${year}-${String(count + 1).padStart(4, "0")}`;
-
-    // Get project name if provided
-    let projectName = undefined;
-    if (validatedData.projectId) {
-      const project = await prisma.project.findUnique({
-        where: { id: validatedData.projectId },
-        select: { name: true },
-      });
-      projectName = project?.name;
-    }
 
     // AI Analysis: Analyze ticket and get suggested category/priority/fix
     const aiAnalysis = await analyzeTicketWithAI({
@@ -89,13 +93,13 @@ export async function createTicket(
     const ticket = await prisma.ticket.create({
       data: {
         organizationId: org.id,
+        projectId: projectId,
         title: validatedData.title,
         description: validatedData.description,
         category: (aiAnalysis.success ? aiAnalysis.data.category : validatedData.category) as any,
         priority: (aiAnalysis.success ? aiAnalysis.data.priority : validatedData.priority) as any,
         guestName: validatedData.guestName,
         guestEmail: validatedData.guestEmail,
-        projectId: validatedData.projectId || null,
         attachments: validatedData.attachments,
         // Store AI analysis results
         aiCategory: aiAnalysis.success ? (aiAnalysis.data.category as any) : undefined,
@@ -143,7 +147,7 @@ export async function createTicket(
       },
     });
 
-    revalidatePath(`/support/${orgSlug}`);
+    revalidatePath("/support/[projectToken]");
 
     return {
       success: true,

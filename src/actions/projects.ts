@@ -204,6 +204,7 @@ export async function getProject(id: string): Promise<ActionResponse<{
   wpUrl: string | null;
   vercelUrl: string | null;
   techStack: string[];
+  supportToken: string | null;
   client: { id: string; name: string; email: string | null } | null;
   projectMembers: Array<{
     id: string;
@@ -259,6 +260,7 @@ export async function getProject(id: string): Promise<ActionResponse<{
         wpUrl: true,
         vercelUrl: true,
         techStack: true,
+        supportToken: true,
         createdAt: true,
         updatedAt: true,
         client: {

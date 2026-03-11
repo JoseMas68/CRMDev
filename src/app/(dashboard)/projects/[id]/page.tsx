@@ -32,6 +32,7 @@ import { WpMonitoringCard } from "@/components/projects/wp-monitoring-card";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { MobileTabNavigation } from "@/components/mobile/tab-navigation";
 import { ProjectTimeReport } from "@/components/projects/project-time-report"; // Added ProjectTimeReport import
+import { SupportLinkCard } from "@/components/projects/support-link-card";
 
 interface ProjectPageProps {
   params: Promise<{ id: string }>;
@@ -448,6 +449,9 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
         {/* WordPress Monitoring */}
         <WpMonitoringCard projectId={id} wpUrl={project.wpUrl} />
+
+        {/* Support Portal Link */}
+        <SupportLinkCard supportToken={project.supportToken} projectName={project.name} />
 
         {/* Project Members */}
         <ProjectMembersSection

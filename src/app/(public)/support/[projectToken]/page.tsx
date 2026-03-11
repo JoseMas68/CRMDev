@@ -1,63 +1,68 @@
 /**
- * Client Support Portal - Public Page
- * Route: /support/[orgSlug]
+ * Client Support Portal - Public Page (by Project)
+ * Route: /support/[projectToken]
  * Accessible to clients without authentication
- * Allows ticket submission with AI triage and auto-reply
+ * Each project has a unique supportToken for direct access
  */
 
 import { notFound } from "next/navigation";
-import { Ticket, MessageSquare, AlertCircle } from "lucide-react";
+import { Ticket, MessageSquare, AlertCircle, Building2 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { SupportTicketForm } from "@/components/support/support-ticket-form";
 
 interface SupportPortalPageProps {
-  params: Promise<{ orgSlug: string }>;
+  params: Promise<{ projectToken: string }>;
 }
 
 export async function generateMetadata({ params }: SupportPortalPageProps) {
-  const { orgSlug } = await params;
+  const { projectToken } = await params;
 
-  // Get org for metadata
-  const org = await prisma.organization.findUnique({
-    where: { slug: orgSlug },
-    select: { name: true },
+  // Get project for metadata
+  const project = await prisma.project.findUnique({
+    where: { supportToken: projectToken },
+    select: { name: true, organization: { select: { name: true } } },
   });
 
-  const orgName = org?.name || orgSlug;
+  const projectName = project?.name || "Proyecto";
+  const orgName = project?.organization?.name || "";
 
   return {
-    title: `Portal de Soporte de ${orgName}`,
-    description: "Reporta incidencias, solicita features o contacta con el equipo de soporte",
+    title: `Portal de Soporte - ${projectName}`,
+    description: orgName ? `Reporta incidencias para ${projectName} de ${orgName}` : "Reporta incidencias o solicita soporte",
   };
 }
 
 export default async function SupportPortalPage({ params }: SupportPortalPageProps) {
-  const { orgSlug } = await params;
+  const { projectToken } = await params;
 
-  // Verify organization exists
-  const org = await prisma.organization.findUnique({
-    where: { slug: orgSlug },
-    select: { id: true, name: true, logo: true },
+  // Find project by supportToken
+  const project = await prisma.project.findUnique({
+    where: { supportToken: projectToken },
+    select: {
+      id: true,
+      name: true,
+      organization: {
+        select: {
+          id: true,
+          name: true,
+          logo: true,
+        },
+      },
+    },
   });
 
-  if (!org) {
+  if (!project) {
     notFound();
   }
 
-  // Get available projects for this org (for context in tickets)
-  const projects = await prisma.project.findMany({
-    where: { organizationId: org.id },
-    select: { id: true, name: true },
-    orderBy: { name: "asc" },
-    take: 20,
-  });
+  const org = project.organization;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
       <div className="container mx-auto px-4 py-12 max-w-3xl">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="flex items-center justify-center mb-4">
+          <div className="flex items-center justify-center mb-4 gap-4">
             {org.logo ? (
               <div className="bg-white dark:bg-slate-800 p-3 rounded-full shadow-sm">
                 <img
@@ -68,15 +73,21 @@ export default async function SupportPortalPage({ params }: SupportPortalPagePro
               </div>
             ) : (
               <div className="bg-primary/10 p-3 rounded-full">
-                <MessageSquare className="h-8 w-8 text-primary" />
+                <Building2 className="h-8 w-8 text-primary" />
               </div>
             )}
+            <div className="bg-primary/10 p-3 rounded-full">
+              <MessageSquare className="h-8 w-8 text-primary" />
+            </div>
           </div>
           <h1 className="text-3xl sm:text-4xl font-bold mb-2">
-            Portal de Soporte de <span className="text-primary">{org.name}</span>
+            Portal de Soporte
           </h1>
-          <p className="text-muted-foreground">
-            ¿Necesitas ayuda? Crea un ticket y nuestro equipo te responderá lo antes posible.
+          <p className="text-muted-foreground mb-1">
+            Proyecto: <span className="font-semibold text-foreground">{project.name}</span>
+          </p>
+          <p className="text-sm text-muted-foreground">
+            de <span className="text-primary">{org.name}</span>
           </p>
         </div>
 
@@ -103,7 +114,14 @@ export default async function SupportPortalPage({ params }: SupportPortalPagePro
             </h2>
           </div>
           <div className="p-6">
-            <SupportTicketForm orgSlug={orgSlug} projects={projects} />
+            <SupportTicketForm
+              projectToken={projectToken}
+              projectName={project.name}
+              projectId={project.id}
+              organizationId={org.id}
+              orgName={org.name}
+              orgLogo={org.logo}
+            />
           </div>
         </div>
 

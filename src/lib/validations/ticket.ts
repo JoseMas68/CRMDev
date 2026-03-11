@@ -47,13 +47,17 @@ export const createTicketSchema = z.object({
     .email("Email inválido")
     .max(255, "El email es demasiado largo"),
 
-  projectId: z.string().cuid("ID de proyecto inválido").optional().transform(val => val === "none" ? undefined : val),
-
   attachments: z
     .array(z.string().url("URL de attachment inválida"))
     .max(5, "Máximo 5 attachments")
     .optional()
     .default([]),
+});
+
+// Extended schema for internal use (includes org and project IDs)
+export const createTicketInternalSchema = createTicketSchema.extend({
+  organizationId: z.string().cuid("ID de organización inválido"),
+  projectId: z.string().cuid("ID de proyecto inválido"),
 });
 
 // Update ticket schema (for dev dashboard)
@@ -91,6 +95,7 @@ export const ticketFilterSchema = z.object({
 
 // Types
 export type CreateTicketInput = z.infer<typeof createTicketSchema>;
+export type CreateTicketInternalInput = z.infer<typeof createTicketInternalSchema>;
 export type UpdateTicketInput = z.infer<typeof updateTicketSchema>;
 export type CreateTicketCommentInput = z.infer<typeof createTicketCommentSchema>;
 export type TicketFilter = z.infer<typeof ticketFilterSchema>;

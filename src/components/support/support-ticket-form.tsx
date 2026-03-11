@@ -26,13 +26,26 @@ import {
 } from "@/components/ui/select";
 
 interface SupportTicketFormProps {
-  orgSlug: string;
-  projects: Array<{ id: string; name: string }>;
+  projectToken: string;
+  projectName: string;
+  projectId: string;
+  organizationId: string;
+  orgName: string;
+  orgLogo?: string | null;
   clientName?: string;
   clientEmail?: string;
 }
 
-export function SupportTicketForm({ orgSlug, projects, clientName, clientEmail }: SupportTicketFormProps) {
+export function SupportTicketForm({
+  projectToken,
+  projectName,
+  projectId,
+  organizationId,
+  orgName,
+  orgLogo,
+  clientName,
+  clientEmail,
+}: SupportTicketFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -55,8 +68,10 @@ export function SupportTicketForm({ orgSlug, projects, clientName, clientEmail }
     setIsSubmitting(true);
 
     try {
-      const result = await createTicket(orgSlug, {
+      const result = await createTicket({
         ...data,
+        projectId: projectId,
+        organizationId: organizationId,
         guestName: data.guestName || clientName || "",
         guestEmail: data.guestEmail || clientEmail || "",
       });
@@ -101,6 +116,28 @@ export function SupportTicketForm({ orgSlug, projects, clientName, clientEmail }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      {/* Organization Info */}
+      <div className="flex items-center gap-3 pb-4 border-b">
+        {orgLogo ? (
+          <div className="bg-white dark:bg-slate-800 p-2 rounded-lg shadow-sm">
+            <img
+              src={orgLogo}
+              alt={`${orgName} logo`}
+              className="h-10 w-10 object-contain"
+            />
+          </div>
+        ) : (
+          <div className="bg-primary/10 p-2 rounded-lg">
+            <LifeBuoy className="h-6 w-6 text-primary" />
+          </div>
+        )}
+        <div>
+          <p className="text-sm text-muted-foreground">Soporte para</p>
+          <p className="font-semibold text-lg">{projectName}</p>
+          <p className="text-xs text-muted-foreground">{orgName}</p>
+        </div>
+      </div>
+
       {/* Guest Info (only if not pre-filled) */}
       {!clientName && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -259,30 +296,6 @@ export function SupportTicketForm({ orgSlug, projects, clientName, clientEmail }
           </Select>
         </div>
       </div>
-
-      {/* Project (optional) */}
-      {projects.length > 0 && (
-        <div className="space-y-2">
-          <Label htmlFor="projectId">Proyecto (opcional)</Label>
-          <Select
-            onValueChange={(value) =>
-              register("projectId").onChange({ target: { value } })
-            }
-          >
-            <SelectTrigger disabled={isSubmitting}>
-              <SelectValue placeholder="Selecciona un proyecto si aplica" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="none">Sin proyecto</SelectItem>
-              {projects.map((project) => (
-                <SelectItem key={project.id} value={project.id}>
-                  {project.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      )}
 
       {/* Description */}
       <div className="space-y-2">

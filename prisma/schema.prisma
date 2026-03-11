@@ -347,6 +347,9 @@ model Project {
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
+  // Support Portal Token (unique UUID for public support access)
+  supportToken   String?      @unique
+
   // Basic Info
   name           String
   description    String?
