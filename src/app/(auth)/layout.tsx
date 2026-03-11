@@ -12,9 +12,6 @@ export default function AuthLayout({
         <div className="absolute inset-0 bg-gradient-to-br from-primary to-primary/80" />
         <div className="relative z-10 flex flex-col justify-between p-12 text-primary-foreground">
           <Link href="/" className="flex items-center gap-2 font-bold text-xl">
-            <div className="h-10 w-10 rounded-lg bg-white/20 backdrop-blur flex items-center justify-center">
-              <span className="font-bold text-lg">C</span>
-            </div>
             CRMDev
           </Link>
 
@@ -57,9 +54,6 @@ export default function AuthLayout({
           {/* Mobile logo */}
           <div className="lg:hidden text-center">
             <Link href="/" className="inline-flex items-center gap-2 font-bold text-xl">
-              <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center">
-                <span className="text-primary-foreground font-bold">C</span>
-              </div>
               CRMDev
             </Link>
           </div>
