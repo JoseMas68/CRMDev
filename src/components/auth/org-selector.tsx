@@ -43,6 +43,16 @@ export function OrgSelector({ userId, userName }: OrgSelectorProps) {
   const { data: orgsData, isPending: isLoadingOrgs, refetch } = useListOrganizations();
   const organizations = orgsData || [];
 
+  // Debug log - remove after fixing
+  useEffect(() => {
+    console.log("OrgSelector Debug:", {
+      userId,
+      organizations,
+      isLoadingOrgs,
+      orgsData,
+    });
+  }, [organizations, isLoadingOrgs, orgsData, userId]);
+
   async function handleCreateOrg(e: React.FormEvent) {
     e.preventDefault();
 
