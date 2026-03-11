@@ -33,6 +33,11 @@ export function ClientsClientView({
 
   return (
     <div className="space-y-4 sm:space-y-6">
+      {/* Título */}
+      <div className="px-4 sm:px-0">
+        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight">Clientes</h1>
+      </div>
+
       {/* Actions bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <p className="text-sm text-muted-foreground hidden sm:block">
