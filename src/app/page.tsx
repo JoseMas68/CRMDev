@@ -12,6 +12,12 @@ import {
   CheckCircle2,
   Menu,
   X,
+  Bot,
+  Sparkles,
+  LifeBuoy,
+  MessageSquare,
+  ExternalLink,
+  Link as LinkIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -207,51 +213,282 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Verified Developer Section - Mobile optimized */}
-      <section className="container px-4 sm:px-6 py-16 sm:py-24">
+      {/* AI Integration Section - Mobile optimized */}
+      <section id="integrations" className="container px-4 sm:px-6 py-16 sm:py-24">
         <div className="rounded-2xl border border-border/50 bg-card p-6 sm:p-8 md:p-16">
           <div className="grid gap-8 md:grid-cols-2 items-center">
             <div>
-              <div className="inline-flex items-center gap-2 rounded-full bg-accent-green/10 px-3 py-1 sm:px-4 sm:py-1.5 text-xs sm:text-sm font-medium text-accent-green mb-4 sm:mb-6">
-                <CheckCircle2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                Insignia de Desarrollador Verificado
+              <div className="inline-flex items-center gap-2 rounded-full bg-accent-purple/10 px-3 py-1 sm:px-4 sm:py-1.5 text-xs sm:text-sm font-medium text-accent-purple mb-4 sm:mb-6">
+                <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                Potenciado por Inteligencia Artificial
               </div>
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight mb-4">
-                Demuestra que eres un desarrollador real
+                Conecta Claude, ChatGPT y otras IAs
               </h2>
               <p className="text-base sm:text-lg text-muted-foreground mb-6">
-                Conecta tu cuenta de GitHub para obtener la insignia de desarrollador verificado.
-                Tus clientes verán que eres un desarrollador real con un perfil activo en GitHub.
+                CRMDev integra Model Context Protocol (MCP). Conecta cualquier asistente de IA
+                para automatizar tareas, crear proyectos, asignar trabajo y mucho más.
               </p>
               <ul className="space-y-3">
                 <li className="flex items-center gap-3 text-muted-foreground text-sm sm:text-base">
-                  <CheckCircle2 className="h-5 w-5 text-accent-green flex-shrink-0" />
-                  <span>Autenticación con GitHub en un clic</span>
+                  <Bot className="h-5 w-5 text-accent-purple flex-shrink-0" />
+                  <span>ChatGPT, Claude, Gemini y más IAs compatibles</span>
                 </li>
                 <li className="flex items-center gap-3 text-muted-foreground text-sm sm:text-base">
-                  <CheckCircle2 className="h-5 w-5 text-accent-green flex-shrink-0" />
-                  <span>Sincronización automática de perfil</span>
+                  <CheckCircle2 className="h-5 w-5 text-accent-purple flex-shrink-0" />
+                  <span>18 endpoints MCP disponibles (proyectos, tareas, clientes, tickets)</span>
                 </li>
                 <li className="flex items-center gap-3 text-muted-foreground text-sm sm:text-base">
-                  <CheckCircle2 className="h-5 w-5 text-accent-green flex-shrink-0" />
-                  <span>Insignia verificada visible en tu perfil</span>
+                  <CheckCircle2 className="h-5 w-5 text-accent-purple flex-shrink-0" />
+                  <span>API keys por organización. Seguridad multi-tenant.</span>
+                </li>
+                <li className="flex items-center gap-3 text-muted-foreground text-sm sm:text-base">
+                  <CheckCircle2 className="h-5 w-5 text-accent-purple flex-shrink-0" />
+                  <span>La IA puede asignar tareas a miembros del equipo</span>
+                </li>
+              </ul>
+            </div>
+            <div className="flex justify-center">
+              <div className="relative w-full max-w-xs">
+                {/* MCP Architecture Visualization */}
+                <div className="rounded-xl bg-gradient-to-br from-primary/10 to-secondary/10 border border-primary/20 p-4 sm:p-6">
+                  <div className="space-y-3 sm:space-y-4">
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-background border border-border/50 flex items-center justify-center text-xs sm:text-sm">
+                        🤖
+                      </div>
+                      <div className="flex-1 text-xs sm:text-sm">
+                        <div className="font-medium">Claude / ChatGPT</div>
+                        <div className="text-muted-foreground text-[10px] sm:text-xs">Asistente IA</div>
+                      </div>
+                    </div>
+                    <div className="flex justify-center">
+                      <div className="text-accent-purple text-lg sm:text-xl">⬇️</div>
+                    </div>
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-background border border-border/50 flex items-center justify-center text-xs sm:text-sm font-mono font-bold text-accent-purple">
+                        MCP
+                      </div>
+                      <div className="flex-1 text-xs sm:text-sm">
+                        <div className="font-medium">REST API</div>
+                        <div className="text-muted-foreground text-[10px] sm:text-xs">18 endpoints</div>
+                      </div>
+                    </div>
+                    <div className="flex justify-center">
+                      <div className="text-accent-purple text-lg sm:text-xl">⬇️</div>
+                    </div>
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-background border border-border/50 flex items-center justify-center text-xs sm:text-sm">
+                        📊
+                      </div>
+                      <div className="flex-1 text-xs sm:text-sm">
+                        <div className="font-medium">CRMDev</div>
+                        <div className="text-muted-foreground text-[10px] sm:text-xs">Tareas, Proyectos, Clientes</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Client Support Section - Mobile optimized */}
+      <section id="support" className="container px-4 sm:px-6 py-16 sm:py-24">
+        <div className="rounded-2xl border border-border/50 bg-card p-6 sm:p-8 md:p-16">
+          <div className="grid gap-8 md:grid-cols-2 items-center">
+            <div>
+              <div className="inline-flex items-center gap-2 rounded-full bg-accent-blue/10 px-3 py-1 sm:px-4 sm:py-1.5 text-xs sm:text-sm font-medium text-accent-blue mb-4 sm:mb-6">
+                <LifeBuoy className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                Soporte Directo con tus Clientes
+              </div>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight mb-4">
+                Conexión directa 24/7
+              </h2>
+              <p className="text-base sm:text-lg text-muted-foreground mb-6">
+                Crea enlaces de soporte personalizados para cada cliente. Incrusta el formulario
+                en sus proyectos web para recibir tickets directamente en CRMDev.
+              </p>
+              <ul className="space-y-3">
+                <li className="flex items-center gap-3 text-muted-foreground text-sm sm:text-base">
+                  <LinkIcon className="h-5 w-5 text-accent-blue flex-shrink-0" />
+                  <span>Enlace único de soporte por cliente: <code className="text-xs bg-muted px-1.5 py-0.5 rounded">/support/empresa</code></span>
+                </li>
+                <li className="flex items-center gap-3 text-muted-foreground text-sm sm:text-base">
+                  <MessageSquare className="h-5 w-5 text-accent-blue flex-shrink-0" />
+                  <span>Tickets categorizados automáticamente por IA</span>
+                </li>
+                <li className="flex items-center gap-3 text-muted-foreground text-sm sm:text-base">
+                  <CheckCircle2 className="h-5 w-5 text-accent-blue flex-shrink-0" />
+                  <span>Asigna tickets a proyectos o miembros del equipo</span>
+                </li>
+                <li className="flex items-center gap-3 text-muted-foreground text-sm sm:text-base">
+                  <ExternalLink className="h-5 w-5 text-accent-blue flex-shrink-0" />
+                  <span>Incrusta el widget en cualquier web de tu cliente</span>
+                </li>
+              </ul>
+            </div>
+            <div className="flex justify-center">
+              <div className="relative w-full max-w-xs">
+                {/* Support Widget Preview */}
+                <div className="rounded-xl bg-gradient-to-br from-accent-blue/10 to-cyan-500/10 border border-accent-blue/20 p-4 sm:p-6">
+                  <div className="space-y-3 sm:space-y-4">
+                    <div className="text-center pb-2 border-b border-accent-blue/20">
+                      <div className="text-sm font-semibold text-accent-blue">Soporte Técnico</div>
+                      <div className="text-[10px] sm:text-xs text-muted-foreground">Respuesta en 24h</div>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="h-2 bg-background/50 rounded w-3/4"></div>
+                      <div className="h-2 bg-background/50 rounded w-1/2"></div>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="h-8 bg-background/50 rounded text-[10px] sm:text-xs flex items-center justify-center text-muted-foreground">
+                        Descripción del problema...
+                      </div>
+                    </div>
+                    <div className="pt-2">
+                      <div className="h-7 sm:h-8 bg-accent-blue/20 rounded text-[10px] sm:text-xs flex items-center justify-center text-accent-blue font-medium">
+                        Enviar Ticket
+                      </div>
+                    </div>
+                    <div className="text-center text-[9px] sm:text-[10px] text-muted-foreground pt-1">
+                      Powered by CRMDev
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Organization & Team Section - Mobile optimized */}
+      <section id="teams" className="container px-4 sm:px-6 py-16 sm:py-24">
+        <div className="rounded-2xl border border-border/50 bg-card p-6 sm:p-8 md:p-16">
+          <div className="grid gap-8 md:grid-cols-2 items-center">
+            <div>
+              <div className="inline-flex items-center gap-2 rounded-full bg-accent-orange/10 px-3 py-1 sm:px-4 sm:py-1.5 text-xs sm:text-sm font-medium text-accent-orange mb-4 sm:mb-6">
+                <Zap className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                Organizaciones Multi-Usuario
+              </div>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight mb-4">
+                Tu espacio de trabajo, tu equipo
+              </h2>
+              <p className="text-base sm:text-lg text-muted-foreground mb-6">
+                Crea organizaciones con espacios de trabajo aislados. Añade miembros humanos
+                y agentes de IA que trabajan juntos en proyectos y tareas.
+              </p>
+              <ul className="space-y-3">
+                <li className="flex items-center gap-3 text-muted-foreground text-sm sm:text-base">
+                  <CheckCircle2 className="h-5 w-5 text-accent-orange flex-shrink-0" />
+                  <span>Miembros humanos con roles (Owner, Admin, Member)</span>
+                </li>
+                <li className="flex items-center gap-3 text-muted-foreground text-sm sm:text-base">
+                  <Bot className="h-5 w-5 text-accent-orange flex-shrink-0" />
+                  <span>Asignar tareas a miembros humanos o IA</span>
+                </li>
+                <li className="flex items-center gap-3 text-muted-foreground text-sm sm:text-base">
+                  <CheckCircle2 className="h-5 w-5 text-accent-orange flex-shrink-0" />
+                  <span>La IA puede ver tu equipo y asignar trabajo</span>
+                </li>
+                <li className="flex items-center gap-3 text-muted-foreground text-sm sm:text-base">
+                  <CheckCircle2 className="h-5 w-5 text-accent-orange flex-shrink-0" />
+                  <span>Multi-tenant: datos aislados por organización</span>
+                </li>
+              </ul>
+            </div>
+            <div className="flex justify-center">
+              <div className="relative w-full max-w-xs">
+                {/* Team Visualization */}
+                <div className="rounded-xl bg-gradient-to-br from-accent-orange/10 to-amber-500/10 border border-accent-orange/20 p-4 sm:p-6">
+                  <div className="space-y-3 sm:space-y-4">
+                    <div className="text-center pb-2 border-b border-accent-orange/20">
+                      <div className="text-sm font-semibold text-accent-orange">Miembros del Equipo</div>
+                      <div className="text-[10px] sm:text-xs text-muted-foreground">4 miembros activos</div>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-full bg-background border border-border/50 flex items-center justify-center text-xs">JP</div>
+                        <div className="flex-1">
+                          <div className="text-xs font-medium">Juan Pérez</div>
+                          <div className="text-[9px] text-muted-foreground">Admin</div>
+                        </div>
+                        <div className="w-2 h-2 rounded-full bg-accent-green"></div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-full bg-background border border-border/50 flex items-center justify-center text-xs">ML</div>
+                        <div className="flex-1">
+                          <div className="text-xs font-medium">María López</div>
+                          <div className="text-[9px] text-muted-foreground">Member</div>
+                        </div>
+                        <div className="w-2 h-2 rounded-full bg-accent-green"></div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-full bg-accent-purple/20 border border-accent-purple/50 flex items-center justify-center text-xs">🤖</div>
+                        <div className="flex-1">
+                          <div className="text-xs font-medium">Claude AI</div>
+                          <div className="text-[9px] text-accent-purple">Asistente IA</div>
+                        </div>
+                        <div className="w-2 h-2 rounded-full bg-accent-purple"></div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-full bg-accent-purple/20 border border-accent-purple/50 flex items-center justify-center text-xs">🤖</div>
+                        <div className="flex-1">
+                          <div className="text-xs font-medium">ChatGPT</div>
+                          <div className="text-[9px] text-accent-purple">Asistente IA</div>
+                        </div>
+                        <div className="w-2 h-2 rounded-full bg-accent-purple"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Verified Developer Section - Mobile optimized - Compact */}
+      <section className="container px-4 sm:px-6 py-12 sm:py-16">
+        <div className="rounded-2xl border border-border/50 bg-card p-6 sm:p-8 md:p-12">
+          <div className="grid gap-6 md:grid-cols-2 items-center">
+            <div>
+              <div className="inline-flex items-center gap-2 rounded-full bg-accent-green/10 px-3 py-1 sm:px-3 sm:py-1 text-[10px] sm:text-xs font-medium text-accent-green mb-3 sm:mb-4">
+                <CheckCircle2 className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                Insignia de Desarrollador Verificado
+              </div>
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight mb-3">
+                Demuestra que eres un desarrollador real
+              </h2>
+              <p className="text-sm sm:text-base text-muted-foreground mb-4">
+                Conecta tu cuenta de GitHub para obtener la insignia. Tus clients verán tu perfil verificado.
+              </p>
+              <ul className="space-y-2">
+                <li className="flex items-center gap-2 text-muted-foreground text-xs sm:text-sm">
+                  <CheckCircle2 className="h-4 w-4 text-accent-green flex-shrink-0" />
+                  <span>Autenticación GitHub OAuth</span>
+                </li>
+                <li className="flex items-center gap-2 text-muted-foreground text-xs sm:text-sm">
+                  <CheckCircle2 className="h-4 w-4 text-accent-green flex-shrink-0" />
+                  <span>Badge de verificado en perfil</span>
                 </li>
               </ul>
             </div>
             <div className="flex justify-center">
               <div className="relative">
-                <div className="w-48 h-48 sm:w-64 sm:h-64 rounded-2xl bg-gradient-to-br from-primary/20 to-secondary/20 border border-primary/30 flex items-center justify-center">
+                <div className="w-40 h-40 sm:w-52 sm:h-52 rounded-2xl bg-gradient-to-br from-primary/20 to-secondary/20 border border-primary/30 flex items-center justify-center">
                   <div className="text-center">
                     <div className="relative inline-block">
-                      <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-muted flex items-center justify-center text-2xl sm:text-3xl font-bold">
+                      <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-muted flex items-center justify-center text-xl sm:text-2xl font-bold">
                         JD
                       </div>
-                      <div className="absolute -bottom-1 -right-1 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-accent-green flex items-center justify-center border-4 border-card">
-                        <span className="text-white text-xs font-bold">✓</span>
+                      <div className="absolute -bottom-1 -right-1 w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-accent-green flex items-center justify-center border-4 border-card">
+                        <span className="text-white text-[10px] sm:text-xs font-bold">✓</span>
                       </div>
                     </div>
-                    <p className="mt-3 sm:mt-4 font-semibold text-sm sm:text-base">Juan Developer</p>
-                    <p className="text-xs sm:text-sm text-muted-foreground">Dev Profesional</p>
+                    <p className="mt-2 sm:mt-3 font-semibold text-xs sm:text-sm">Juan Developer</p>
+                    <p className="text-[10px] sm:text-xs text-muted-foreground">Verificado</p>
                   </div>
                 </div>
               </div>

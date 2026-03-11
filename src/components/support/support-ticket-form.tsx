@@ -9,7 +9,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
+import { Loader2, Bug, Lightbulb, HelpCircle, LifeBuoy, CreditCard, Zap, Shield, FileText, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { createTicket } from "@/actions/tickets";
 import { createTicketSchema, type CreateTicketInput } from "@/lib/validations/ticket";
@@ -82,12 +82,10 @@ export function SupportTicketForm({ orgSlug, projects, clientName, clientEmail }
   if (isSuccess) {
     return (
       <div className="text-center py-8">
-        <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 dark:bg-green-900 rounded-full mb-4">
-          <svg className="w-8 h-8 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-          </svg>
+        <div className="inline-flex items-center justify-center w-16 h-16 bg-accent-green/10 rounded-full mb-4">
+          <CheckCircle2 className="w-8 h-8 text-accent-green" />
         </div>
-        <h3 className="text-xl font-semibold text-green-900 dark:text-green-100 mb-2">
+        <h3 className="text-xl font-semibold text-accent-green mb-2">
           ¡Ticket Creado!
         </h3>
         <p className="text-muted-foreground mb-6">
@@ -133,14 +131,54 @@ export function SupportTicketForm({ orgSlug, projects, clientName, clientEmail }
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="BUG">🐛 Bug / Error</SelectItem>
-              <SelectItem value="FEATURE_REQUEST">💡 Sugerencia</SelectItem>
-              <SelectItem value="QUESTION">❓ Pregunta</SelectItem>
-              <SelectItem value="SUPPORT">🛠️ Soporte Técnico</SelectItem>
-              <SelectItem value="BILLING">💳 Facturación</SelectItem>
-              <SelectItem value="PERFORMANCE">⚡ Rendimiento</SelectItem>
-              <SelectItem value="SECURITY">🔒 Seguridad</SelectItem>
-              <SelectItem value="OTHER">📋 Otro</SelectItem>
+              <SelectItem value="BUG">
+                <div className="flex items-center gap-2">
+                  <Bug className="h-4 w-4 text-destructive" />
+                  <span>Bug / Error</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="FEATURE_REQUEST">
+                <div className="flex items-center gap-2">
+                  <Lightbulb className="h-4 w-4 text-amber-500" />
+                  <span>Sugerencia</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="QUESTION">
+                <div className="flex items-center gap-2">
+                  <HelpCircle className="h-4 w-4 text-accent-blue" />
+                  <span>Pregunta</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="SUPPORT">
+                <div className="flex items-center gap-2">
+                  <LifeBuoy className="h-4 w-4 text-accent-purple" />
+                  <span>Soporte Técnico</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="BILLING">
+                <div className="flex items-center gap-2">
+                  <CreditCard className="h-4 w-4 text-emerald-500" />
+                  <span>Facturación</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="PERFORMANCE">
+                <div className="flex items-center gap-2">
+                  <Zap className="h-4 w-4 text-accent-orange" />
+                  <span>Rendimiento</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="SECURITY">
+                <div className="flex items-center gap-2">
+                  <Shield className="h-4 w-4 text-red-500" />
+                  <span>Seguridad</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="OTHER">
+                <div className="flex items-center gap-2">
+                  <FileText className="h-4 w-4 text-muted-foreground" />
+                  <span>Otro</span>
+                </div>
+              </SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -157,10 +195,30 @@ export function SupportTicketForm({ orgSlug, projects, clientName, clientEmail }
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="LOW">🟢 Baja</SelectItem>
-              <SelectItem value="MEDIUM">🟡 Media</SelectItem>
-              <SelectItem value="HIGH">🟠 Alta</SelectItem>
-              <SelectItem value="URGENT">🔴 Urgente</SelectItem>
+              <SelectItem value="LOW">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-accent-green" />
+                  <span>Baja</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="MEDIUM">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-accent-orange" />
+                  <span>Media</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="HIGH">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-accent-blue" />
+                  <span>Alta</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="URGENT">
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className="h-4 w-4 text-destructive" />
+                  <span>Urgente</span>
+                </div>
+              </SelectItem>
             </SelectContent>
           </Select>
         </div>
