@@ -133,7 +133,6 @@ export default function HomePage() {
       {/* Hero Section - Mobile optimized */}
       <section className="container px-4 sm:px-6 flex flex-col items-center justify-center gap-6 py-16 sm:py-20 md:py-24 lg:py-32 text-center">
         <div className="inline-flex items-center rounded-full border border-primary/30 bg-primary/10 px-3 py-1 sm:px-4 sm:py-1.5 text-xs sm:text-sm font-medium text-primary">
-          <Github className="mr-1.5 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
           Ahora con Sincronización GitHub
         </div>
 
