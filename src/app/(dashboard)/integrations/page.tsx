@@ -46,8 +46,8 @@ export default async function IntegrationsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Integraciones</h1>
-        <p className="text-muted-foreground">
+        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight">Integraciones</h1>
+        <p className="text-sm sm:text-base text-muted-foreground">
           Conecta CRMDev con tus herramientas de desarrollo.
         </p>
       </div>

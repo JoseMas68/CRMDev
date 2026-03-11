@@ -25,7 +25,7 @@ export default async function AccountPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Cuenta</h1>
+        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight">Cuenta</h1>
         <p className="text-muted-foreground mt-2">
           Gestiona la configuración de tu cuenta y preferencias.
         </p>

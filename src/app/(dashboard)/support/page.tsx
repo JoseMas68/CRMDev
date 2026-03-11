@@ -38,11 +38,11 @@ export default async function SupportDashboardPage() {
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
-          <Ticket className="h-8 w-8" />
+        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight flex items-center gap-2">
+          <Ticket className="h-6 sm:h-8 w-6 sm:w-8" />
           Soporte al Cliente
         </h1>
-        <p className="text-muted-foreground">
+        <p className="text-sm sm:text-base text-muted-foreground">
           Gestiona los tickets de soporte, responde a clientes y da seguimiento.
         </p>
       </div>

@@ -22,7 +22,7 @@ export default async function PasswordPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Cambiar Contraseña</h1>
+        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight">Cambiar Contraseña</h1>
         <p className="text-muted-foreground mt-2">
           Actualiza tu contraseña para mantener tu cuenta segura.
         </p>
