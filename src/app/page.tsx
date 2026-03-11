@@ -69,9 +69,8 @@ export default function HomePage() {
               <Button variant="ghost">Iniciar Sesión</Button>
             </Link>
             <Link href="/signup">
-              <Button className="gap-2">
-                <Github className="h-4 w-4" />
-                Empezar con GitHub
+              <Button>
+                Crear Cuenta
               </Button>
             </Link>
           </div>
@@ -122,9 +121,8 @@ export default function HomePage() {
                 </Button>
               </Link>
               <Link href="/signup" onClick={() => setMobileMenuOpen(false)}>
-                <Button className="w-full gap-2">
-                  <Github className="h-4 w-4" />
-                  Continuar con GitHub
+                <Button className="w-full">
+                  Crear Cuenta
                 </Button>
               </Link>
             </div>
@@ -151,9 +149,8 @@ export default function HomePage() {
 
         <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto px-4">
           <Link href="/signup" className="flex-1 sm:flex-initial">
-            <Button size="lg" className="gap-2 glow-violet w-full sm:w-auto">
-              <Github className="h-5 w-5" />
-              Continuar con GitHub
+            <Button size="lg" className="glow-violet w-full sm:w-auto">
+              Crear Cuenta
             </Button>
           </Link>
           <Link href="#demo" className="flex-1 sm:flex-initial">
