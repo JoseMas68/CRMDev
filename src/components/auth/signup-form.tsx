@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Loader2, Github, Mail, AlertCircle } from "lucide-react";
+import { Loader2, Mail, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 
@@ -43,7 +43,6 @@ type SignupInput = z.infer<typeof signupSchema>;
 export function SignupForm() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  const [isGitHubLoading, setIsGitHubLoading] = useState(false);
   const [showVerificationInfo, setShowVerificationInfo] = useState(false);
 
   const {
@@ -86,19 +85,7 @@ export function SignupForm() {
     }
   }
 
-  async function handleGitHubSignUp() {
-    setIsGitHubLoading(true);
-    try {
-      await signIn.social({
-        provider: "github",
-        callbackURL: "/select-org",
-      });
-    } catch (error) {
-      console.error("GitHub signup error:", error);
-      toast.error("Error al registrarse con GitHub");
-      setIsGitHubLoading(false);
-    }
-  }
+
 
   return (
     <motion.div
@@ -123,32 +110,7 @@ export function SignupForm() {
         </p>
       </div>
 
-      {/* Botón de GitHub OAuth */}
-      <Button
-        type="button"
-        variant="outline"
-        className="w-full gap-2 h-11"
-        onClick={handleGitHubSignUp}
-        disabled={isGitHubLoading || isLoading}
-      >
-        {isGitHubLoading ? (
-          <Loader2 className="h-4 w-4 animate-spin" />
-        ) : (
-          <Github className="h-4 w-4" />
-        )}
-        Continuar con GitHub
-      </Button>
 
-      <div className="relative">
-        <div className="absolute inset-0 flex items-center">
-          <span className="w-full border-t" />
-        </div>
-        <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-background px-2 text-muted-foreground">
-            O continúa con email
-          </span>
-        </div>
-      </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="space-y-2">
@@ -158,7 +120,7 @@ export function SignupForm() {
             type="text"
             placeholder="Juan Developer"
             autoComplete="name"
-            disabled={isLoading || isGitHubLoading}
+            disabled={isLoading}
             {...register("name")}
           />
           {errors.name && (
@@ -173,7 +135,7 @@ export function SignupForm() {
             type="email"
             placeholder="tu@ejemplo.com"
             autoComplete="email"
-            disabled={isLoading || isGitHubLoading}
+            disabled={isLoading}
             {...register("email")}
           />
           {errors.email && (
@@ -188,7 +150,7 @@ export function SignupForm() {
             type="password"
             placeholder="********"
             autoComplete="new-password"
-            disabled={isLoading || isGitHubLoading}
+            disabled={isLoading}
             {...register("password")}
           />
           {errors.password && (
@@ -203,7 +165,7 @@ export function SignupForm() {
             type="password"
             placeholder="********"
             autoComplete="new-password"
-            disabled={isLoading || isGitHubLoading}
+            disabled={isLoading}
             {...register("confirmPassword")}
           />
           {errors.confirmPassword && (
@@ -213,7 +175,7 @@ export function SignupForm() {
           )}
         </div>
 
-        <Button type="submit" className="w-full" disabled={isLoading || isGitHubLoading}>
+        <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           Crear Cuenta
         </Button>

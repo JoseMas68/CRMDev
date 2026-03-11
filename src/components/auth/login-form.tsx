@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Loader2, Github, AlertCircle, Eye, EyeOff } from "lucide-react";
+import { Loader2, AlertCircle, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 
@@ -29,7 +29,6 @@ export function LoginForm() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
   const [isLoading, setIsLoading] = useState(false);
-  const [isGitHubLoading, setIsGitHubLoading] = useState(false);
   const [showVerificationHelp, setShowVerificationHelp] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -74,19 +73,7 @@ export function LoginForm() {
     }
   }
 
-  async function handleGitHubSignIn() {
-    setIsGitHubLoading(true);
-    try {
-      await signIn.social({
-        provider: "github",
-        callbackURL: callbackUrl,
-      });
-    } catch (error) {
-      console.error("GitHub login error:", error);
-      toast.error("Error al iniciar sesión con GitHub");
-      setIsGitHubLoading(false);
-    }
-  }
+
 
   return (
     <motion.div
@@ -111,32 +98,7 @@ export function LoginForm() {
         </p>
       </div>
 
-      {/* Botón de GitHub OAuth */}
-      <Button
-        type="button"
-        variant="outline"
-        className="w-full gap-2 h-11"
-        onClick={handleGitHubSignIn}
-        disabled={isGitHubLoading || isLoading}
-      >
-        {isGitHubLoading ? (
-          <Loader2 className="h-4 w-4 animate-spin" />
-        ) : (
-          <Github className="h-4 w-4" />
-        )}
-        Continuar con GitHub
-      </Button>
 
-      <div className="relative">
-        <div className="absolute inset-0 flex items-center">
-          <span className="w-full border-t" />
-        </div>
-        <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-background px-2 text-muted-foreground">
-            O continúa con email
-          </span>
-        </div>
-      </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="space-y-2">
@@ -146,7 +108,7 @@ export function LoginForm() {
             type="email"
             placeholder="tu@ejemplo.com"
             autoComplete="email"
-            disabled={isLoading || isGitHubLoading}
+            disabled={isLoading}
             {...register("email")}
           />
           {errors.email && (
@@ -170,7 +132,7 @@ export function LoginForm() {
               type={showPassword ? "text" : "password"}
               placeholder="********"
               autoComplete="current-password"
-              disabled={isLoading || isGitHubLoading}
+              disabled={isLoading}
               className="pr-10"
               {...register("password")}
             />
@@ -178,7 +140,7 @@ export function LoginForm() {
               type="button"
               onClick={() => setShowPassword(!showPassword)}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-              disabled={isLoading || isGitHubLoading}
+              disabled={isLoading}
             >
               {showPassword ? (
                 <EyeOff className="h-4 w-4" />
@@ -192,7 +154,7 @@ export function LoginForm() {
           )}
         </div>
 
-        <Button type="submit" className="w-full" disabled={isLoading || isGitHubLoading}>
+        <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           Iniciar Sesión
         </Button>
