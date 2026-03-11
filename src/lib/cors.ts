@@ -1,17 +1,47 @@
 /**
  * CORS Configuration for API endpoints
  *
- * Security: Restricts cross-origin requests to trusted origins only
+ * Origins are configured via environment variables.
+ * Development mode allows localhost ports automatically.
+ *
+ * Environment Variables:
+ * - NEXT_PUBLIC_APP_URL: Main application URL
+ * - NEXT_PUBLIC_MCP_PUBLIC_URL: MCP API public URL
+ * - ALLOWED_CORS_ORIGINS: Comma-separated list of additional allowed origins (production only)
  */
 
-// Whitelist of allowed origins
-const ALLOWED_ORIGINS = [
-  process.env.NEXT_PUBLIC_APP_URL,
-  process.env.NEXT_PUBLIC_MCP_PUBLIC_URL,
-  'https://claude.ai', // For Claude Desktop integration
-  'http://localhost:3000', // Development
-  'http://localhost:3001', // Alternative dev port
-].filter(Boolean) as string[];
+/**
+ * Get list of allowed origins based on environment
+ */
+function getAllowedOrigins(): string[] {
+  const origins: string[] = [];
+
+  // Always allow app URLs from environment
+  if (process.env.NEXT_PUBLIC_APP_URL) {
+    origins.push(process.env.NEXT_PUBLIC_APP_URL);
+  }
+  if (process.env.NEXT_PUBLIC_MCP_PUBLIC_URL) {
+    origins.push(process.env.NEXT_PUBLIC_MCP_PUBLIC_URL);
+  }
+
+  // Development: allow localhost ports automatically
+  if (process.env.NODE_ENV === 'development') {
+    origins.push(
+      'http://localhost:3000',
+      'http://localhost:3001',
+      'http://localhost:3002'
+    );
+  }
+
+  // Production: additional explicitly allowed origins from env var
+  // Example: ALLOWED_CORS_ORIGINS="https://claude.ai,https://example.com"
+  const allowedOriginsEnv = process.env.ALLOWED_CORS_ORIGINS;
+  if (allowedOriginsEnv) {
+    origins.push(...allowedOriginsEnv.split(',').map(o => o.trim()).filter(Boolean));
+  }
+
+  return origins;
+}
 
 /**
  * Check if origin is allowed
@@ -19,8 +49,10 @@ const ALLOWED_ORIGINS = [
 export function isOriginAllowed(origin: string | null): boolean {
   if (!origin) return false; // No origin header = reject
 
+  const allowedOrigins = getAllowedOrigins();
+
   // Allow exact matches
-  if (ALLOWED_ORIGINS.includes(origin)) {
+  if (allowedOrigins.includes(origin)) {
     return true;
   }
 
@@ -57,8 +89,10 @@ export function getCorsHeaders(origin: string | null): Record<string, string> {
     return {};
   }
 
+  const allowedOrigins = getAllowedOrigins();
+
   return {
-    'Access-Control-Allow-Origin': origin || ALLOWED_ORIGINS[0],
+    'Access-Control-Allow-Origin': origin || allowedOrigins[0],
     'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
     'Access-Control-Allow-Credentials': 'true',

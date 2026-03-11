@@ -139,8 +139,11 @@ model Organization {
   // API Keys (MCP Integrations)
   apiKeys               ApiKey[]
 
-  // AI Settings
-  openaiApiKey          String?
+  // AI Settings - ENCRYPTED
+  // TODO: Migrate existing keys to encrypted format, then remove openaiApiKey
+  openaiApiKey          String?   // Legacy plaintext (migrate to encrypted, will be deprecated)
+  openaiApiKeyEncrypted String?   // AES-256-GCM encrypted API key
+  openaiApiKeyNonce     String?   // GCM nonce for decryption
 
   // Telegram Integrations (Multi-tenant bot)
   telegramLinkTokens     TelegramLinkToken[]

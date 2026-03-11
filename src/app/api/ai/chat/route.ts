@@ -6,6 +6,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getPrismaWithSession } from "@/lib/prisma";
 import { checkRateLimit, getRateLimitKey, RATE_LIMITS } from "@/lib/rate-limit";
+import { safeDecrypt } from "@/lib/encryption";
 
 export const runtime = "nodejs";
 export const maxDuration = 60; // 60 segundos para responses largos
@@ -321,13 +322,22 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 2. Obtener API Key de OpenAI de la organización
+    // 2. Obtener API Key de OpenAI de la organización (encriptada)
     const org = await prisma.organization.findUnique({
       where: { id: activeOrganizationId },
-      select: { openaiApiKey: true },
+      select: {
+        openaiApiKey: true, // Legacy fallback
+        openaiApiKeyEncrypted: true,
+        openaiApiKeyNonce: true,
+      },
     });
 
-    if (!org?.openaiApiKey) {
+    // Try encrypted first, fallback to plaintext
+    const apiKey = safeDecrypt(org?.openaiApiKeyEncrypted ?? null, org?.openaiApiKeyNonce ?? null)
+      ?? org?.openaiApiKey
+      ?? null;
+
+    if (!apiKey) {
       return NextResponse.json(
         { error: "OpenAI API key not configured. Go to Settings → AI Assistant" },
         { status: 400 }
@@ -343,7 +353,7 @@ export async function POST(req: NextRequest) {
     }
 
     // 4. Inicializar OpenAI
-    const openai = new OpenAI({ apiKey: org.openaiApiKey });
+    const openai = new OpenAI({ apiKey });
 
     // 5. Obtener Prisma con session para tenant isolation
     const db = await getPrismaWithSession(session);
