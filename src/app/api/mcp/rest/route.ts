@@ -71,11 +71,12 @@ const toolDefinitions = {
     },
   },
   list_tasks: {
-    description: "Listar tareas con filtros",
+    description: "Listar tareas con filtros por proyecto, estado o asignado",
     parameters: {
       limit: { type: "number", description: "Límite de tareas a devolver, por defecto 20", optional: true },
       projectId: { type: "string", description: "Filtrar por proyecto", optional: true },
       status: { type: "string", description: "Estado: TODO, IN_PROGRESS, IN_REVIEW, DONE, CANCELLED", optional: true },
+      assigneeId: { type: "string", description: "Filtrar por usuario asignado (usar list_members para obtener IDs)", optional: true },
     },
   },
   create_task: {
@@ -353,6 +354,7 @@ export async function POST(req: NextRequest) {
             organizationId,
             ...(args.projectId && { projectId: args.projectId }),
             ...(args.status && { status: args.status }),
+            ...(args.assigneeId && { assigneeId: args.assigneeId }),
           },
           select: {
             id: true,
@@ -361,6 +363,14 @@ export async function POST(req: NextRequest) {
             status: true,
             priority: true,
             dueDate: true,
+            assigneeId: true,
+            assignee: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+              },
+            },
             project: { select: { name: true } },
           },
           take: args.limit || 20,
