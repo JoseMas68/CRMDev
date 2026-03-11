@@ -361,7 +361,7 @@ export default async function DashboardPage() {
                     return (
                       <Link
                         key={ticket.id}
-                        href={`/support/${ticket.id}`}
+                        href={`/support/tickets/${ticket.id}`}
                         className="block p-2 rounded-lg border hover:bg-muted/50 transition-colors overflow-hidden"
                       >
                         <p className="text-xs font-medium truncate mb-1">{ticket.title}</p>
