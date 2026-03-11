@@ -131,25 +131,25 @@ export function MobileSidebar({ user, children }: MobileSidebarProps) {
         <SheetTitle className="sr-only">Menú principal</SheetTitle>
         <div className="flex flex-col h-full overflow-hidden">
           {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b shrink-0">
+          <div className="flex items-center justify-between gap-3 p-4 border-b shrink-0">
             <div className="flex items-center gap-3 flex-1 min-w-0">
+              <div className="flex-shrink-0">
+                <UserBadge
+                  user={{
+                    name: user.name,
+                    image: user.image,
+                    avatarUrl: user.avatarUrl,
+                    isVerifiedDev: user.isVerifiedDev,
+                    githubUsername: user.githubUsername,
+                  }}
+                />
+              </div>
               <div className="flex flex-col min-w-0">
                 <span className="font-medium text-sm truncate">{user.name}</span>
                 <span className="text-xs text-muted-foreground truncate">
                   {user.email}
                 </span>
               </div>
-            </div>
-            <div className="shrink-0">
-              <UserBadge
-                user={{
-                  name: user.name,
-                  image: user.image,
-                  avatarUrl: user.avatarUrl,
-                  isVerifiedDev: user.isVerifiedDev,
-                  githubUsername: user.githubUsername,
-                }}
-              />
             </div>
           </div>
 
@@ -247,7 +247,7 @@ export function MobileSidebar({ user, children }: MobileSidebarProps) {
           </div>
 
           {/* Footer */}
-          <div className="p-4 border-t shrink-0">
+          <div className="p-4 border-t shrink-0 mt-auto">
             <Button
               variant="ghost"
               className="w-full justify-start text-muted-foreground hover:text-destructive"

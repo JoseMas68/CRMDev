@@ -210,9 +210,9 @@ export default async function DashboardPage() {
       </div>
 
       {/* Main Content Grid */}
-      <div className="grid gap-4 md:gap-6 lg:grid-cols-3 px-4 sm:px-0 overflow-x-hidden">
+      <div className="grid gap-3 sm:gap-4 md:gap-6 lg:grid-cols-3 px-4 sm:px-0 w-full overflow-hidden">
         {/* Tasks Quick View - Takes 2 columns on large screens */}
-        <Card className="lg:col-span-2 shadow-sm overflow-x-hidden">
+        <Card className="lg:col-span-2 shadow-sm overflow-hidden w-full">
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
@@ -284,9 +284,9 @@ export default async function DashboardPage() {
         </Card>
 
         {/* Right Column */}
-        <div className="space-y-4 md:space-y-6">
+        <div className="space-y-3 sm:space-y-4 md:space-y-6 w-full overflow-hidden">
           {/* Time Tracker Widget */}
-          <Card className="border-2 border-primary/20 shadow-sm overflow-hidden">
+          <Card className="border-2 border-primary/20 shadow-sm overflow-hidden w-full">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between gap-2">
                 <div className="min-w-0 flex-1">
@@ -317,7 +317,7 @@ export default async function DashboardPage() {
           </Card>
 
           {/* Support Widget */}
-          <Card className="shadow-sm overflow-hidden">
+          <Card className="shadow-sm overflow-hidden w-full">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between gap-2">
                 <div className="min-w-0 flex-1">
