@@ -53,6 +53,7 @@ export function SupportTicketForm({
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<CreateTicketInput>({
     resolver: zodResolver(createTicketSchema),
@@ -196,9 +197,7 @@ export function SupportTicketForm({
           <Label htmlFor="category">Categoría</Label>
           <Select
             defaultValue="SUPPORT"
-            onValueChange={(value) =>
-              register("category").onChange({ target: { value } })
-            }
+            onValueChange={(value) => setValue("category", value as any)}
           >
             <SelectTrigger disabled={isSubmitting}>
               <SelectValue />
@@ -260,9 +259,7 @@ export function SupportTicketForm({
           <Label htmlFor="priority">Prioridad</Label>
           <Select
             defaultValue="MEDIUM"
-            onValueChange={(value) =>
-              register("priority").onChange({ target: { value } })
-            }
+            onValueChange={(value) => setValue("priority", value as any)}
           >
             <SelectTrigger disabled={isSubmitting}>
               <SelectValue />

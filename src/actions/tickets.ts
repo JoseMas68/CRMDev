@@ -50,7 +50,16 @@ export async function createTicket(
   try {
     // Extract org and project IDs before validation
     const { organizationId, projectId, ...ticketData } = input;
-    const validatedData = createTicketSchema.parse(ticketData);
+
+    // Ensure guestName and guestEmail have values (they're optional in schema but required in DB)
+    const guestName = ticketData.guestName || "Cliente";
+    const guestEmail = ticketData.guestEmail || "cliente@ejemplo.com";
+
+    const validatedData = createTicketSchema.parse({
+      ...ticketData,
+      guestName,
+      guestEmail,
+    });
 
     // Get organization to verify it exists
     const org = await prisma.organization.findUnique({

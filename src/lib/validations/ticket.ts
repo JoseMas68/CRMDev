@@ -40,12 +40,14 @@ export const createTicketSchema = z.object({
   guestName: z
     .string()
     .min(2, "El nombre debe tener al menos 2 caracteres")
-    .max(100, "El nombre es demasiado largo"),
+    .max(100, "El nombre es demasiado largo")
+    .optional(),
 
   guestEmail: z
     .string()
     .email("Email inválido")
-    .max(255, "El email es demasiado largo"),
+    .max(255, "El email es demasiado largo")
+    .optional(),
 
   attachments: z
     .array(z.string().url("URL de attachment inválida"))
