@@ -99,68 +99,67 @@ export const createProjectSchema = z.object({
 
   // 1. INFORMACIÓN DE PRODUCCIÓN
   productionUrl: z
-    .string()
-    .url("Invalid production URL")
-    .max(500)
+    .union([
+      z.literal(""),
+      z.string().url("Invalid production URL").max(500),
+    ])
     .optional()
-    .nullable()
-    .or(z.literal("")),
+    .nullable(),
 
   stagingUrl: z
-    .string()
-    .url("Invalid staging URL")
-    .max(500)
+    .union([
+      z.literal(""),
+      z.string().url("Invalid staging URL").max(500),
+    ])
     .optional()
-    .nullable()
-    .or(z.literal("")),
+    .nullable(),
 
   developmentUrl: z
-    .string()
-    .url("Invalid development URL")
-    .max(500)
+    .union([
+      z.literal(""),
+      z.string().url("Invalid development URL").max(500),
+    ])
     .optional()
-    .nullable()
-    .or(z.literal("")),
+    .nullable(),
 
   hostingProvider: z
     .string()
     .max(100)
     .optional()
-    .nullable()
-    .or(z.literal("")),
+    .nullable(),
 
   // 2. ALMACENAMIENTO Y DOCUMENTACIÓN
   driveFolder: z
-    .string()
-    .url("Invalid Drive folder URL")
-    .max(500)
+    .union([
+      z.literal(""),
+      z.string().url("Invalid Drive folder URL").max(500),
+    ])
     .optional()
-    .nullable()
-    .or(z.literal("")),
+    .nullable(),
 
   figmaLink: z
-    .string()
-    .url("Invalid Figma URL")
-    .max(500)
+    .union([
+      z.literal(""),
+      z.string().url("Invalid Figma URL").max(500),
+    ])
     .optional()
-    .nullable()
-    .or(z.literal("")),
+    .nullable(),
 
   githubLink: z
-    .string()
-    .url("Invalid GitHub URL")
-    .max(500)
+    .union([
+      z.literal(""),
+      z.string().url("Invalid GitHub URL").max(500),
+    ])
     .optional()
-    .nullable()
-    .or(z.literal("")),
+    .nullable(),
 
   documentationLink: z
-    .string()
-    .url("Invalid documentation URL")
-    .max(500)
+    .union([
+      z.literal(""),
+      z.string().url("Invalid documentation URL").max(500),
+    ])
     .optional()
-    .nullable()
-    .or(z.literal("")),
+    .nullable(),
 
   // 3. CAJA FUERTE PARA ENV
   envVars: z
