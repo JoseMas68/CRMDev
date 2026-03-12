@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Loader2, AlertCircle, Eye, EyeOff } from "lucide-react";
+import { Loader2, AlertCircle, Eye, EyeOff, Github } from "lucide-react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 
@@ -98,7 +98,42 @@ export function LoginForm() {
         </p>
       </div>
 
+      {/* GitHub OAuth Button */}
+      <Button
+        type="button"
+        variant="outline"
+        className="w-full"
+        onClick={() => {
+          setIsLoading(true);
+          signIn.social({
+            provider: "github",
+            callbackURL: callbackUrl,
+          }).catch((error) => {
+            console.error("GitHub login error:", error);
+            toast.error("Error al conectar con GitHub");
+            setIsLoading(false);
+          });
+        }}
+        disabled={isLoading}
+      >
+        {isLoading ? (
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+        ) : (
+          <Github className="mr-2 h-4 w-4" />
+        )}
+        Iniciar sesión con GitHub
+      </Button>
 
+      <div className="relative">
+        <div className="absolute inset-0 flex items-center">
+          <span className="w-full border-t" />
+        </div>
+        <div className="relative flex justify-center text-xs uppercase">
+          <span className="bg-background px-2 text-muted-foreground">
+            O continúa con
+          </span>
+        </div>
+      </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="space-y-2">
