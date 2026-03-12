@@ -39,11 +39,30 @@ async function getGitHubToken(userId: string): Promise<string | null> {
       providerId: "github",
     },
     select: {
+      id: true,
       accessToken: true,
+      accessTokenExpiresAt: true,
     },
   });
 
-  return account?.accessToken || null;
+  if (!account) {
+    console.log("[GITHUB] No GitHub account found for user:", userId);
+    return null;
+  }
+
+  if (!account.accessToken) {
+    console.log("[GITHUB] GitHub account exists but no access token");
+    return null;
+  }
+
+  // Check if token expired (GitHub OAuth tokens can expire)
+  if (account.accessTokenExpiresAt && account.accessTokenExpiresAt < new Date()) {
+    console.log("[GITHUB] GitHub token expired at:", account.accessTokenExpiresAt);
+    return null;
+  }
+
+  console.log("[GITHUB] Found valid GitHub token");
+  return account.accessToken;
 }
 
 /**
@@ -110,17 +129,21 @@ export async function fetchGitHubRepos(): Promise<
     });
 
     if (!session?.user?.id) {
+      console.error("[GITHUB] No session found");
       return { success: false, error: "No autorizado" };
     }
 
     const token = await getGitHubToken(session.user.id);
 
     if (!token) {
+      console.error("[GITHUB] No access token found for user:", session.user.id);
       return {
         success: false,
         error: "GitHub no conectado. Conecta tu cuenta de GitHub primero.",
       };
     }
+
+    console.log("[GITHUB] Fetching repos for user:", session.user.id);
 
     // Fetch repositories from GitHub API
     const response = await fetch(
@@ -134,20 +157,32 @@ export async function fetchGitHubRepos(): Promise<
       }
     );
 
+    console.log("[GITHUB] GitHub API response status:", response.status);
+
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error("[GITHUB] GitHub API error:", response.status, errorText);
+
       if (response.status === 401) {
         return {
           success: false,
           error: "Token de GitHub expirado. Reconecta tu cuenta.",
         };
       }
+      if (response.status === 403) {
+        return {
+          success: false,
+          error: "Sin permisos. Asegúrate de autorizar el acceso a repositorios.",
+        };
+      }
       return {
         success: false,
-        error: `Error de GitHub: ${response.statusText}`,
+        error: `Error de GitHub (${response.status}): ${response.statusText}`,
       };
     }
 
     const repos: GitHubRepo[] = await response.json();
+    console.log("[GITHUB] Successfully fetched", repos.length, "repos");
 
     return { success: true, data: repos };
   } catch (error) {
