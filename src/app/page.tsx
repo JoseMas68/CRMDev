@@ -164,8 +164,8 @@ export default function HomePage() {
         </p>
       </section>
 
-      {/* Features Section - Mobile optimized */}
-      <section id="features" className="container px-4 sm:px-6 py-16 sm:py-24">
+      {/* Features Section - Hidden on mobile */}
+      <section id="features" className="hidden md:block container px-4 sm:px-6 py-16 sm:py-24">
         <div className="text-center mb-12 sm:mb-16">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight mb-4 px-4">
             Diseñado para cómo trabajan los desarrolladores
@@ -209,8 +209,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* AI Integration Section - OpenClaw Theme */}
-      <section id="integrations" className="container px-4 sm:px-6 py-16 sm:py-24 relative overflow-hidden">
+      {/* AI Integration Section - OpenClaw Theme - Hidden on mobile */}
+      <section id="integrations" className="hidden md:block container px-4 sm:px-6 py-16 sm:py-24 relative overflow-hidden">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-mesh -z-10 opacity-50" />
 
         <div className="rounded-3xl border-gradient-purple bg-card/30 backdrop-blur-sm p-6 sm:p-8 md:p-16 relative overflow-hidden group">
@@ -338,8 +338,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Client Support Section - Terminal Style */}
-      <section id="support" className="container px-4 sm:px-6 py-16 sm:py-24">
+      {/* Client Support Section - Terminal Style - Hidden on mobile */}
+      <section id="support" className="hidden md:block container px-4 sm:px-6 py-16 sm:py-24">
         <div className="rounded-3xl border border-border/40 bg-card/50 backdrop-blur-md p-6 sm:p-8 md:p-16 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -z-10" />
 
@@ -410,8 +410,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Organization & Team Section - High Tech Style */}
-      <section id="teams" className="container px-4 sm:px-6 py-16 sm:py-24">
+      {/* Organization & Team Section - High Tech Style - Hidden on mobile */}
+      <section id="teams" className="hidden md:block container px-4 sm:px-6 py-16 sm:py-24">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div className="relative order-2 lg:order-1 flex justify-center">
             {/* Team Mesh/Flow Visual */}
@@ -478,8 +478,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Verified Developer Section - Elite Certification Style */}
-      <section className="container px-4 sm:px-6 py-16 sm:py-24">
+      {/* Verified Developer Section - Elite Certification Style - Hidden on mobile */}
+      <section className="hidden md:block container px-4 sm:px-6 py-16 sm:py-24">
         <div className="rounded-3xl border-2 border-accent-green/30 bg-accent-green/5 p-8 md:p-16 relative overflow-hidden group">
           <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-accent-green/20 rounded-full blur-3xl group-hover:bg-accent-green/30 transition-all animate-pulse" />
 
@@ -535,8 +535,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Pricing Section - Mobile optimized */}
-      <section id="pricing" className="container px-4 sm:px-6 py-16 sm:py-24">
+      {/* Pricing Section - Hidden on mobile */}
+      <section id="pricing" className="hidden md:block container px-4 sm:px-6 py-16 sm:py-24">
         <div className="text-center mb-12 sm:mb-16">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight mb-4 px-4">
             Precios simples y transparentes
@@ -592,8 +592,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* CTA Section - CTR Optimized */}
-      <section className="container px-4 sm:px-6 py-20 sm:py-32">
+      {/* CTA Section - CTR Optimized - Hidden on mobile */}
+      <section className="hidden md:block container px-4 sm:px-6 py-20 sm:py-32">
         <div className="relative rounded-[2.5rem] bg-black border-gradient-purple p-8 sm:p-12 md:p-24 text-center overflow-hidden shadow-[0_50px_100px_-20px_rgba(167,139,250,0.3)]">
           {/* Animated Background Mesh */}
           <div className="absolute inset-0 bg-mesh opacity-20 pointer-events-none" />
