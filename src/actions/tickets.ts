@@ -48,6 +48,13 @@ export async function createTicket(
   input: CreateTicketInput & { organizationId: string; projectId: string }
 ): Promise<ActionResponse<{ ticketId: string; ticketNumber: string }>> {
   try {
+    // Debug: Log received input
+    console.log('[TICKETS] Received input:', {
+      organizationId: input.organizationId,
+      projectId: input.projectId,
+      title: input.title,
+    });
+
     // Extract org and project IDs before validation
     const { organizationId, projectId, ...ticketData } = input;
 

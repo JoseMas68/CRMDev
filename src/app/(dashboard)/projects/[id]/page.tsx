@@ -132,11 +132,18 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
             )}
           </div>
 
-          <Link href={`/projects/${id}/edit`} className="w-full sm:w-auto shrink-0 mt-2 sm:mt-0">
-            <Button variant="outline" size="sm" className="w-full sm:w-auto">
-              Editar Proyecto
-            </Button>
-          </Link>
+          <div className="flex gap-2 w-full sm:w-auto shrink-0 mt-2 sm:mt-0">
+            <Link href={`/projects/${id}/details`} className="flex-1 sm:flex-initial">
+              <Button variant="outline" size="sm" className="w-full sm:w-auto">
+                Más Detalles
+              </Button>
+            </Link>
+            <Link href={`/projects/${id}/edit`} className="flex-1 sm:flex-initial">
+              <Button size="sm" className="w-full sm:w-auto">
+                Editar
+              </Button>
+            </Link>
+          </div>
         </div>
       </div>
 

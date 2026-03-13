@@ -13,6 +13,7 @@
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { Prisma } from "@prisma/client";
+import crypto from "crypto";
 import { auth } from "@/lib/auth";
 import { getPrismaWithSession, prisma } from "@/lib/prisma";
 import {
@@ -368,6 +369,7 @@ export async function createProject(
         techStack: validatedData.techStack,
         labels: validatedData.labels,
         organizationId: session.session.activeOrganizationId,
+        supportToken: `${crypto.randomUUID()}`, // Generate unique support token for public portal
       },
       select: { id: true },
     });

@@ -57,6 +57,11 @@ export default async function SupportPortalPage({ params }: SupportPortalPagePro
 
   const org = project.organization;
 
+  // Validate organization exists
+  if (!org) {
+    throw new Error(`Project ${project.id} has no organization associated`);
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
       <div className="container mx-auto px-4 py-12 max-w-3xl">
@@ -83,11 +88,11 @@ export default async function SupportPortalPage({ params }: SupportPortalPagePro
           <h1 className="text-3xl sm:text-4xl font-bold mb-2">
             Portal de Soporte
           </h1>
-          <p className="text-muted-foreground mb-1">
-            Proyecto: <span className="font-semibold text-foreground">{project.name}</span>
+          <p className="text-lg text-muted-foreground mb-1">
+            de <span className="font-bold text-primary">{org.name}</span>
           </p>
           <p className="text-sm text-muted-foreground">
-            de <span className="text-primary">{org.name}</span>
+            Proyecto: <span className="font-semibold text-foreground">{project.name}</span>
           </p>
         </div>
 

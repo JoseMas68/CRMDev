@@ -69,9 +69,25 @@ export function SupportTicketForm({
     setIsSubmitting(true);
 
     try {
+      // Debug: Log values before sending
+      console.log('[SupportTicketForm] Sending ticket with:', {
+        projectId,
+        organizationId,
+        projectName,
+        orgName,
+      });
+
       // Don't send empty strings for optional fields
       const guestName = data.guestName?.trim() || clientName || undefined;
       const guestEmail = data.guestEmail?.trim() || clientEmail || undefined;
+
+      // Validate required IDs
+      if (!projectId || !organizationId) {
+        console.error('[SupportTicketForm] Missing IDs:', { projectId, organizationId });
+        toast.error("Error: ID de proyecto u organización no válido");
+        setIsSubmitting(false);
+        return;
+      }
 
       const result = await createTicket({
         ...data,
