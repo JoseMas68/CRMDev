@@ -69,12 +69,16 @@ export function SupportTicketForm({
     setIsSubmitting(true);
 
     try {
+      // Don't send empty strings for optional fields
+      const guestName = data.guestName?.trim() || clientName || undefined;
+      const guestEmail = data.guestEmail?.trim() || clientEmail || undefined;
+
       const result = await createTicket({
         ...data,
+        guestName,
+        guestEmail,
         projectId: projectId,
         organizationId: organizationId,
-        guestName: data.guestName || clientName || "",
-        guestEmail: data.guestEmail || clientEmail || "",
       });
 
       if (result.success) {

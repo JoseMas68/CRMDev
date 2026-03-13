@@ -51,15 +51,12 @@ export async function createTicket(
     // Extract org and project IDs before validation
     const { organizationId, projectId, ...ticketData } = input;
 
-    // Ensure guestName and guestEmail have values (they're optional in schema but required in DB)
-    const guestName = ticketData.guestName || "Cliente";
-    const guestEmail = ticketData.guestEmail || "cliente@ejemplo.com";
+    // Validate input data
+    const validatedData = createTicketSchema.parse(ticketData);
 
-    const validatedData = createTicketSchema.parse({
-      ...ticketData,
-      guestName,
-      guestEmail,
-    });
+    // Use validated data or defaults for guest info
+    const guestName = validatedData.guestName || "Cliente";
+    const guestEmail = validatedData.guestEmail || "cliente@ejemplo.com";
 
     // Get organization to verify it exists
     const org = await prisma.organization.findUnique({
@@ -93,8 +90,8 @@ export async function createTicket(
     const aiAnalysis = await analyzeTicketWithAI({
       title: validatedData.title,
       description: validatedData.description,
-      guestName: validatedData.guestName,
-      guestEmail: validatedData.guestEmail,
+      guestName,
+      guestEmail,
       projectName,
     });
 
@@ -107,8 +104,8 @@ export async function createTicket(
         description: validatedData.description,
         category: (aiAnalysis.success ? aiAnalysis.data.category : validatedData.category) as any,
         priority: (aiAnalysis.success ? aiAnalysis.data.priority : validatedData.priority) as any,
-        guestName: validatedData.guestName,
-        guestEmail: validatedData.guestEmail,
+        guestName,
+        guestEmail,
         attachments: validatedData.attachments,
         // Store AI analysis results
         aiCategory: aiAnalysis.success ? (aiAnalysis.data.category as any) : undefined,
@@ -126,14 +123,14 @@ export async function createTicket(
       ticketDescription: validatedData.description,
       category: ticket.category,
       priority: ticket.priority,
-      guestName: validatedData.guestName,
-      guestEmail: validatedData.guestEmail,
+      guestName,
+      guestEmail,
       projectName,
     });
 
     // TODO: Send email to guest (implement Resend integration)
     // For now, log the auto-reply
-    console.log("[TICKET] Auto-reply for", validatedData.guestEmail, ":", autoReply);
+    console.log("[TICKET] Auto-reply for", guestEmail, ":", autoReply);
 
     // Mark auto-reply as sent
     await prisma.ticket.update({
@@ -148,7 +145,7 @@ export async function createTicket(
     await prisma.activity.create({
       data: {
         type: "TICKET_CREATED",
-        title: `Ticket ${ticketNumber} creado por ${validatedData.guestName}`,
+        title: `Ticket ${ticketNumber} creado por ${guestName}`,
         description: validatedData.title,
         ticketId: ticket.id,
         userId: (await getFirstUserInOrg(org.id)) || "",

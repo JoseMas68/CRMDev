@@ -37,17 +37,11 @@ export const createTicketSchema = z.object({
 
   priority: ticketPriorityEnum.default("MEDIUM"),
 
-  guestName: z
-    .string()
-    .min(2, "El nombre debe tener al menos 2 caracteres")
-    .max(100, "El nombre es demasiado largo")
-    .optional(),
+  // guestName: optional, default values handled in server action
+  guestName: z.string().optional(),
 
-  guestEmail: z
-    .string()
-    .email("Email inválido")
-    .max(255, "El email es demasiado largo")
-    .optional(),
+  // guestEmail: optional, default values handled in server action
+  guestEmail: z.string().optional(),
 
   attachments: z
     .array(z.string().url("URL de attachment inválida"))
